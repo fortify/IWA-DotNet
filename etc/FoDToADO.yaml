@@ -1,0 +1,32 @@
+fod:
+  baseUrl: https://emea.fortify.com         # Base URL to connect to FoD
+  #tenant:   MyTenant                        # FoD tenant
+  #userName: MyUser                          # FoD user name
+  #password: MyPAT                           # FoD Personal Access Token (recommended) or password
+  scopes:   view-apps, view-issues          # Scopes to request during authentication, defaults to view-apps and view-issues
+  #clientId:                                # Client id, alternative for user-based authentication 
+  #clientSecret:                            # Client secret, alternative for user-based authentication
+  release:
+    #name: MyApp:MyRelease                   # Process release(s) with the given name
+                                            # Note that FoD performs a 'contains' search rather than 'equals' search,
+                                            # so this may match MyRelease, MyRelease1 and MyRelease2 
+    #regex: .*:master                        # Process release(s) that match the given regex
+                                            # This example will process all releases named 'master' for all applications 
+    id: 56327                               # Process release with the given id
+    #filter:
+    #  expressions: releaseName=='master'    # Process releases for which the given SpEL expression returns true                  
+    orderBy:
+      field: releaseName                    # Request FoD to return releases ordered by the given property 
+      direction: ASC                        # Order ascending (ASC) or descending (DESC)
+    # embed:                                # See dedicated section on loading additional data from FoD
+  vulnerability:
+    filterParam: scanType:Static            # Pass the given filter parameter to FoD when loading vulnerability data
+    includeFixed: false                     # Whether to include fixed vulnerabilities in the results, defaults to false
+    includeSuppressed: false                # Whether to include suppressed vulnerabilities in the results, defaults to false
+    # includeAll: false                     # Shortcut for setting both includeFixed and includeSuppressed to the given value
+    filter:                                 
+      expressions:                          # Client-side filtering of vulnerabilities using SpEL
+    orderBy:
+      field: instanceId                     # Request FoD to return vulnerabilities ordered by the given property 
+      direction: ASC                        # Order ascending (ASC) or descending (DESC)
+    # embed:                                # See dedicated section on loading additional data from FoD
