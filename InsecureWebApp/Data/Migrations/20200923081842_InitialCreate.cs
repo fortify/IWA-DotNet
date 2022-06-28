@@ -29,12 +29,27 @@ namespace MicroFocus.InsecureWebApp.Data.Migrations
                 {
                     table.PrimaryKey("PK_Product", x => x.ID);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "ProductSearch",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false).Annotation("SqlServer:Identity", "1, 1"),
+                    SearchText = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: false)
+                }, 
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductSearch", x => x.ID);
+                });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "Product");
+            migrationBuilder.DropTable(
+                name: "ProductSearch");
         }
     }
 }

@@ -22,11 +22,32 @@ namespace MicroFocus.InsecureWebApp.Controllers
             _context = context;
         }
         #endregion
+        // POST: api/v1/products
+        [HttpPost]
+        public async Task<IActionResult> InsertSearchText(String keywords, string UserId)
+        {
+            String query = string.Empty;
+            if (!String.IsNullOrEmpty(keywords) && (!String.IsNullOrEmpty(UserId)))
+            {
+                query = "INSERT INTO ProductSearch (SearchText,UserId) VALUES ('" + keywords + "', '" + UserId + "')";
+                _context.Database.ExecuteSqlCommand(query);
+            }
+            return Ok(query);
+        }
 
         // GET: api/v1/products
         [HttpGet]
         public ActionResult<IEnumerable<Product>> GetProducts(String keywords, long limit = 50)
         {
+            /* FvB */
+            var query = "SELECT TOP " + Convert.ToInt32(limit) + " * FROM dbo.Product WHERE (" +
+                " Name LIKE '%" + keywords + "%' OR " +
+                " Summary LIKE '%" + keywords + "%' OR " +
+                " Description LIKE '%" + keywords + "%')";
+
+            var products1 = _context.Database.ExecuteSqlCommand(query);
+            //return products;
+            //var products1 = _context.Product.FromSqlRaw(query);
             /*var products = from p in _context.Product
                            select p;
 

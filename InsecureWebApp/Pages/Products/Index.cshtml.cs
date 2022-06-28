@@ -12,6 +12,7 @@ using System.Globalization;
 using MicroFocus.InsecureWebApp.Models;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using System.Security.Claims;
 
 namespace MicroFocus.InsecureWebApp.Pages.Products
 {
@@ -35,7 +36,16 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
 
         public async Task OnGetAsync()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
             GetAppSettingsFile();
+            Controllers.ProductsController pc = new Controllers.ProductsController(_context);
+
+            await pc.InsertSearchText(Keywords, userId);
+
+            ActionResult<IEnumerable<Product>> p =  pc.GetProducts(Keywords, 50);
+
+
+
             var productBAL = new ProductBAL();
 
             CurrencySymbol = NumberFormatInfo.CurrentInfo.CurrencySymbol;
@@ -52,6 +62,7 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
 
             //Product = await products.ToListAsync();
             Product = products.ToList();
+
             SearchCount = Product.Count();
 
             //Product = await _context.Product.ToListAsync();
