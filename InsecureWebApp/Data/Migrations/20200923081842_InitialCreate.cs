@@ -37,10 +37,25 @@ namespace MicroFocus.InsecureWebApp.Data.Migrations
                     ID = table.Column<int>(nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     SearchText = table.Column<string>(nullable: false),
                     UserId = table.Column<string>(nullable: false)
-                }, 
+                },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductSearch", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Prescription",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false).Annotation("SqlServer:Identity", "1, 1"),
+                    DocName = table.Column<string>(nullable: false),
+                    Advice = table.Column<string>(nullable: false),
+                    Product = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Prescription", x => x.ID);
                 });
         }
 
@@ -50,6 +65,8 @@ namespace MicroFocus.InsecureWebApp.Data.Migrations
                 name: "Product");
             migrationBuilder.DropTable(
                 name: "ProductSearch");
+            migrationBuilder.DropTable(
+                name: "Prescription");
         }
     }
 }

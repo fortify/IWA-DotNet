@@ -14,5 +14,7 @@ namespace MicroFocus.InsecureWebApp.Data
         {
         }
         public DbSet<MicroFocus.InsecureWebApp.Models.Product> Product { get; set; }
+
+        public DbSet<Prescription> Prescription { get; set; }
     }
 }

@@ -13,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.StaticFiles;
+using System.Reflection;
+using System.IO;
 
 namespace MicroFocus.InsecureWebApp
 {
@@ -44,9 +46,16 @@ namespace MicroFocus.InsecureWebApp
 
             services.AddSwaggerGen(c =>
             {
+
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "IWA.NET API", Version = "v1" });
+                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+                c.EnableAnnotations();
+                //c.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["controller"]}_{e.HttpMethod}");
             });
+
+
             
+
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.

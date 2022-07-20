@@ -12,6 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Migrations\20220718074954_Prescription.cs" />
+    <Compile Remove="Data\Migrations\20220718074954_Prescription.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\.dockerignore" Link=".dockerignore">
       <DependentUpon>$(DockerDefaultDockerfile)</DependentUpon>
     </None>
@@ -37,6 +42,7 @@
     <PackageReference Include="Moment.js" Version="2.19.2" />
     <PackageReference Include="SharpZipLib" Version="1.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.7" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.0.0" />
   </ItemGroup>
 
 </Project>

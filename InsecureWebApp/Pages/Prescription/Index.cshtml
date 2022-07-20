@@ -1,0 +1,113 @@
+﻿@page "{Search?}"
+@using MicroFocus.InsecureWebApp.Models
+@using Microsoft.AspNetCore.Mvc.Controllers
+@using System.Text
+
+@model  MicroFocus.InsecureWebApp.Pages.Prescription.PresModel
+
+@{
+
+    ViewData["Title"] = "Index";
+}
+<div class="bg-light py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mb-0"><a asp-page="/Prescriptions">List</a> </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="site-section-sm">
+
+    <div class="container">
+        @{
+            string search = Request.Query["Search"];
+            if (!string.IsNullOrEmpty(search))
+            {
+                <div class="row pt-2">
+                    <div class="col-md-12 text-center">
+                        <h2>Search</h2>
+                        <h5><span class="bg-light text-dark">
+                        @{
+                            var str = Model.GetSearchText().ToString();
+                         }
+                            @Html.Raw(ViewData["XSS"].ToString())
+                            <!--@Html.Raw(Request.Query["Search"])-->
+                        </span></h5>
+                    </div>
+                </div>
+            }
+        }
+
+        <div class="row mb-1">
+            <form asp-action="/Prescription" class="col-md-12" method="GET">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search prescription" name="Search" id="Search" value="@Html.Raw(Model.Search)">
+                    <input type="text" hidden class="form-control" name="Msg" id="Msg" value="<b>wrote this prescription Number</b>">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+            @foreach (var item in Model.Prescriptions)
+            {
+                <div class="row pt-1 border border-info">
+                    <div class="col">
+                        <button class="btnGetDoc btn btn-primary" data-pres-id="@item.ID" type="button" id="btnGetDoc_@item.ID">Get Prescription</button>
+                    </div>
+                    <div class="col">
+                        <h3 class="text-dark"><a asp-page="./Details" asp-route-id="@item.ID">@item.ID</a></h3>
+                    </div>
+                    <div class="col">
+                        <span class="text-info" id="Add_Update_Details_@item.ID">
+                        @item.DocName
+                        </span>
+                    </div>
+                    <div class="col">
+                        <p class="text-info">
+                            @Html.DivInjectionHTMLString(item.Advice)
+                        </p>
+                    </div>
+                </div>
+            }
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        (function ($) {
+            $(document).ready(function () {
+                $(".btnGetDoc").on('click', function(event){
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    var PresId = $(this).data("pres-id");
+                    const uri = '/prescription?Handler=DoctorName&ID='+PresId;
+                    var sMsg = $("#Msg").val(); //"<b>wrote this prescription Number</b>";
+                    var spanId = "#Add_Update_Details_" + PresId
+
+                    $.ajax({
+                        type: 'GET',
+                        url: '/prescription?Handler=DoctorName',
+                        data: { ID: PresId, Msg: sMsg },
+                        success: function(data, textStatus, xhr) {
+                                //alert(xhr.responseText);
+                                //alert(spanId);
+                                $(spanId).html(xhr.responseText);
+                        },
+                        error: function (jqXHR, status, err) {//status is Error and the errorThrown is undefined
+                            //alert(jqXHR.responseText);
+                            alert('Request Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.statusText);
+                            //$("#Add_Update_Details").html(jqXHR.responseText);
+                        }
+                    });
+                });
+
+            });
+        })(jQuery);
+    </script>
+}

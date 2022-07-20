@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MicroFocus.InsecureWebApp.Models;
 using MicroFocus.InsecureWebApp.Data;
+using Swashbuckle.AspNetCore.Annotations;
+using System.IO;
+using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MicroFocus.InsecureWebApp.Controllers
 {
@@ -23,20 +27,26 @@ namespace MicroFocus.InsecureWebApp.Controllers
         }
         #endregion
         // POST: api/v1/products
-        [HttpPost]
+        [SwaggerOperation(
+            OperationId = "InsertSearchText",
+            Description = "Requires user id",
+            Summary = "Save Keyword search user wise"
+        )]
+        [HttpPost("InsertSearchText")]
         public async Task<IActionResult> InsertSearchText(String keywords, string UserId)
         {
             String query = string.Empty;
             if (!String.IsNullOrEmpty(keywords) && (!String.IsNullOrEmpty(UserId)))
             {
-                query = "INSERT INTO ProductSearch (SearchText,UserId) VALUES ('" + keywords + "', '" + UserId + "')";
+                query = "DELETE FROM ProductSearch where UserId='" + UserId + "'; INSERT INTO ProductSearch (SearchText,UserId) VALUES ('" + keywords + "', '" + UserId + "')";
                 _context.Database.ExecuteSqlCommand(query);
             }
             return Ok(query);
         }
 
         // GET: api/v1/products
-        [HttpGet]
+        [SwaggerOperation("GetProducts")]
+        [HttpGet("GetProducts")]
         public ActionResult<IEnumerable<Product>> GetProducts(String keywords, long limit = 50)
         {
             /* FvB */
@@ -63,16 +73,29 @@ namespace MicroFocus.InsecureWebApp.Controllers
                 products = products.Take(Convert.ToInt32(limit));
             }
             return await products.AsNoTracking().ToListAsync();*/
-            var products = _context.Product.FromSqlRaw("SELECT TOP " + Convert.ToInt32(limit) + " * FROM dbo.Product WHERE (" +
+            var products = _context.Product.FromSqlRaw("SELECT TOP " + Convert.ToInt32(limit) + " *, Description as HtmlContent FROM dbo.Product WHERE (" +
                 " Name LIKE '%" + keywords + "%' OR " +
                 " Summary LIKE '%" + keywords + "%' OR " +
                 " Description LIKE '%" + keywords + "%')").ToList();
             return products;
         }
 
+        [SwaggerOperation("GetTestResponse")]
+        [HttpGet("GetTestResponse")]
+        public async Task<IActionResult> GetTestResponse()
+        {
+            //for testing of XSS purpose
+            var response = Content("Test Success !!");
+            return Ok(response.Content.ToString());
+
+            //await HttpResponseWritingExtensions.WriteAsync(HttpContext.Response, "Hello World");
+            //return Ok(HttpContext.Response);
+        }
+
         #region snippet_GetByID
         // GET: api/v1/products/5
-        [HttpGet("{id}")]
+        [SwaggerOperation(OperationId = "GetProductById")]
+        [HttpGet("GetProductById/{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var Product = await _context.Product.FindAsync(id);
@@ -88,7 +111,8 @@ namespace MicroFocus.InsecureWebApp.Controllers
 
         #region snippet_Update
         // PUT: api/v1/products/5
-        [HttpPut("{id}")]
+        [SwaggerOperation(OperationId = "PutProduct")]
+        [HttpPut("PutProductById/{id}")]
 #pragma warning disable SF8FC171238E9435BBC5E53DF24BB279A // Mass Assignment : Insecure Binder Configuration
         public async Task<IActionResult> PutProduct(int id, Product Product)
 #pragma warning restore SF8FC171238E9435BBC5E53DF24BB279A // Mass Assignment : Insecure Binder Configuration
@@ -122,7 +146,8 @@ namespace MicroFocus.InsecureWebApp.Controllers
 
         #region snippet_Create
         // POST: api/v1/products
-        [HttpPost]
+        [SwaggerOperation(OperationId = "PostProduct")]
+        [HttpPost("PostProduct")]
 #pragma warning disable SF8FC171238E9435BBC5E53DF24BB279A // Mass Assignment : Insecure Binder Configuration
         public async Task<ActionResult<Product>> PostProduct(Product Product)
 #pragma warning restore SF8FC171238E9435BBC5E53DF24BB279A // Mass Assignment : Insecure Binder Configuration
@@ -137,7 +162,9 @@ namespace MicroFocus.InsecureWebApp.Controllers
 
         #region snippet_Delete
         // DELETE: api/v1/products/5
-        [HttpDelete("{id}")]
+        //[Route("DeleteProduct", Name = "DeleteProduct")]
+        [SwaggerOperation(OperationId = "DeleteProduct")]
+        [HttpDelete("DeleteProduct/{id}")]
         public async Task<ActionResult<Product>> DeleteProduct(long id)
         {
             var Product = await _context.Product.FindAsync(id);
