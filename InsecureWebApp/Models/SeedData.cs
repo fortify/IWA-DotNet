@@ -41,6 +41,23 @@ namespace MicroFocus.InsecureWebApp.Models
                     SeedUsers(serviceProvider.GetRequiredService<UserManager<IdentityUser>>());
                 }
 
+                if (context.Prescription.Any())
+                {
+                    logger.LogError("Prescription Data has already been seeded!");
+                }else
+                {
+                    context.Prescription.AddRange(
+                        new Prescription
+                        {
+                            DocName = "Dr. John Miller",
+                            Advice = "Please drink plenty of water",
+                            Product = "SWA234-A568-00010",
+                            UserId = "ceb92675-6e4c-4bee-b91f-c4b41a58b3d8"
+                        }
+                        );
+                }
+                context.SaveChanges();
+
                 // Look for any products.
                 if (context.Product.Any())
                 {

@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MicroFocus.InsecureWebApp.Models
 {
-    public class Product
+    public class Product : TagHelper
     {
         public int ID { get; set; }
         public string Code { get; set; }
@@ -35,5 +37,23 @@ namespace MicroFocus.InsecureWebApp.Models
         public int Rating { get; set; }
 
         public bool Available { get; set; }
+
+        [NotMapped]
+        public string HtmlContent { get; set; }
+
+        public override void Process(TagHelperContext context, TagHelperOutput output)
+        {
+            var sHTML = new TagBuilder("div");
+            sHTML.Attributes.Add("class", "col-sm-6 col-lg-4 text-center item mb-4");
+            sHTML.InnerHtml.AppendHtml(
+                string.Format("({0})", this.Name));
+
+            var title = new TagBuilder("div");
+            title.Attributes.Add("class", "text-dark");
+            title.InnerHtml.AppendHtml(
+                string.Format("{0}", this.Summary));
+            title.InnerHtml.AppendHtml(sHTML);
+
+        }
     }
 }

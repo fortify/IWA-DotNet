@@ -36,6 +36,13 @@
             $(document).ready(function () {
                 $('#subscribe-newsletter').SubscribeNewsletter();
                 $('#shopping-cart-count').CartCount();
+                $( "a[class^='productId']" ).each(function() {
+                    //alert($(this).attr('class'));
+                });
+                $( ".xsinject" ).each(function() {
+                    $(this).html("<span>" + $(this).html() + "</span>");
+                });
+                //$('.xsInject').html(name);  
             });
         })(jQuery);
     </script>

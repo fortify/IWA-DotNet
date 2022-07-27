@@ -9,10 +9,11 @@ using MicroFocus.InsecureWebApp.Data;
 using MicroFocus.InsecureWebApp.Models;
 using System.Xml;
 using System.Globalization;
-using MicroFocus.InsecureWebApp.Models;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using System.Text;
 
 namespace MicroFocus.InsecureWebApp.Pages.Products
 {
@@ -31,6 +32,8 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
         public IList<Product> Product { get;set; }
         [BindProperty(SupportsGet = true)]
         public string Keywords { get; set; }
+        public string sHTML { get; set; }
+
         public int ProductCount { get; set; }
         public int SearchCount { get; set; }
 
@@ -39,12 +42,11 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
             GetAppSettingsFile();
             Controllers.ProductsController pc = new Controllers.ProductsController(_context);
+            
 
             await pc.InsertSearchText(Keywords, userId);
 
             ActionResult<IEnumerable<Product>> p =  pc.GetProducts(Keywords, 50);
-
-
 
             var productBAL = new ProductBAL();
 
@@ -65,6 +67,11 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
 
             SearchCount = Product.Count();
 
+            sHTML = "<div class=\"body_padded\"><h1>" + Keywords + " trying seach</h1><div id =\"code\"><table width = '100%' bgcolor='white' style=\"border:2px #C0C0C0 solid\">" +
+                "<tr>	<td><div id =\"code\">" + ProductCount.ToString() + "</div></td></tr>	</table>	</div>	<br />	<br />	<FORM><INPUT TYPE =\"BUTTON\" VALUE=\"Compare\" ONCLICK=\"window.location.href='javascript:alert(1)'\">" +
+                "</FORM></div>";
+            ViewData["ScriptInput"] = "alert(1);";
+
             //Product = await _context.Product.ToListAsync();
         }
 
@@ -76,5 +83,28 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
                     optional: false, reloadOnChange: true);
             _iconfiguration = builder.Build();
         }
+
+
+        public static async Task WriteOutput(HttpResponse Response, string Title, string Body)
+        {
+            //Controllers.ProductsController pc = new Controllers.ProductsController(contextnew);
+            var sb = new StringBuilder();
+            //sb.Append("<!DOCTYPE html><head><meta charset=\"utf-8\">");
+            //if (Title != null)
+            //{
+            //    sb.Append("<title>" + Title + "</title>");
+            //}
+            //sb.Append("</head><body>");
+            //sb.Append(Body);
+            //sb.Append("</body></html>");
+            //Task<IActionResult> result = pc.GetTestResponse();
+            sb.Append("<div>");
+            sb.Append(Body);
+            //sb.Append(result.ToString()) ;
+            sb.Append("</div>");
+            await HttpResponseWritingExtensions.WriteAsync(Response, sb.ToString());
+        }
     }
+
+
 }

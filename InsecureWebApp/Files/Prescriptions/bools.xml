@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<prescriptions>
+    <prescription>
+        <id>1</id>
+        <DocName>John Wood</DocName>
+        <price>$1200</price>
+    </prescription>
+
+    <prescription>
+        <id>2</id>
+        <DocName>Jack Ma</DocName>
+        <price>$1100</price>
+    </prescription>
+</prescriptions>
