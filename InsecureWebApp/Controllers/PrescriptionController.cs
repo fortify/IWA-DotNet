@@ -1,4 +1,4 @@
-﻿using MicroFocus.InsecureWebApp.Data;
+using MicroFocus.InsecureWebApp.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
