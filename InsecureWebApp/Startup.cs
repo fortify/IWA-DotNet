@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.StaticFiles;
 using System.Reflection;
 using System.IO;
+using MicroFocus.InsecureWebApp.Models;
 
 namespace MicroFocus.InsecureWebApp
 {
@@ -36,7 +37,7 @@ namespace MicroFocus.InsecureWebApp
                     Configuration.GetConnectionString("DefaultConnection")));
             //services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
             //    .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();

@@ -22,6 +22,8 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage
 
         public static string PersonalData => "PersonalData";
 
+        public static string Address => "Address";
+
         public static string TwoFactorAuthentication => "TwoFactorAuthentication";
 
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
@@ -29,6 +31,8 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage
         public static string EmailNavClass(ViewContext viewContext) => PageNavClass(viewContext, Email);
 
         public static string ChangePasswordNavClass(ViewContext viewContext) => PageNavClass(viewContext, ChangePassword);
+
+        public static string AddressNavClass(ViewContext viewContext) => PageNavClass(viewContext, Address);
 
         public static string DownloadPersonalDataNavClass(ViewContext viewContext) => PageNavClass(viewContext, DownloadPersonalData);
 

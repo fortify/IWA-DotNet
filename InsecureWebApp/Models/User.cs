@@ -2,7 +2,7 @@
 
 namespace MicroFocus.InsecureWebApp.Models
 {
-    public class User : IdentityUser
+    public class User : ApplicationUser
     {
     }
 }

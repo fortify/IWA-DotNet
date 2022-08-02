@@ -234,9 +234,6 @@ namespace MicroFocus.InsecureProductService.Data.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DeliveryTime")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 

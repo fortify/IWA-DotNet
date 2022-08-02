@@ -38,7 +38,7 @@ namespace MicroFocus.InsecureWebApp.Models
                 } 
                 else
                 {
-                    SeedUsers(serviceProvider.GetRequiredService<UserManager<IdentityUser>>());
+                    SeedUsers(serviceProvider.GetRequiredService<UserManager<ApplicationUser>>());
                 }
 
                 if (context.Prescription.Any())
@@ -217,7 +217,7 @@ namespace MicroFocus.InsecureWebApp.Models
             }
         }
 
-        private static void SeedUsers(UserManager<IdentityUser> userManager)
+        private static void SeedUsers(UserManager<ApplicationUser> userManager)
         {
             if (userManager.FindByEmailAsync("admin@localhost.com").Result == null)
             {
