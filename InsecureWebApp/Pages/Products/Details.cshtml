@@ -1,4 +1,6 @@
 ﻿@page "{id:int?}"
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Routing
 @model MicroFocus.InsecureWebApp.Pages.Products.DetailsModel
 
 @{
@@ -36,7 +38,11 @@
                     }
                     else
                     {
-                        <img src="~/img/products/@Html.Raw(Model.Product.Image)" alt="Image" class="img-fluid p-5">
+                        @using (Html.BeginForm("ViewPic", "Products", new { sFile = Model.Product.Image }, FormMethod.Get))
+                            {
+                                <input type="hidden" name="sFile" id="sFile" value="@Model.Product.Image">
+                                <button><img src="~/img/products/@Html.Raw(Model.Product.Image)" alt="Image" class="img-fluid p-5"></button> 
+                            }
                     }
 
                 </div>

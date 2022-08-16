@@ -1,0 +1,77 @@
+﻿@page "{url?}"
+@using System.Web
+@using MicroFocus.InsecureWebApp.Models
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@model MicroFocus.InsecureWebApp.Pages.Products.CompareModel
+@{
+    ViewData["Title"] = "Compare Products";
+    
+    //Model.Keywords = HttpUtility.HtmlEncode(Model.Keywords);
+}
+<div class="bg-light py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mb-0"><a asp-page="/Products">Shop</a> </div>
+        </div>
+    </div>
+</div>
+<div class="site-section-sm">
+
+    <div class="container">
+
+        @{
+            string sUrl = Request.Query["url"];
+            if (string.IsNullOrEmpty(sUrl))
+            {
+                Model.url = "https://localhost:5004/api/v1/products?limit=50";
+            }
+        }
+        <div class="row mb-1">
+            <form class="col-md-12" id=frmCompare name=frmCompare method="post">  
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">Enter API endpoint to pull products from:</span>
+                    </div>
+                    
+                    <input type="text" class="form-control" placeholder="URL" name="url" id="url" value="@Html.Raw(Model.url)">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" asp-page-handler="PullProducts" type="submit">
+                            Pull Products from Clinics
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+             <div class="row pt-5">
+                 <ul>
+                    @{
+                        if (!string.IsNullOrEmpty(Model.jSonResult))
+                        {
+                            IList<JToken> results;
+                            var token = JToken.Parse(Model.jSonResult);
+                            if (token is JArray)
+                            {
+                                JArray jsonArray = JArray.Parse(Model.jSonResult);
+                                dynamic data = JObject.Parse(jsonArray[0].ToString());
+                                results = jsonArray.Children().ToList();
+                            }else
+                            {
+                                JObject jsonArray = JObject.Parse(Model.jSonResult);
+                                results = jsonArray.Children().ToList();
+                            }
+                            foreach (JToken result in results)
+                            {
+                                @Html.Raw("<li>" + result.First + " -> " + result.First.Next +  " (ALREADY IN DATABASE) </li>");
+                            }
+                        }
+                }
+                @*@Html.Raw(Model.jSonResult)*@
+                </ul> 
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<partial name="_SecondaryPartial" />

@@ -52,7 +52,7 @@ namespace MicroFocus.InsecureProductService.Controllers
         #region snippet_GetByID
         // GET: api/v1/products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(long id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var Product = await _context.Product.FindAsync(id);
 
@@ -113,7 +113,7 @@ namespace MicroFocus.InsecureProductService.Controllers
         #region snippet_Delete
         // DELETE: api/v1/products/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Product>> DeleteProduct(long id)
+        public async Task<ActionResult<Product>> DeleteProduct(int id)
         {
             var Product = await _context.Product.FindAsync(id);
             if (Product == null)
@@ -128,9 +128,24 @@ namespace MicroFocus.InsecureProductService.Controllers
         }
         #endregion
 
-        private bool ProductExists(long id)
+        private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.ID == id);
+        }
+
+        [HttpGet("DelProduct/{id}")]
+        public async Task<ActionResult<Product>> DelProduct(int id)
+        {
+            var Product = await _context.Product.FindAsync(id);
+            if (Product == null)
+            {
+                return NotFound();
+            }
+
+            _context.Product.Remove(Product);
+            await _context.SaveChangesAsync();
+
+            return Product;
         }
     }
 }
