@@ -54,7 +54,7 @@ namespace MicroFocus.InsecureWebApp
                 //c.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["controller"]}_{e.HttpMethod}");
             });
 
-
+            services.AddDirectoryBrowser();
             
 
             services.Configure<IdentityOptions>(options =>
@@ -115,6 +115,7 @@ namespace MicroFocus.InsecureWebApp
 
             app.UseHttpsRedirection();
 
+
             // Set up custom content types - associating file extension to MIME type
             var provider = new FileExtensionContentTypeProvider();
             provider.Mappings[".vue"] = "application/javascript";
@@ -136,6 +137,7 @@ namespace MicroFocus.InsecureWebApp
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseDirectoryBrowser();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

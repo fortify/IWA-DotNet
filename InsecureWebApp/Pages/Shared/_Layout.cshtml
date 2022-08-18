@@ -30,6 +30,7 @@
     <script src="~/js/components/SubscribeNewsletter.js"></script>
     <script src="~/js/components/CartCount.js"></script>
     <script src="~/js/app.js" asp-append-version="true"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
     <script th:inline="javascript">
         (function ($) {
@@ -43,6 +44,7 @@
                     $(this).html("<span>" + $(this).html() + "</span>");
                 });
                 //$('.xsInject').html(name);  
+                //swal("hello world");
             });
         })(jQuery);
     </script>

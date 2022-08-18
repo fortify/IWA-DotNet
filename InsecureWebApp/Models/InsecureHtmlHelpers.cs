@@ -20,7 +20,7 @@ namespace MicroFocus.InsecureWebApp.Models
             string htmlOutput = string.Empty;
             var tagBuilder = new TagBuilder("div");
             tagBuilder.AddCssClass("xsinject");
-            tagBuilder.InnerHtml.AppendHtml("<a href = 'javascript:alert(\" "+ ProductDesc +" \")' > " + ProductDesc.Substring(0,20) + " </a>");
+            tagBuilder.InnerHtml.AppendHtml("<a href = 'javascript:swal(\" "+ ProductDesc +" \")' > " + ProductDesc.Substring(0,20) + " </a>");
             
             using (var writer = new StringWriter())
             {

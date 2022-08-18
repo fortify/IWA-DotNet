@@ -11,6 +11,11 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.IO;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Net.Http;
+using System.Net;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace MicroFocus.InsecureWebApp.Controllers
 {
@@ -80,6 +85,62 @@ namespace MicroFocus.InsecureWebApp.Controllers
             return products;
         }
 
+        [HttpPost("GetProductFromOtherSource")]
+        public async Task<string> GetProductFromOtherSource(string url)
+        {
+            var httpClientHandler = new HttpClientHandler();
+            httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+            {
+                return true;
+            };
+
+            string sReturnVal = string.Empty;
+            HttpClient client = new HttpClient(httpClientHandler);
+            HttpResponseMessage response = await client.GetAsync(url);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                var product = await response.Content.ReadAsStringAsync();
+                sReturnVal = response.Content.ReadAsStringAsync().Result;
+
+            }
+            //dynamic dynJson = JsonConvert.DeserializeObject(sReturnVal).ToString();
+            return sReturnVal;
+        }
+
+        [SwaggerOperation("ViewPic")]
+        [HttpGet("ViewPic")]
+        public ActionResult ViewPic(string sFile)
+        {
+
+            var fileProvider = new FileExtensionContentTypeProvider();
+
+            //Environment.WebRootPath
+            //"~/img/products/"
+            //Build the File Path.
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\products\\") + sFile;
+            
+            
+
+            if (!fileProvider.TryGetContentType(Path.GetExtension(path), out string contentType))
+            {
+                return PhysicalFile(path, "image/jpeg");
+            } else
+            {
+                return PhysicalFile(path, contentType);
+            }
+
+            ////Read the File data into Byte Array.
+            //byte[] bytes = System.IO.File.ReadAllBytes(path);
+
+
+            ////Send the File to Download.
+            //return PhysicalFile(path, "image/jpeg");
+            ////return File(bytes, "image/jpeg", sFile);
+            ////return new FileStreamResult(new MemoryStream(bytes), "image/jpeg") { FileDownloadName = sFile };
+
+
+        }
+
         [SwaggerOperation("GetTestResponse")]
         [HttpGet("GetTestResponse")]
         public async Task<IActionResult> GetTestResponse()
@@ -97,6 +158,18 @@ namespace MicroFocus.InsecureWebApp.Controllers
         [SwaggerOperation(OperationId = "GetProductById")]
         [HttpGet("GetProductById/{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
+        {
+            var Product = await _context.Product.FindAsync(id);
+
+            if (Product == null)
+            {
+                return NotFound();
+            }
+
+            return Product;
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Product>> GetEachProduct(int id)
         {
             var Product = await _context.Product.FindAsync(id);
 
@@ -165,7 +238,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
         //[Route("DeleteProduct", Name = "DeleteProduct")]
         [SwaggerOperation(OperationId = "DeleteProduct")]
         [HttpDelete("DeleteProduct/{id}")]
-        public async Task<ActionResult<Product>> DeleteProduct(long id)
+        public async Task<ActionResult<Product>> DeleteProduct(int id)
         {
             var Product = await _context.Product.FindAsync(id);
             if (Product == null)
@@ -180,7 +253,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
         }
         #endregion
 
-        private bool ProductExists(long id)
+        private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.ID == id);
         }
