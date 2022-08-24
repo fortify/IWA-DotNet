@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using System.Net;
+using MicroFocus.InsecureWebApp.Controllers;
 
 namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account
 {
@@ -43,7 +46,7 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [EmailAddress]
+            //[EmailAddress]
             public string Email { get; set; }
 
             [Required]
@@ -79,11 +82,15 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                //var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+                UserController uc = new UserController(_logger, _signInManager, HttpContext);
+                var result = await uc.AuthUser(Input.Email, Input.Password, Input.RememberMe);
+
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    _logger.LogInformation("{0} logged in.",Input.Email);
+                    return Redirect(returnUrl + "?SID=" + HttpContext.Session.Id);
                 }
                 if (result.RequiresTwoFactor)
                 {
@@ -96,6 +103,7 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    _logger.LogWarning("Invalid login attempt");
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -108,5 +109,24 @@ namespace MicroFocus.InsecureWebApp.Controllers
             return Ok(new { success = true });
         }
 
+        [HttpGet("IsEmailFromTrustedDomain")]
+        public bool IsEmailFromTrustedDomain(string sEmail)
+        {
+            bool sRetVal = false;
+            IPAddress[] hostIPsAddress = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
+            var emailsplit = sEmail.Split(".");
+            foreach (IPAddress ip in hostIPsAddress)
+            {
+                IPAddress hostIPAddress = IPAddress.Parse(ip.ToString());
+                IPHostEntry hostInfo = Dns.GetHostByAddress(hostIPAddress);
+                if (hostInfo.HostName.EndsWith(emailsplit[1]))
+                {
+                    sRetVal = true;
+                    break;
+                }
+            }
+
+            return sRetVal;
+        }
     }
 }

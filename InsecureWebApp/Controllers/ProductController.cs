@@ -124,19 +124,25 @@ namespace MicroFocus.InsecureWebApp.Controllers
 
             _context.Entry(Product).State = EntityState.Modified;
 
-            try
+            if (await TryUpdateModelAsync<Product>(Product,"", c => c.Code, 
+                c => c.Price, 
+                c => c.Name, 
+                c => c.Description ))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
+                try
                 {
-                    return NotFound();
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (!ProductExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
             }
 

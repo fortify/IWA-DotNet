@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage
 {
@@ -18,16 +20,24 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly ILogger<MicroFocus.InsecureWebApp.Controllers.SiteController> _loggerSC;
 
         public EmailModel(
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
+            ILogger<ExternalLoginModel> logger,
+            ILogger<MicroFocus.InsecureWebApp.Controllers.SiteController> loggerSC,
             IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
+            _loggerSC = loggerSC;
             _emailSender = emailSender;
         }
+
+        public bool IsTrusted { get; set; }
 
         public string Username { get; set; }
 
@@ -128,18 +138,27 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage
             var userId = await _userManager.GetUserIdAsync(user);
             var email = await _userManager.GetEmailAsync(user);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var callbackUrl = Url.Page(
-                "/Account/ConfirmEmail",
-                pageHandler: null,
-                values: new { area = "Identity", userId = userId, code = code },
-                protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
-                email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-            StatusMessage = "Verification email sent. Please check your email.";
+            MicroFocus.InsecureWebApp.Controllers.SiteController sc = new Controllers.SiteController(_loggerSC);
+
+            IsTrusted = sc.IsEmailFromTrustedDomain(email);
+            if (IsTrusted)
+            {
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmail",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId = userId, code = code },
+                    protocol: Request.Scheme);
+                await _emailSender.SendEmailAsync(
+                    email,
+                    "Confirm your email",
+                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                StatusMessage = "Verification email sent. Please check your email.";
+            } else
+                StatusMessage = "Verification email not sent. Check domain name.";
+
             return RedirectToPage();
         }
     }

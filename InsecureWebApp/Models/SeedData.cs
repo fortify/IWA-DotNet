@@ -12,7 +12,7 @@ namespace MicroFocus.InsecureWebApp.Models
 {
     public class SeedData
     {
-        public static void Initialize(IServiceProvider serviceProvider)
+        public static async void Initialize(IServiceProvider serviceProvider)
         {
 
             using (var context = new ApplicationDbContext(
@@ -61,7 +61,8 @@ namespace MicroFocus.InsecureWebApp.Models
                 // Look for any products.
                 if (context.Product.Any())
                 {
-                    return; // DB has been seeded
+                    logger.LogError("Product Data has already been seeded!");
+                    //return; // DB has been seeded
                 }
                 else
                 {
@@ -214,6 +215,48 @@ namespace MicroFocus.InsecureWebApp.Models
                 }
                 
                 context.SaveChanges();
+
+                if (context.Order.Any())
+                {
+                    logger.LogError("Order Data has already been seeded!");
+                }
+                else
+                {
+                    context.Order.AddRange(
+                        new Order
+                        {
+                            Date = DateTime.Today,
+                            Discount = 10,
+                            User = context.Users.FirstOrDefault(),
+                            LineItems = new System.Collections.Generic.List<OrderDetail>
+                            {
+                                new OrderDetail
+                                {
+                                    OrderId = 1,
+                                    Product = context.Product.FirstOrDefault(),
+                                    Qty = 1
+                                }
+                            }
+                        },
+                        new Order
+                        {
+                            Date = DateTime.Today,
+                            Discount = 5,
+                            User = context.Users.Skip(1).FirstOrDefault(),
+                            LineItems = new System.Collections.Generic.List<OrderDetail>
+                            {
+                                new OrderDetail
+                                {
+                                    OrderId = 2,
+                                    Product = context.Product.Skip(1).FirstOrDefault(),
+                                    Qty = 1
+                                }
+                            }
+                        }
+                        );
+                }
+                context.SaveChanges();
+
             }
         }
 
@@ -237,7 +280,7 @@ namespace MicroFocus.InsecureWebApp.Models
             {
                 User user = new User();
                 user.UserName = "user@localhost.com";
-                user.Email = "user@localhost";
+                user.Email = "user@localhost.com";
 
                 IdentityResult result = userManager.CreateAsync(user, "password").Result;
 

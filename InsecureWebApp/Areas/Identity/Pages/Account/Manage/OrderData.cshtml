@@ -1,0 +1,67 @@
+﻿@page
+@model MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage.OrderDataModel
+@{
+    ViewData["Title"] = "Order Data";
+    ViewData["ActivePage"] = ManageNavPages.OrderData;
+}
+
+<div class="container">
+    <h4>@ViewData["Title"]</h4>
+
+    <div class="row">
+        <div class="col-md-12">
+            <p>Your account contains multiple orders. This page allows you to view or cancel the orders.</p>
+            <p>
+                <strong>Cancelling orders will hold your shipment.</strong>
+            </p>
+            <form id="order-data" asp-page="GetOrderData" method="post" class="form-group">
+                <button class="btn btn-primary" type="submit">Create Random Order Enteries</button>
+            </form>
+            <p>
+                <div class="row mb-5">
+                    <div class="site-blocks-table" style="width:100%">
+                        <table id="item-table" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="product-thumbnail">Id</th>
+                                    <th class="product-name">Date</th>
+                                    <th class="product-price">User Email</th>
+                                    <th class="product-total">Discount</th>
+                                    <th class="product-remove">Product</th>
+                                    <th class="product-quantity">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach(var od in Model.Orders)
+                            {
+                                <tr>
+                                    <td class="product-thumbnail">@od.Id</td>
+                                    <td class="product-name">@od.Date.ToShortDateString()</td>
+                                    <td class="product-price">@od.User</td>
+                                    <td class="product-total">@od.Discount%</td>
+                                    <td colspan=2>&nbsp;</td>
+                                    @foreach(var prod in od.LineItems)
+                                    {
+                                    <tr>
+                                        <td colspan="5" class="text-right">@prod.Product.Code</td>
+                                        <td class="product-quantity">@prod.Qty</td>
+                                    </tr>
+                                    }
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+                @*<a id="delete" asp-page="DeletePersonalData" class="btn btn-primary">Delete</a>*@
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

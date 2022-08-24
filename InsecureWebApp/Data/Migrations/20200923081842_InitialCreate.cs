@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace MicroFocus.InsecureWebApp.Data.Migrations
 {
@@ -57,6 +58,32 @@ namespace MicroFocus.InsecureWebApp.Data.Migrations
                 {
                     table.PrimaryKey("PK_Prescription", x => x.ID);
                 });
+            migrationBuilder.CreateTable(
+                name: "Order",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false).Annotation("SqlServer:Identity", "1, 1"),
+                    Date = table.Column<DateTime>(nullable: false),
+                    Discount = table.Column<int>(nullable: false),
+                    UserId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Order", x => x.ID);
+                });
+            migrationBuilder.CreateTable(
+                name: "OrderDetail",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false).Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<int>(nullable: false),
+                    ProductId = table.Column<int>(nullable: false),
+                    Qty = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderDetail", x => x.ID);
+                });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -67,6 +94,10 @@ namespace MicroFocus.InsecureWebApp.Data.Migrations
                 name: "ProductSearch");
             migrationBuilder.DropTable(
                 name: "Prescription");
+            migrationBuilder.DropTable(
+                name: "Order");
+            migrationBuilder.DropTable(
+                name: "OrderDetail");
         }
     }
 }

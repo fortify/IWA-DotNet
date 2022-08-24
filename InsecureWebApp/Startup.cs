@@ -15,6 +15,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.StaticFiles;
 using System.Reflection;
 using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace MicroFocus.InsecureWebApp
 {
@@ -30,6 +31,8 @@ namespace MicroFocus.InsecureWebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //services.AddAntiforgery(options => { options.Cookie.Expiration = TimeSpan.Zero; });
+
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
@@ -43,7 +46,12 @@ namespace MicroFocus.InsecureWebApp
             services.AddControllers();
             services.AddRazorPages();
             services.AddRouting(options => options.LowercaseUrls = true);
-
+            services.AddSession(options =>
+                {
+                    options.Cookie.Name = "IWA.Session";
+                    options.IdleTimeout = TimeSpan.FromHours(8);
+                    options.Cookie.IsEssential = true;
+                });
             services.AddSwaggerGen(c =>
             {
 
@@ -53,8 +61,6 @@ namespace MicroFocus.InsecureWebApp
                 //c.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["controller"]}_{e.HttpMethod}");
             });
 
-
-            
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -75,6 +81,16 @@ namespace MicroFocus.InsecureWebApp
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = true;
+            });
+
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                //options.CheckConsentNeeded = context => true;
+                options.CheckConsentNeeded = context => false;
+                options.MinimumSameSitePolicy =  SameSiteMode.None;
+                options.Secure = CookieSecurePolicy.None;
             });
 
             /*
@@ -131,10 +147,11 @@ namespace MicroFocus.InsecureWebApp
             });
 
             app.UseRouting();
-
+            app.UseSession();
+            app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
