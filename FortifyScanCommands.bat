@@ -3,6 +3,5 @@ Del *.fpr
 del *.log
 sourceanalyzer -b iwa -clean
 sourceanalyzer -b iwa -debug -logfile trans.log devenv IWA.NET.sln /REBUILD
-sourceanalyzer -b iwa -debug -logfile scan.log -scan -f iwa.fpr -Dcom.fortify.sca.rules.enable_wi_correlation 
 sourceanalyzer -b iwa -debug -logfile scan.log -scan -f iwa.fpr -Dcom.fortify.sca.rules.enable_wi_correlation
-start "" "iwa.fpr" 
+start "" "iwa.fpr"

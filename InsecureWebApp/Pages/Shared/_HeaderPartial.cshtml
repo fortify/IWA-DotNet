@@ -1,6 +1,7 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+﻿@using MicroFocus.InsecureWebApp.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <div class="site-navbar py-2">
 
@@ -56,6 +57,7 @@
                                 </li>
                                 <li><a asp-page="/Products/Index">Weight management</a></li>
                                 <li><a asp-page="/Products/Index">Toiletries</a></li>
+                                <li><a asp-page="/Products/Compare">Pull Products from Clinics</a></li>
                             </ul>
                         </li>
                         <li class="has-children">

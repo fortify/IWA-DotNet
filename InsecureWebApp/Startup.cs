@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using System.Reflection;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using MicroFocus.InsecureWebApp.Models;
 
 namespace MicroFocus.InsecureWebApp
 {
@@ -39,7 +40,7 @@ namespace MicroFocus.InsecureWebApp
                     Configuration.GetConnectionString("DefaultConnection")));
             //services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
             //    .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
@@ -61,7 +62,8 @@ namespace MicroFocus.InsecureWebApp
                 //c.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["controller"]}_{e.HttpMethod}");
             });
 
-
+            services.AddDirectoryBrowser();
+            
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
@@ -130,6 +132,7 @@ namespace MicroFocus.InsecureWebApp
 
             app.UseHttpsRedirection();
 
+
             // Set up custom content types - associating file extension to MIME type
             var provider = new FileExtensionContentTypeProvider();
             provider.Mappings[".vue"] = "application/javascript";
@@ -151,7 +154,7 @@ namespace MicroFocus.InsecureWebApp
             app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseAuthorization();
-            
+            app.UseDirectoryBrowser();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

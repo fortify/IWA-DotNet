@@ -4,9 +4,10 @@
     ViewData["Title"] = "Home";
 }
 
+@using MicroFocus.InsecureWebApp.Models
 @using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <div class="site-blocks-cover" style="background-image: url('/img/home_hero_1a.jpg');">
     <div class="container">

@@ -1,0 +1,48 @@
+﻿@page
+@using MicroFocus.InsecureWebApp.Models
+@model MicroFocus.InsecureWebApp.Pages.Cart.FileListModel
+@{
+    ViewData["Title"] = "View Files";
+}
+
+<div class="bg-light py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mb-0"><a asp-page="/Cart/Index">Cart</a> </div>
+            <div class="col-md-6 mb-0 text-right"><a asp-page="Cart/FileList">Files</a> </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section-sm">
+
+    <div class="container">
+
+            <div id="item-files">
+                <div class="row mb-5">
+                    <div class="site-blocks-table" style="width:100%">
+                        <table id="item-table" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="product-thumbnail">File Name</th>
+                                    <th class="product-total">Path</th>
+                                    <th class="product-remove">Direcrtory Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (FileModel file in Model.Files)
+                            {
+                                <tr>
+                                    <td>@file.Name</td>
+                                    <td>@file.Path</td>
+                                    <td>@file.DirectoryName</td>
+                                </tr>
+                            }
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+    </div>
+</div>

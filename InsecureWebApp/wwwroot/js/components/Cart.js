@@ -70,7 +70,28 @@ $.fn.Cart = function (options) {
                 window.location.href = "/products";
             });
             $this.find('#checkout-cart').on('click', function (event) {
-                alert("This functionality is not yet implemented");
+                $.ajaxSetup({ async: false });
+                const myJSON = JSON.stringify(cart);
+                $.get("/api/v1/cart/SaveOrder?jSonOrder=" + myJSON)
+                    .then(response => {
+                        swal(response);
+                        Swal.fire({
+                            title: 'Do you want to proceed to payment?',
+                            showDenyButton: true,
+                            showCancelButton: false,
+                            confirmButtonText: 'Yes',
+                            denyButtonText: `Continue Shopping`,
+                        }).then((result) => {
+                            /* Read more about isConfirmed, isDenied below */
+                            if (result.isConfirmed) {
+                                Swal.fire('Moving to Payment Gateway', '', 'success')
+                            } else if (result.isDenied) {
+                                //Swal.fire('Changes are not saved', '', 'info')
+                            }
+                        })
+                    })
+
+                swal("This functionality is not yet implemented");
                 //window.location.href = "/cart/checkout";
             });
 

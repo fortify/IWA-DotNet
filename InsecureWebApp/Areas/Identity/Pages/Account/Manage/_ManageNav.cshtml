@@ -1,4 +1,5 @@
-﻿@inject SignInManager<IdentityUser> SignInManager
+@using MicroFocus.InsecureWebApp.Models
+@inject SignInManager<ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
@@ -11,7 +12,7 @@
         <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">External logins</a></li>
     }
     <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.OrderNavClass(ViewContext)" id="order-data" asp-page="./OrderData">Orders</a></li>
-
+    <li class="nav-item"><a class="nav-link @ManageNavPages.AddressNavClass(ViewContext)" id="address-credit" asp-page="./Address">Update Address</a></li>
+    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Download Personal data</a></li>
 </ul>
