@@ -29,6 +29,7 @@ namespace MicroFocus.InsecureWebApp.Pages.Prescription
 
         public async Task OnGet()
         {
+            await Task.Delay(1);
             List<Models.Prescription> p = pc.GetPrescription(Search);
             //Search = pc.GetSearchText(Search);
             Prescriptions = p;
@@ -41,7 +42,7 @@ namespace MicroFocus.InsecureWebApp.Pages.Prescription
             return cr.Content.ToString();
         }
 
-        public async Task<IActionResult> OnGetDoctorName(string ID, string Msg)
+        public IActionResult OnGetDoctorName(string ID, string Msg)
         {
             int iPresId;
             int.TryParse(ID, out iPresId);

@@ -86,6 +86,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
             bool retFunc = false;
             if (!string.IsNullOrEmpty(xmlContent))
             {
+                await Task.Delay(100);
                 string path = Path.Combine(Directory.GetCurrentDirectory(), PRESCRIPTION_LOCATION) + sFileName;
 
                 XmlDocument document = new XmlDocument();

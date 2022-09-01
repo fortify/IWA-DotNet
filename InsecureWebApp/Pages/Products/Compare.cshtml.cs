@@ -14,7 +14,7 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
 {
     public class CompareModel : PageModel
     {
-        private static IConfiguration _iconfiguration;
+        private static readonly IConfiguration _iconfiguration;
 
         public List<MicroFocus.InsecureWebApp.Models.Product> Products { get; set; }
         public string jSonResult { get; set; }
@@ -31,12 +31,12 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
 
         public string url { get; set; }
 
-        public async void OnGetAsync()
+        public void OnGetAsync()
         {
 
         }
 
-        public async void OnPost(string url)
+        public void OnPost(string url)
         {
             //try
             //{

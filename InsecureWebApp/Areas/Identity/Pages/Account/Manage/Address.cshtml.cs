@@ -59,7 +59,7 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage
                 using (AesCryptoServiceProvider myAes = new AesCryptoServiceProvider())
                 {
                     byte[] bytes = Convert.FromBase64String(user.CreditCardNo);
-                    creditcard = CryptoController.DecryptStringFromBytes_Aes(bytes, enckey, enciv);
+                    creditcard = CryptoController.DecryptStringFromBytes_Aes(bytes, enckey, enciv).Replace("\0","");
                 }
             }
 

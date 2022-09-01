@@ -41,6 +41,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
         public async Task<IActionResult> InsertSearchText(String keywords, string UserId)
         {
             String query = string.Empty;
+            await Task.Delay(1);
             if (!String.IsNullOrEmpty(keywords) && (!String.IsNullOrEmpty(UserId)))
             {
                 query = "DELETE FROM ProductSearch where UserId='" + UserId + "'; INSERT INTO ProductSearch (SearchText,UserId) VALUES ('" + keywords + "', '" + UserId + "')";
@@ -55,12 +56,22 @@ namespace MicroFocus.InsecureWebApp.Controllers
         public ActionResult<IEnumerable<Product>> GetProducts(String keywords, long limit = 50)
         {
             /* FvB */
-            var query = "SELECT TOP " + Convert.ToInt32(limit) + " * FROM dbo.Product WHERE (" +
+            var query = "SELECT TOP " + Convert.ToInt32(limit) + " *, Description as HtmlContent FROM dbo.Product WHERE (" +
                 " Name LIKE '%" + keywords + "%' OR " +
                 " Summary LIKE '%" + keywords + "%' OR " +
                 " Description LIKE '%" + keywords + "%')";
+            try
+            {
+                var products1 = _context.Database.ExecuteSqlCommand(query);
+            }catch (Exception ex)
+            {
+                
+                // add sensitive data and bubble up exception
+                ex.Data.Add("dynamic data", query);
 
-            var products1 = _context.Database.ExecuteSqlCommand(query);
+                throw new Exception("Problem building SQL Query:"+query, ex.InnerException);
+                //throw ex;
+            }
             //return products;
             //var products1 = _context.Product.FromSqlRaw(query);
             /*var products = from p in _context.Product
@@ -143,7 +154,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
 
         [SwaggerOperation("GetTestResponse")]
         [HttpGet("GetTestResponse")]
-        public async Task<IActionResult> GetTestResponse()
+        public IActionResult GetTestResponse()
         {
             //for testing of XSS purpose
             var response = Content("Test Success !!");

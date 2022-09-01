@@ -1,4 +1,5 @@
 ﻿using MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account;
+using MicroFocus.InsecureWebApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,11 @@ namespace MicroFocus.InsecureWebApp.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger _logger;
         private readonly HttpContext _httpContext;
 
-        public UserController(ILogger<LoginModel> logger, SignInManager<IdentityUser> signInManager, HttpContext httpContext)
+        public UserController(ILogger<LoginModel> logger, SignInManager<ApplicationUser> signInManager, HttpContext httpContext)
         {
             _signInManager = signInManager;
             _logger = logger;
@@ -39,7 +40,9 @@ namespace MicroFocus.InsecureWebApp.Controllers
             {
                 _logger.LogInformation("{0} logged in.", sUserName);
                 _httpContext.Session.SetString("AuthToken", sUserName);
-                _httpContext.Response.Cookies.Append("AuthToken", sUserName);
+                _httpContext.Response.Cookies.Append("AuthToken", sUserName, new CookieOptions { 
+                    Expires = DateTimeOffset.Now.AddYears(1)
+                });
                 _httpContext.Session.SetString("SessID", _httpContext.Session.Id);
                 _httpContext.Response.Cookies.Append("SessID", _httpContext.Session.Id);
             }

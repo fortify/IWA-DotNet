@@ -14,10 +14,10 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage
     public class OrderDataModel : PageModel
     {
         private readonly MicroFocus.InsecureWebApp.Data.ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<OrderDataModel> _logger;
 
-        public OrderDataModel(UserManager<IdentityUser> userManager,
+        public OrderDataModel(UserManager<ApplicationUser> userManager,
             ILogger<OrderDataModel> logger, MicroFocus.InsecureWebApp.Data.ApplicationDbContext context)
         {
             _context = context;

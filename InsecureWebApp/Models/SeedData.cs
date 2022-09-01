@@ -14,7 +14,7 @@ namespace MicroFocus.InsecureWebApp.Models
     {
         public static async void Initialize(IServiceProvider serviceProvider)
         {
-
+            await Task.Delay(1);
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<
                     DbContextOptions<ApplicationDbContext>>()))

@@ -12,7 +12,7 @@ namespace MicroFocus.InsecureWebApp.Models
         public int Id { get; set; }
         public DateTime Date { get; set; }
         public int Discount { get; set; }
-        public virtual IdentityUser User { get; set; }
+        public virtual ApplicationUser User { get; set; }
         public List<OrderDetail> LineItems { get; set; }
 
         [NotMapped]

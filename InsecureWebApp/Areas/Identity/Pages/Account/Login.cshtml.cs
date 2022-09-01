@@ -88,6 +88,7 @@ namespace MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account
                 UserController uc = new UserController(_logger, _signInManager, HttpContext);
                 var result = await uc.AuthUser(Input.Email, Input.Password, Input.RememberMe);
 
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("{0} logged in.",Input.Email);
