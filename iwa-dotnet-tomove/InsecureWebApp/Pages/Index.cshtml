@@ -1,0 +1,177 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+@using MicroFocus.InsecureWebApp.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<div class="site-blocks-cover" style="background-image: url('/img/home_hero_1a.jpg');">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-7 mx-auto order-lg-2 py-5">
+                <div class="site-block-cover-content text-center">
+                    <h2 class="sub-title">Local Service, Global Reach</h2>
+                    <h1 class="main-title">Welcome To IWA.NET Pharmacy Direct</h1>
+                </div>
+                <div class="jumbotron text-center" style="opacity: 0.9">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <h4>Welcome back to our site @User.Identity.Name!</h4>
+                        <p class="pt-4">
+                            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn p-2 btn-outline-info"> Your Account </a>
+                            <a asp-page="/Products/Index" class="btn p-2 btn-outline-success"> Shop Now </a>
+                        </p>
+                    }
+                    else
+                    {
+                        <h4>Welcome Guest!</h4>
+                        <p class="pt-4">
+                            <a asp-area="Identity" asp-page="/Account/Register" class="btn p-2 btn-outline-info"> Register </a>
+                            <a asp-page="/Products/Index" class="btn p-2 btn-outline-success"> Shop Now </a>
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section">
+    <div class="container">
+        <div class="row align-items-stretch section-overlap">
+            <div class="col-md-6 col-lg-4 mb-4 mb-lg-0">
+                <div class="banner-wrap bg-primary h-100">
+                    <a href="#" class="h-100">
+                        <h5>Free <br> Shipping</h5>
+                        <p>
+                            Amet sit amet dolor
+                            <strong>Lorem, ipsum dolor sit amet consectetur adipisicing.</strong>
+                        </p>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4 mb-lg-0">
+                <div class="banner-wrap h-100">
+                    <a href="#" class="h-100">
+                        <h5>Season <br> Sale 50% Off</h5>
+                        <p>
+                            Amet sit amet dolor
+                            <strong>Lorem, ipsum dolor sit amet consectetur adipisicing.</strong>
+                        </p>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4 mb-lg-0">
+                <div class="banner-wrap bg-warning h-100">
+                    <a href="#" class="h-100">
+                        <h5>Buy <br> A Gift Card</h5>
+                        <p>
+                            Amet sit amet dolor
+                            <strong>Lorem, ipsum dolor sit amet consectetur adipisicing.</strong>
+                        </p>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="new-products">
+    <div class="site-section bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="title-section text-center col-12">
+                    <h2 class="text-uppercase">New Products</h2>
+                </div>
+            </div>
+            <div id="product-data" class="row">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section">
+    <div class="container">
+        <div class="row">
+            <div class="title-section text-center col-12">
+                <h2 class="text-uppercase">Testimonials</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 block-3 products-wrap">
+                <div class="nonloop-block-3 no-direction owl-carousel">
+
+                    <div class="testimony">
+                        <blockquote>
+                            <img src="/img/person_1.jpg" alt="Image" class="img-fluid w-25 mb-4 rounded-circle">
+                            <p>&ldquo;Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nemo omnis voluptatem consectetur quam tempore obcaecati maiores voluptate aspernatur iusto eveniet, placeat ab quod tenetur ducimus. Minus ratione sit quaerat unde.&rdquo;</p>
+                        </blockquote>
+
+                        <p>&mdash; Sarah Peters</p>
+                    </div>
+
+                    <div class="testimony">
+                        <blockquote>
+                            <img src="/img/person_2.jpg" alt="Image" class="img-fluid w-25 mb-4 rounded-circle">
+                            <p>
+                                &ldquo;Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nemo omnis voluptatem consectetur quam tempore
+                                obcaecati maiores voluptate aspernatur iusto eveniet, placeat ab quod tenetur ducimus. Minus ratione sit quaerat
+                                unde.&rdquo;
+                            </p>
+                        </blockquote>
+
+                        <p>&mdash; Brent Easter</p>
+                    </div>
+
+                    <div class="testimony">
+                        <blockquote>
+                            <img src="/img/person_3.jpg" alt="Image" class="img-fluid w-25 mb-4 rounded-circle">
+                            <p>
+                                &ldquo;Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nemo omnis voluptatem consectetur quam tempore
+                                obcaecati maiores voluptate aspernatur iusto eveniet, placeat ab quod tenetur ducimus. Minus ratione sit quaerat
+                                unde.&rdquo;
+                            </p>
+                        </blockquote>
+
+                        <p>&mdash; Lucas Gallione</p>
+                    </div>
+
+                    <div class="testimony">
+                        <blockquote>
+                            <img src="/img/person_4.jpg" alt="Image" class="img-fluid w-25 mb-4 rounded-circle">
+                            <p>
+                                &ldquo;Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nemo omnis voluptatem consectetur quam tempore
+                                obcaecati maiores voluptate aspernatur iusto eveniet, placeat ab quod tenetur ducimus. Minus ratione sit quaerat
+                                unde.&rdquo;
+                            </p>
+                        </blockquote>
+
+                        <p>&mdash; Martin Van Dyck</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_SecondaryPartial" />
+
+@section scripts{ 
+    <script src="~/js/components/NewProducts.js"></script>
+    <script type="text/javascript">
+        (function ($) {
+            $(document).ready(function () {
+                $('#new-products').NewProducts({
+                    currencySymbol: "@Model.CurrencySymbol"
+                });
+            });
+        })(jQuery);
+    </script>
+}

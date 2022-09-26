@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+@*    <meta http-equiv="Content-Type" content="text/html; charset=UTF-7" />*@
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewData["Title"] - IWA.NET Pharmacy Direct</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" type="text/css" />
+    <!--link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" type="text/css" /-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css">
+    <link rel="stylesheet" href="~/lib/icomoon/style.css" type="text/css" />
+    <link rel="stylesheet" href="~/lib/css/owl.carousel.min.css" type="text/css" />
+    <link rel="stylesheet" href="~/lib/css/owl.theme.default.min.css" type="text/css" />
+    <link rel="stylesheet" href="~/lib/css/star-rating.min.css" type="text/css">
+    <link rel="stylesheet" href="~/lib/css/star-rating-theme.min.css" type="text/css">
+    <link rel="stylesheet" href="~/css/app.css" type="text/css" />
+</head>
+<body>
+
+    <div id="app" class="d-flex flex-column min-vh-100 site-wrap">
+        <partial name="_HeaderPartial" />
+        @RenderBody()
+        <partial name="_FooterPartial" />
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/js/owl.carousel.min.js"></script>
+    <script src="~/lib/js/popper.min.js"></script>
+    <script src="~/lib/js/moment-with-locales.min.js"></script>
+    <script src="~/js/components/SubscribeNewsletter.js"></script>
+    <script src="~/js/components/CartCount.js"></script>
+    <script src="~/js/app.js" asp-append-version="true"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script th:inline="javascript">
+        (function ($) {
+            $(document).ready(function () {
+                $('#subscribe-newsletter').SubscribeNewsletter();
+                $('#shopping-cart-count').CartCount();
+                $( "a[class^='productId']" ).each(function() {
+                    //alert($(this).attr('class'));
+                });
+                $( ".xsinject" ).each(function() {
+                    $(this).html("<span>" + $(this).html() + "</span>");
+                });
+                //$('.xsInject').html(name);  
+                //swal("hello world");
+            });
+        })(jQuery);
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

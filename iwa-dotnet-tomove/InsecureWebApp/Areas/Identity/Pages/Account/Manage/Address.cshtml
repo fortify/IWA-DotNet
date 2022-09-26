@@ -1,0 +1,37 @@
+﻿@page
+@model MicroFocus.InsecureWebApp.Areas.Identity.Pages.Account.Manage.AddressModel
+@{
+    ViewData["Title"] = "Personal Data";
+    ViewData["ActivePage"] = ManageNavPages.Address;
+}
+<div class="container">
+    <h4>@ViewData["Title"]</h4>
+    <partial name="_StatusMessage" model="Model.StatusMessage" />
+    <div class="row">
+        <div class="col-md-6">
+            <form id="address-form" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Username"></label>
+                    <input asp-for="Username" class="form-control" disabled />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Input.Address"></label>
+                    <textarea asp-for="Input.Address" class="form-control" rows="3" cols="40"></textarea>
+                    <span asp-validation-for="Input.Address" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Input.CreditCard"></label>
+                    <input asp-for="Input.CreditCard" class="form-control" />
+                    <span asp-validation-for="Input.CreditCard" class="text-danger"></span>
+                </div>
+                <button id="update-address-button" type="submit" class="btn btn-primary">Save</button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

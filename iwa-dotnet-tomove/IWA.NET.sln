@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecureWebApp", "InsecureWebApp\InsecureWebApp.csproj", "{B014F7E7-4909-469B-9A4E-E09A48DEBF37}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecureWebAppTests", "InsecureWebAppTests\InsecureWebAppTests.csproj", "{A544E42D-D65D-4C81-8500-0DA1F2B3E5DC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1957714E-BC03-4D95-9E4E-D960D85A0ECE}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
+		bin\cleanup.ps1 = bin\cleanup.ps1
+		etc\commands.txt = etc\commands.txt
+		bin\fod-ado-sync.ps1 = bin\fod-ado-sync.ps1
+		etc\FoDToGitHub.yml = etc\FoDToGitHub.yml
+		bin\fortify-fod.ps1 = bin\fortify-fod.ps1
+		bin\fortify-sca.ps1 = bin\fortify-sca.ps1
+		bin\fortify-scancentral-dast.groovy = bin\fortify-scancentral-dast.groovy
+		bin\fortify-scancentral-dast.ps1 = bin\fortify-scancentral-dast.ps1
+		bin\fortify-scancentral-sast.ps1 = bin\fortify-scancentral-sast.ps1
+		bin\fortify-sourceandlibscanner.ps1 = bin\fortify-sourceandlibscanner.ps1
+		bin\fortify-webinspect.ps1 = bin\fortify-webinspect.ps1
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecureProductService", "InsecureProductService\InsecureProductService.csproj", "{D9C33705-D886-43D9-B5CA-E0ABF57F0970}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecurePaymentService", "InsecurePaymentService\InsecurePaymentService.csproj", "{32A4F1A7-CE7C-48E5-8578-2F739E13ED79}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecureShippingService", "InsecureShippingService\InsecureShippingService.csproj", "{9118EE7E-AAA4-417B-9AA3-DAF901B1F39F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B014F7E7-4909-469B-9A4E-E09A48DEBF37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B014F7E7-4909-469B-9A4E-E09A48DEBF37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B014F7E7-4909-469B-9A4E-E09A48DEBF37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B014F7E7-4909-469B-9A4E-E09A48DEBF37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A544E42D-D65D-4C81-8500-0DA1F2B3E5DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A544E42D-D65D-4C81-8500-0DA1F2B3E5DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A544E42D-D65D-4C81-8500-0DA1F2B3E5DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A544E42D-D65D-4C81-8500-0DA1F2B3E5DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9C33705-D886-43D9-B5CA-E0ABF57F0970}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9C33705-D886-43D9-B5CA-E0ABF57F0970}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9C33705-D886-43D9-B5CA-E0ABF57F0970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32A4F1A7-CE7C-48E5-8578-2F739E13ED79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A4F1A7-CE7C-48E5-8578-2F739E13ED79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32A4F1A7-CE7C-48E5-8578-2F739E13ED79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9118EE7E-AAA4-417B-9AA3-DAF901B1F39F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9118EE7E-AAA4-417B-9AA3-DAF901B1F39F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9118EE7E-AAA4-417B-9AA3-DAF901B1F39F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {48CC928A-DEF7-4204-AB3E-087D66D53AD3}
+	EndGlobalSection
+EndGlobal

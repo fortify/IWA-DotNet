@@ -1,0 +1,169 @@
+﻿@page
+@using MicroFocus.InsecureWebApp.Models
+@using Microsoft.AspNetCore.Mvc.Controllers
+@using System.Text
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model MicroFocus.InsecureWebApp.Pages.Prescription.UploadModel
+
+@{
+
+    ViewData["Title"] = "Upload Prescription";
+}
+<style>
+.image-upload {
+    width: 100%;
+    height: 300px;
+    border: 1px dashed #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    position: relative;
+    text-align: center;
+    background: #f8f8f9;
+    color: #666;
+    overflow: hidden;
+}
+
+
+.item-wrapper form img {
+    margin-bottom: 20px;
+    width: auto;
+    height: auto;
+    max-height: 400px;
+    width: auto;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+
+.image-upload img {
+    height: 100%!important;
+    width: auto!important;
+    border-radius: 0px;
+    margin: 0 auto;
+}
+
+.image-upload i {
+    font-size: 6em;
+    color: #ccc;
+}
+
+
+.image-upload input {
+    cursor: pointer;
+    opacity: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 10;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+</style>
+<div class="bg-light py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mb-0"><a asp-page="/Prescriptions">List</a> </div>
+        </div>
+    </div>
+</div>
+<div class="site-section-sm">
+
+    <div class="container">
+
+       @{
+           if (TempData["FileUpload"] != null){
+                string result = TempData["FileUpload"].ToString();
+                if (!string.IsNullOrEmpty(result))
+                {
+                    <div class="row pt-2">
+                        <div class="col-md-12 text-center">
+                            <h2>@Html.Raw(result)</h2>
+                        </div>
+                    </div>
+                }
+           }
+        }
+
+        <div class="row mb-1">
+            <div class="col-md-12 text-center">
+            <form id=frmUpload name=frmUpload asp-controller="PrescriptionController" asp-action="UploadFile" method="post" enctype="multipart/form-data">  
+                <div class="image-upload">
+                    <label style="cursor: pointer;" for="file_upload">
+                        <img src="" alt="" class="uploaded-image">
+                        <div class="h-100">
+                                <div class="dplay-tbl">
+                                <div class="dplay-tbl-cell">
+                                    <i class="fa fa-upload" aria-hidden="true"></i>
+                                    <h5><b>Choose Your XML to Upload</b></h5>
+                                    <h6 class="mt-10 mb-70">Or Drop Your XML Here</h6>
+                                </div>
+                            </div>
+                        </div><!--upload-content-->
+                        <input data-required="image" placeholder="Upload prescription XML" type="file" name="PresFile" id="PresFile" class="image-input" data-traget-resolution="image_resolution" accept=".xml">
+                    </label>
+                 </div>
+
+                <div class="row pt-1 border border-info">
+                     <div class=col>
+                         File Name
+                     </div>
+                     <div class=col>
+                         File Content
+                     </div>
+                     <div class=col>
+                         Processed xml
+                     </div>
+                     <div class=col>
+                         Download
+                     </div>
+                 </div>
+           @foreach (PrescriptionFileModel file in Model.files)
+            {
+                <div class="row pt-1 border border-info">
+                    <div class="col">
+                        @file.FileName
+                    </div>
+                    <div class="col text-wrap" style="height:130px; width:300px;">
+                        <form id="frmXmlUpd" name="frmXmlUpd" method="post"> 
+                            <input asp-for="@file.FileName" class="form-control" name="sFileName" id="sFileName" type="hidden">
+                            <textarea class="form-control" name="xmlContent" id="xmlContent" rows="3" style="resize:none">@Html.Raw(file.FileDesc)</textarea>
+                            <div class="input-group-addon input-group-append">
+                                <button class="btn btn-secondary" asp-page-handler="UpdateXml" type="submit">
+                                    <i class="fa fa-save"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col">
+                        @Html.Raw(file.xml)
+                    </div>
+                    <div class="col">
+                        <a asp-controller="Prescription" asp-action="DownloadFile" asp-route-filename="@file.FileName">Downlaod</a>
+                    </div>
+                </div>
+            }                
+                
+@*                <input type="file" class="form-control" placeholder="Upload prescription XML" name="PresFile" id="PresFile" accept=".xml">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit">
+                            <i class="fa fa-upload"></i>
+                        </button>
+                    </div>*@
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        (function ($) {
+            $(document).ready(function () {
+                document.getElementById("PresFile").onchange = function() {
+                    document.getElementById("frmUpload").submit();
+                };
+            });
+        })(jQuery);
+    </script>
+}

@@ -1,0 +1,121 @@
+﻿@page "{Keywords?}"
+@using System.Web
+@using MicroFocus.InsecureWebApp.Models
+@addTagHelper *,CustomTagHelper
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+
+@model MicroFocus.InsecureWebApp.Pages.Products.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+    
+    //Model.Keywords = HttpUtility.HtmlEncode(Model.Keywords);
+}
+
+@*<style>
+.container, .navbar{display:none;} 
+body { padding: 5px } 
+/*body:before { content:"@Html.Raw(Request.Query["HtmlInput"])"; }*/
+</style>*@
+@*<script>@Html.Raw(ViewData["ScriptInput"])</script>*@
+
+
+<div class="bg-light py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mb-0"><a asp-page="/Products">Shop</a> </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section-sm">
+
+    <div class="container">
+
+        @if (User.IsInRole("Admin"))
+        {
+            <p>
+                <a asp-page="./Admin/Create">Create New</a>
+            </p>
+        }
+
+        @{
+            string keywords = Request.Query["Keywords"];
+            if (!string.IsNullOrEmpty(keywords))
+            {
+                <div class="row pt-2">
+                    <div class="col-md-12 text-center">
+                        <h2>Search</h2>
+                        <h5>&quot;<span class="bg-light text-dark">@Html.Raw(Request.Query["Keywords"])</span>&quot;</h5>
+                    </div>
+                </div>
+            }
+        }
+
+        <div class="row mb-1">
+            <form asp-action="/Products" class="col-md-12" method="GET">
+                <div class="input-group">
+                    @*<input type="text" class="form-control" placeholder="Search products" name="keywords" id="keywords" asp-for="Keywords">*@
+                    <input type="text" class="form-control" placeholder="Search products" name="keywords" id="keywords" value="@Html.Raw(Model.Keywords)">
+                    @*@Html.TextBoxFor(m => m.Keywords, new {@class = "form-control", placeholder="Search products"})*@
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="row pt-5">
+            @foreach (var item in Model.Product)
+            {
+                <div class="col-sm-6 col-lg-4 text-center item mb-4">
+                    @if (item.OnSale)
+                    {
+                        <span class="tag">Sale</span>
+                    }
+                    <a class="productId-@item.ID" asp-page="./Details" asp-route-id="@item.ID">
+                        @if (string.IsNullOrEmpty(item.Image))
+                        {
+                            <img src="~/img/awaiting-image-sm.png}" alt="Awaiting Image" class="img-thumbnail">
+                        }
+                        else
+                        {
+                            <img src="~/img/products/@Html.Raw(item.Image)" alt="Image" class="img-thumbnail">
+                        }
+                    </a>
+                    <h3 class="text-dark"><a asp-page="./Details" asp-route-id="@item.ID">@item.Name</a></h3>
+                    <p class="price">
+                        @if (item.OnSale)
+                        {
+                            <del>
+                                <span>@string.Format("{0:C}", item.Price)</span>
+                            </del>
+                            <span> &mdash; </span>
+                            <span>@string.Format("{0:C}", item.SalePrice)</span>
+                        }
+                        else
+                        {
+                            <span>@string.Format("{0:C}", item.Price)</span>
+                        }
+                    </p>
+                    @Html.DivInjectionHTMLString(item.Description + " Added text for more info on Product")
+                </div>
+                
+            }
+        </div>
+
+        <div class="row pt-4">
+            <div class="col-md-12">
+                <h5>Showing <span>@Html.Raw(Model.SearchCount)</span> of <span>@Html.Raw(Model.ProductCount)</span> products</h5>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+@*<span class="code">@Html.Raw(@Model.sHTML) </span> *@
+<partial name="_SecondaryPartial" />
+

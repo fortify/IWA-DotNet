@@ -1,0 +1,151 @@
+﻿@page "{id:int?}"
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Routing
+@model MicroFocus.InsecureWebApp.Pages.Products.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="bg-light py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mb-0"><a asp-page="/Products/Index">Shop</a> <span class="mx-2 mb-0">/</span> <strong class="text-black">@Html.Raw(Model.Product.Name)</strong></div>
+        </div>
+    </div>
+</div>
+
+<div class="site-section-sm">
+
+    <div class="container">
+
+        @if (User.IsInRole("Admin"))
+        {
+            <p>
+                <a asp-page="./Admin/Edit" asp-route-id="@Model.Product.ID">Edit</a> |
+                <a asp-page="./Admin/Delete" asp-route-id="@Model.Product.ID">Delete</a>
+            </p>
+        }
+
+        <div class="row">
+
+            <div class="col-md-5 mr-auto">
+                <div class="border text-center">
+                    @if (string.IsNullOrEmpty(Model.Product.Image))
+                    {
+                        <img src="~/img/awaiting-image-sm.png}" alt="Awaiting Image" class="img-thumbnail">
+
+                    }
+                    else
+                    {
+                        @using (Html.BeginForm("ViewPic", "Products", new { sFile = Model.Product.Image }, FormMethod.Get))
+                            {
+                                <input type="hidden" name="sFile" id="sFile" value="@Model.Product.Image">
+                                <button><img src="~/img/products/@Html.Raw(Model.Product.Image)" alt="Image" class="img-fluid p-5"></button> 
+                            }
+                    }
+
+                </div>
+            </div>
+            <div class="col-md-6 item-entry">
+                <h2 class="text-black">@Model.Product.Name</h2>
+                <h5>@Model.Product.Code</h5>
+                <div class="product-rating mb-2">
+                    <input class="star-rating" id="input-1" type="number" name="input-1" value="@Model.Product.Rating">
+                </div>
+                <h6>Summary</h6>
+                <p>@Model.Product.Summary</p>
+                <h6>Description</h6>
+                <p>@Model.Product.Description></p>
+                <h4 class="price pt-2 pb-4 item-price">
+                    @if (Model.Product.OnSale)
+                    {
+                        <del>
+                            <span>@string.Format("{0:C}", Model.Product.Price)</span>
+                        </del>
+                        <span> &mdash; </span>
+                        <span>@string.Format("{0:C}", Model.Product.SalePrice)</span>
+                    }
+                    else
+                    {
+                        <span>@string.Format("{0:C}", Model.Product.Price)</span>
+                    }
+                    @if (Model.Product.InStock)
+                    {
+                        <span class="badge badge-success">In Stock</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Out of Stock</span>
+                        <span class="badge badge-light text-dark">In stock in @Model.Product.TimeToStock days</span>
+                    }
+                </h4>
+
+                <div class="cart-add">
+                    <div class="mb-5">
+                        <div class="input-group mb-3" style="max-width: 180px;">
+                            <div class="input-group-prepend">
+                                <button id="quantity-minus" class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
+                            </div>
+                            <input class="form-control text-center" value="1" id="quantity-value" readonly>
+                            <div class="input-group-append">
+                                <button id="quantity-plus" class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p>
+                        @if (Model.Product.InStock)
+                        {
+                            <a id="add-to-cart" href="#" class="buy-now btn btn-sm height-auto px-4 py-3 btn-primary">Add To Cart</a>
+                        }
+                        else
+                        {
+                            <a id="add-to-cart" href="#" class="disabled buy-now btn btn-sm height-auto px-4 py-3 btn-primary">Add To Cart</a>
+                        }
+                    </p>
+                </div>
+
+                <div class="confirmation-modal">
+                    <div id="checkout-now-modal" role="dialog" aria-hidden="true" class="modal fade" style="display: none;">
+                        <div class="modal-dialog modal-md">
+                            <div tabindex="-1" role="document" aria-labelledby="checkout-now-header" aria-describedby="checkout-now-modal-body" class="modal-content">
+                                <header id="checkout-now-modal-header" class="modal-header">
+                                    <h5 class="modal-title">Checkout Now</h5>
+                                    <button type="button" aria-label="Close" class="close" data-dismiss="modal">×</button>
+                                </header>
+                                <div id="checkout-now-modal-body" class="modal-body">
+                                    <div class="m-4 text-center">
+                                        <h4></h4>
+                                    </div>
+                                </div>
+                                <footer id="checkout-now-modal-footer" class="modal-footer">
+                                    <button id="checkout-now" type="button" class="btn btn-primary" data-dismiss="modal">Buy now</button>
+                                    <button id="continue-shopping" type="button" class="btn btn-secondary" data-dismiss="modal">Continue shopping</button>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<partial name="_SecondaryPartial" />
+
+@section scripts{
+    <script src="~/lib/js/star-rating.min.js"></script>
+    <script src="~/lib/js/star-rating-theme.min.js"></script>
+    <script src="~/js/components/CartAdd.js"></script>
+    <script type="text/javascript">
+        (function ($) {
+            $('.cart-add').CartAdd({ pid: "@Model.Product.ID" });
+            $('input[class="star-rating"]').each(function () {
+                $(this).rating({ displayOnly: true, showCaption: false, step: 1.0, size: 'xs', theme: 'krajee-fas' });
+            });
+        })(jQuery);
+    </script>
+}

@@ -1,0 +1,155 @@
+﻿@using MicroFocus.InsecureWebApp.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<div class="site-navbar py-2">
+
+    <div class="search-wrap">
+        <div class="container">
+            <a href="#" class="search-close js-search-close"><span class="icon-close2"></span></a>
+            <form asp-page="/Products" method="GET">
+                <input type="text" class="form-control" name="keywords" id="nav-keywords" placeholder="Search keyword(s) and hit enter...">
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="logo">
+                <div class="site-logo">
+                    <a class="navbar-brand js-logo-clone" asp-page="/Index">
+                        <img src="~/img/logo.png" alt="IWA Pharmacy Direct">
+                    </a>
+                </div>
+            </div>
+            <div class="main-nav d-none d-lg-block">
+                <nav class="site-navigation text-right text-md-center" role="navigation">
+                    <ul class="site-menu js-clone-nav d-none d-lg-block">
+                        <li class="has-children">
+                            <a asp-page="/Products/Index">Shop</a>
+                            <ul class="dropdown">
+                                <li class="has-children">
+                                    <a asp-page="/Products/Index">Health &amp; wellbeing</a>
+                                    <ul class="dropdown">
+                                        <li><a asp-page="/Products/Index">First aid</a></li>
+                                        <li><a asp-page="/Products/Index">Health conditions</a></li>
+                                        <li><a asp-page="/Products/Index">Stop smoking</a></li>
+                                    </ul>
+                                </li>
+                                <li class="has-children">
+                                    <a asp-page="/Products/Index">Medicines &amp; treatments</a>
+                                    <ul class="dropdown">
+                                        <li><a asp-page="/Products/Index">Allergy &amp; hayfever</a></li>
+                                        <li><a asp-page="/Products/Index">Children's medicines</a></li>
+                                        <li><a asp-page="/Products/Index">Cough, cold &amp; flu</a></li>
+                                        <li><a asp-page="/Products/Index">Pain relief</a></li>
+                                    </ul>
+                                </li>
+                                <li class="has-children">
+                                    <a asp-page="/Products/Index">Vitamins &amp; supplements</a>
+                                    <ul class="dropdown">
+                                        <li><a asp-page="/Products/Index">Everyday vitamins &amp; supplements</a></li>
+                                        <li><a asp-page="/Products/Index">Children's vitamins &amp; supplements</a></li>
+                                        <li><a asp-page="/Products/Index">Mens supplements</a></li>
+                                        <li><a asp-page="/Products/Index">Womens supplements</a></li>
+                                    </ul>
+                                </li>
+                                <li><a asp-page="/Products/Index">Weight management</a></li>
+                                <li><a asp-page="/Products/Index">Toiletries</a></li>
+                                <li><a asp-page="/Products/Compare">Pull Products from Clinics</a></li>
+                            </ul>
+                        </li>
+                        <li class="has-children">
+                            <a asp-page="/Prescriptions">Prescriptions</a>
+                            <ul class="dropdown">
+                                <li>
+                                    <a asp-page="/Prescription/Index">One-off prescriptions</a>
+                                    <a asp-page="/Prescription/Upload">Repeat prescriptions</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="has-children">
+                            <a asp-page="/Services">Services</a>
+                            <ul class="dropdown">
+                                <li>
+                                    <a asp-page="/Services">Flu vaccinations</a>
+                                    <a asp-page="/Services">Stop smoking</a>
+                                    <a asp-page="/Services">Travel vaccinations</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a asp-page="/Advice">Advice</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="site-top-icons">
+                <ul>
+                    <li>
+                        <a href="#" class="icons-btn d-inline-block js-search-open">
+                            <span class="icon-search"></span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <div class="has-children">
+                            @if (!SignInManager.IsSignedIn(User))
+                            {
+                                <a asp-area="Identity" asp-page="/Account/Login" class="icons-menu d-inline-block">
+                                    <span class="icon-account_circle"></span>
+                                    <span class="my-account-text">My Account</span>
+                                </a>
+                                <ul class="dropdown">
+                                    <li>
+                                        <a class="nav-link" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path"><i class="fa fa-sign-in fa-fw"></i> Login </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link" target="_blank" href="/swagger"><i class="fa fa-code fa-fw"></i> API Explorer </a>
+                                    </li>
+                                </ul>
+                            }
+                            @if (SignInManager.IsSignedIn(User))
+                            {
+                                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="icons-menu d-inline-block">
+                                    <span class="icon-account_circle"></span>
+                                    <span class="my-account-text">@User.Identity.Name</span>
+                                </a>
+                                <ul class="dropdown">
+                                    <li>
+                                        <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index"><i class="fa fa-user fa-fw"></i> Manage </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link" target="_blank" href="/swagger"><i class="fa fa-code fa-fw"></i> API Explorer </a>
+                                    </li>
+                                    <li>
+                                        <form id="logout-form" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                            <a class="nav-link" style="padding: 9px 20px;width:100%" href="javascript:{}" 
+                                               onmouseover="this.style.background='#f4f5f9';this.style.color='#25262a';"
+                                               onmouseout="this.style.background='#3c3d41';this.style.color='#51eaea';"
+                                               onclick="document.getElementById('logout-form').submit(); return false;"><i class="fa fa-sign-out fa-fw"></i> Logout </a>
+                                        </form>
+                                    </li>
+                                </ul>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        <a asp-page="/Cart/Index" class="icons-btn d-inline-block bag">
+                            <span class="icon-shopping-bag"></span>
+                            <span id="shopping-cart-count" class="number">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="site-menu-toggle js-menu-toggle ml-3 d-inline-block d-lg-none">
+                            <span class="icon-menu"></span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</div>

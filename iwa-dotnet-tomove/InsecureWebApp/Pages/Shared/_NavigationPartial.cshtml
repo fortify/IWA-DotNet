@@ -1,0 +1,32 @@
+﻿@using MicroFocus.InsecureWebApp.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav flex-grow-1">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-page="/Products/Index">Products</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-page="/Services">Services</a>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-page="/Products/Index">Products</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-page="/Services">Services</a>
+        </li>
+    }
+</ul>
+
