@@ -15,8 +15,10 @@ name: Fortify on Demand Scan
 
 on:
   workflow_dispatch:
-  #push:
-  #  branches: [ "main" ]
+  push:
+    branches: 
+      - 'main'
+      - 'gh-actions'
 
 jobs:
   FoD-SAST-Scan:
@@ -46,9 +48,9 @@ jobs:
       - name: Download Fortify ScanCentral Client
         uses: fortify/gha-setup-scancentral-client@v2
         with:
-          version: 22.1.0
+          version: 22.1.1
       - name: Package Code + Dependencies
-        run: scancentral package -bt msbuild -bf IWA.Net.sln -o package.zip
+        run: scancentral package $Env:PACKAGE_OPTS -o package.zip
         env:
           PACKAGE_OPTS: "-bt msbuild -bf IWA.Net.sln"
 
@@ -78,7 +80,7 @@ jobs:
           fod_release_id: ${{ secrets.FOD_RELEASE_ID }}
 
       # Import Fortify on Demand results to GitHub Security Code Scanning
-      - name: Import Results
+      - name: Import Results from Fortify on Demand
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ./gh-fortify-sast.sarif
