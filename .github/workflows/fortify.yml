@@ -56,7 +56,7 @@ jobs:
       - name: Download Fortify on Demand Universal CI Tool
         uses: fortify/gha-setup-fod-uploader@v1
       - name: Perform SAST Scan
-        run: java -jar "$Env:FOD_UPLOAD_JAR" -z package.zip -aurl "$Env:FOD_API_URL" -purl "$Env:FOD_URL" -rid "$Env:FOD_RELEASE_ID" -tc "$Env:FOD_TENANT" -uc "$Env:FOD_USER" "$Env:FOD_PAT" "$Env:FOD_UPLOADER_OPTS" -n "$Env:FOD_UPLOADER_NOTES"
+        run: java -jar ${env:FOD_UPLOAD_JAR} -z package.zip -aurl ${env:FOD_API_URL} -purl ${env:FOD_URL} -rid ${env:FOD_RELEASE_ID} -tc ${env:FOD_TENANT} -uc ${env:FOD_USER} ${env:FOD_PAT} -n ${env:FOD_UPLOADER_NOTES} -ep 2 -pp 0 -I 1 -apf
         env:
           FOD_URL: "https://ams.fortify.com/"
           FOD_API_URL: "https://api.ams.fortify.com/"
@@ -64,7 +64,6 @@ jobs:
           FOD_USER: ${{ secrets.FOD_USER }}
           FOD_PAT: ${{ secrets.FOD_PAT }}
           FOD_RELEASE_ID: ${{ secrets.FOD_RELEASE_ID }}
-          FOD_UPLOADER_OPTS: "-ep 2 -pp 0 -I 1 -apf"
           FOD_UPLOADER_NOTES: 'Triggered by GitHub Actions (${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})'
 
       # Once scan completes, pull SAST issues from Fortify on Demand and generate SARIF output.
