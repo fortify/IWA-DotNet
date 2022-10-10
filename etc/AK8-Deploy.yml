@@ -1,0 +1,48 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+  labels:
+    app: IWA
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: webapp
+  template:
+    metadata:
+      namespace: default
+      labels:
+        app: IWA
+        service: webapp
+    spec:
+      containers:
+        - name: webapp
+          image: IWA.azurecr.io/IWA:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 443
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: "https://+:443;http://+:80"
+            - name: ASPNETCORE_HTTPS_PORT
+              value: 44330
+            - name: ConnectionStrings:DefaultConnection
+              value: Server=db;Database=aspnet-iwa-dev;User=sa;Password=novell@123;
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp
+  labels:
+    app: IWA
+    service: webapp
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 44330
+      targetPort: 44330
+      protocol: TCP
+  selector:
+    service: webapp
