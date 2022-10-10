@@ -48,7 +48,7 @@ jobs:
       - name: Download Fortify ScanCentral Client
         uses: fortify/gha-setup-scancentral-client@v2
         with:
-          version: 22.1.1
+          version: 22.1.0
       - name: Package Code + Dependencies
         run: scancentral package $Env:PACKAGE_OPTS -o package.zip
         env:
