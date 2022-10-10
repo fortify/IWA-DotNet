@@ -1,0 +1,1 @@
+This folder should contain "terraform-provider-azurerm_v3.23.0_x5.exe" to test the terraform script.
