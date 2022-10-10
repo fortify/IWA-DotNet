@@ -38,6 +38,10 @@ namespace MicroFocus.InsecureWebApp
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
+            //GRAPH QL IMPLEMENTATION
+            services.AddGraphQLServer()
+                .AddQueryType<Query>()
+                .AddMutationType<Order>();
             //services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
             //    .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -157,6 +161,7 @@ namespace MicroFocus.InsecureWebApp
             app.UseDirectoryBrowser();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGraphQL();
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
