@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  db:
+    image: "mcr.microsoft.com/mssql/server:2017-latest"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=novell@123
+  insecurewebapp:
+    image: ${DOCKER_REGISTRY-}insecurewebapp
+    build:
+      context: .
+      dockerfile: InsecureWebApp/Dockerfile
+    ports:
+    - "44331:80"
+    depends_on:
+      - db

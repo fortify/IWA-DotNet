@@ -60,6 +60,19 @@ To build (and unit test) the application either select "Build->Build Solution" f
 ```
 msbuild IWA.NET.sln /p:Configuration=Debug /t:Clean,Build
 ```
+## Docker Build
+
+To create docker image:
+
+```
+docker-compose build
+```
+To create and test locally, no support of SSL, use httpport=44331 to test i.e., http://localhost:44331/:
+
+```
+docker-compose up
+```
+
 
 ## Running the Application
 

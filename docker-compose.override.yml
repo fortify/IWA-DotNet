@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  insecurewebapp:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings:DefaultConnection=Server=db;Database=aspnet-iwa-dev;User=sa;Password=novell@123;
+    ports:
+      - "80"
+      - "443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
