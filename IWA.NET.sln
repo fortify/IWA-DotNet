@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecurePaymentService", "I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecureShippingService", "InsecureShippingService\InsecureShippingService.csproj", "{9118EE7E-AAA4-417B-9AA3-DAF901B1F39F}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{86AA6AAA-67F9-469F-92D5-008D4C88D0EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{9118EE7E-AAA4-417B-9AA3-DAF901B1F39F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9118EE7E-AAA4-417B-9AA3-DAF901B1F39F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9118EE7E-AAA4-417B-9AA3-DAF901B1F39F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86AA6AAA-67F9-469F-92D5-008D4C88D0EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86AA6AAA-67F9-469F-92D5-008D4C88D0EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86AA6AAA-67F9-469F-92D5-008D4C88D0EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86AA6AAA-67F9-469F-92D5-008D4C88D0EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

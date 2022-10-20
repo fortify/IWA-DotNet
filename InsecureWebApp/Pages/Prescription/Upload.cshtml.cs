@@ -23,16 +23,22 @@ namespace MicroFocus.InsecureWebApp.Pages.Prescription
 
         public void OnGet()
         {
-            //Fetch all files in the Folder (Directory).
-            string[] filePaths = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Files\\Prescriptions"),"*.xml");
-
             //Copy File names to Model collection.
             this.files = new List<PrescriptionFileModel>();
-            foreach (string filePath in filePaths)
+            try
             {
-                //string fullPath = filePath + "\\" + Path.GetFileName(filePath);
-                files.Add(new PrescriptionFileModel { FileName = Path.GetFileName(filePath), FileDesc = getXmlFileContent(filePath), xml=getXml(filePath) });
+                //Fetch all files in the Folder (Directory).
+                string[] filePaths = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Files\\Prescriptions"), "*.xml");
+
+
+                foreach (string filePath in filePaths)
+                {
+                    //string fullPath = filePath + "\\" + Path.GetFileName(filePath);
+                    files.Add(new PrescriptionFileModel { FileName = Path.GetFileName(filePath), FileDesc = getXmlFileContent(filePath), xml = getXml(filePath) });
+                }
             }
+            catch (System.Exception ex)
+            { }
         }
 
         public string getXml(string sFilePath)

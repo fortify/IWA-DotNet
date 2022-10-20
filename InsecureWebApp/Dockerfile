@@ -8,6 +8,8 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 WORKDIR /src
 COPY ["InsecureWebApp/InsecureWebApp.csproj", "InsecureWebApp/"]
+COPY ["InsecureWebApp/wwwroot", "InsecureWebApp/wwwroot"]
+COPY ["InsecureWebApp/Files", "InsecureWebApp/Files"]
 RUN dotnet restore "InsecureWebApp/InsecureWebApp.csproj"
 COPY . .
 WORKDIR "/src/InsecureWebApp"
