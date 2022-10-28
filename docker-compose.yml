@@ -7,7 +7,11 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=novell@123
   insecurewebapp:
-    image: ${DOCKER_REGISTRY-}insecurewebapp
+    image: "fortifydocker/iwa-dotnet:latest"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings:DefaultConnection=Server=db;Database=aspnet-iwa-dev;User=sa;Password=novell@123;    
     build:
       context: .
       dockerfile: InsecureWebApp/Dockerfile

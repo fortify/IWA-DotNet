@@ -28,7 +28,7 @@ namespace MicroFocus.InsecureWebApp.Pages.Prescription
             try
             {
                 //Fetch all files in the Folder (Directory).
-                string[] filePaths = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Files\\Prescriptions"), "*.xml");
+                string[] filePaths = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "Files"+ Path.DirectorySeparatorChar +"Prescriptions"), "*.xml");
 
 
                 foreach (string filePath in filePaths)
@@ -128,7 +128,7 @@ namespace MicroFocus.InsecureWebApp.Pages.Prescription
             if (PresFile == null || PresFile.Length == 0)
                 return Content("file not selected");
 
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "Files\\Prescriptions", PresFile.FileName);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "Files"+ Path.DirectorySeparatorChar +"Prescriptions", PresFile.FileName);
             var task = await pc.UploadFile(PresFile, path);
             
             if (!task)

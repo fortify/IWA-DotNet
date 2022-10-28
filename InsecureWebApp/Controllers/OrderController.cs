@@ -82,8 +82,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
         [HttpPost("ReadOrderFromFile")]
         public List<tmpOrder> ReadOrderFromFile()
         {
-            string filePath = Directory.GetCurrentDirectory();
-            filePath = filePath + "\\Files\\Order.file";
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Files"+ Path.DirectorySeparatorChar +"Order.file");
 
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             MemoryStream memoryStream = new MemoryStream(System.IO.File.ReadAllBytes(filePath));

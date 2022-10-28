@@ -128,7 +128,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
             //Environment.WebRootPath
             //"~/img/products/"
             //Build the File Path.
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\products\\") + sFile;
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot" + Path.DirectorySeparatorChar + "img" + Path.DirectorySeparatorChar + "products" + Path.DirectorySeparatorChar) + sFile;
             
             
 
