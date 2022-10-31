@@ -21,4 +21,7 @@ RUN dotnet publish "InsecureWebApp.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN rm -rf appsettings.json
+RUN cp appsettings.Docker.json appsettings.json
+RUN mkdir -p Files/Prescriptions
 ENTRYPOINT ["dotnet", "InsecureWebApp.dll"]

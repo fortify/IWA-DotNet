@@ -55,8 +55,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
                 JArray json = JArray.Parse(jSonOrder);
 
                 var to = Newtonsoft.Json.JsonConvert.DeserializeObject<List<tmpOrder>>(json.ToString());
-                string filePath = Directory.GetCurrentDirectory();
-                filePath = filePath + "\\Files\\Order.file";
+                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Files"+ Path.DirectorySeparatorChar +"Order.file");
 
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
                 using (FileStream oStream = new FileStream(filePath, FileMode.OpenOrCreate))

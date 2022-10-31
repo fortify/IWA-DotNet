@@ -16,8 +16,9 @@ namespace MicroFocus.InsecureWebApp.Controllers
         [HttpPost("UploadFile")]
         public async Task<IActionResult> UploadFile(IFormFile file, string zipFileName, string targetDir = "")
         {
-            string sDir = Path.Combine(Directory.GetCurrentDirectory(), PRESCRIPTION_LOCATION);
-            string sPath = Path.Combine(Directory.GetCurrentDirectory(), targetDir) + "\\" +  zipFileName;
+            string sPres_Location = "Files" + Path.DirectorySeparatorChar + "Prescriptions" + Path.DirectorySeparatorChar;
+            string sDir = Path.Combine(Directory.GetCurrentDirectory(), sPres_Location);
+            string sPath = Path.Combine(Directory.GetCurrentDirectory(), targetDir) + Path.DirectorySeparatorChar +  zipFileName;
             FastZip fastZip = new FastZip();
             string fileFilter = null;
             string sFinalDir = string.Empty;
@@ -31,7 +32,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
             }
             if (string.IsNullOrEmpty(targetDir))
             {
-                targetDir = PRESCRIPTION_LOCATION;
+                targetDir = sPres_Location;
             }
             fastZip.ExtractZip(sDir + zipFileName, targetDir, fileFilter);
 

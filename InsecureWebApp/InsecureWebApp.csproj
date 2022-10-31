@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
 	<RuntimeFrameworkVersion>3.1.5</RuntimeFrameworkVersion>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <UserSecretsId>iwa-689A97DD-C582-4A71-A532-A05A55CB7B74</UserSecretsId>
     <RootNamespace>MicroFocus.InsecureWebApp</RootNamespace>
     <ApplicationIcon>favicon.ico</ApplicationIcon>

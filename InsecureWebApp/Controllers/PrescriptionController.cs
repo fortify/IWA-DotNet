@@ -87,7 +87,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
             if (!string.IsNullOrEmpty(xmlContent))
             {
                 await Task.Delay(100);
-                string path = Path.Combine(Directory.GetCurrentDirectory(), PRESCRIPTION_LOCATION) + sFileName;
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "Files"+ Path.DirectorySeparatorChar +"Prescriptions" + Path.DirectorySeparatorChar) + sFileName;
 
                 XmlDocument document = new XmlDocument();
                 document.Load(path);
@@ -103,7 +103,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
         public FileResult DownloadFile(string fileName)
         {
             //Build the File Path.
-            string path = Path.Combine(Directory.GetCurrentDirectory(), PRESCRIPTION_LOCATION) + fileName;
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "Files"+ Path.DirectorySeparatorChar +"Prescriptions" + Path.DirectorySeparatorChar) + fileName;
 
             //Read the File data into Byte Array.
             byte[] bytes = System.IO.File.ReadAllBytes(path);

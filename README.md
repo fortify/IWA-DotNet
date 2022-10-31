@@ -65,12 +65,12 @@ msbuild IWA.NET.sln /p:Configuration=Debug /t:Clean,Build
 To create docker image:
 
 ```
-docker-compose build
+docker build . --file InsecureWebApp/Dockerfile
 ```
 To create and test locally, no support of SSL, use httpport=44331 to test i.e., http://localhost:44331/:
 
 ```
-docker-compose up
+docker-compose pull && docker-compose up -d
 ```
 
 

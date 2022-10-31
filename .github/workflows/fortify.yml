@@ -47,9 +47,9 @@ jobs:
       - name: Download Fortify ScanCentral Client
         uses: fortify/gha-setup-scancentral-client@v2
         with:
-          version: 22.1.0
+          version: 22.1.2
       - name: Package Code + Dependencies
-        run: scancentral package -bt msbuild -bf IWA.Net.sln -o package.zip
+        run: scancentral package -bt msbuild -bf IWA.Net.sln -o package.zip -oss
 
       # Start Fortify on Demand SAST scan and wait until results complete. For more information on FoDUploader commands, see https://github.com/fod-dev/fod-uploader-java
       - name: Download Fortify on Demand Universal CI Tool
