@@ -1,0 +1,52 @@
+# Integrate Fortify ScanCentral Static AppSec Testing (SAST) into your Gitlab CICD pipeline
+# The following Gitlab environment variables must be defined before using this job
+#   - $FCLI_DEFAULT_SC_SAST_CLIENT_AUTH_TOKEN
+#   - $FCLI_DEFAULT_SSC_CI_TOKEN
+#   - $FCLI_DEFAULT_SSC_URL
+#   - $FCLI_DEFAULT_SSC_USER
+#   - $FCLI_DEFAULT_SSC_PASSWORD
+#   - $SSC_AV_ID
+
+fortify-test:
+    stage: test
+    extends:
+    - .shared_windows_runners
+    variables:
+        DOTNET_SDK: "https://download.visualstudio.microsoft.com/download/pr/b70ad520-0e60-43f5-aee2-d3965094a40d/667c122b3736dcbfa1beff08092dbfc3/dotnet-sdk-3.1.426-win-x64.exe"
+        scancentral_client_version: '22.2.0'
+        fod_uploader_version: '5.4.0'
+        FOD_URL: "https://ams.fortify.com"
+        FOD_API_URL: "https://api.ams.fortify.com/"
+        FOD_UPLOADER_OPTS: -ep 2 -pp 0 -I 1 -apf
+        FOD_NOTES: "Triggered by Gitlab Pipeline IID $CI_PIPELINE_IID: $CI_PIPELINE_URL"
+    before_script:
+        # Local Variables - DO NOT CHANGE
+        - $fcli_version='v1.1.0'
+        - $fortify_tools_dir="c:\fortify\tools"	
+        - $scancentral_home="$fortify_tools_dir\ScanCentral"
+        - $fcli_home="$fortify_tools_dir\fcli" 
+        - wget $DOTNET_SDK -UseBasicParsing -O dotnet-sdk-3.1.426-win-x64.exe
+        - .\dotnet-sdk-3.1.426-win-x64.exe /install /quiet /norestart
+        - wget "https://github.com/fortify/fcli/releases/download/$fcli_version/fcli-windows.zip" -UseBasicParsing -O fcli-windows.zip
+        - Expand-Archive fcli-windows.zip -DestinationPath "$fcli_home\bin"
+        - $env:Path += ";$fcli_home\bin;$scancentral_home\bin" 
+        - refreshenv
+        - fcli.exe tool sc-client install $scancentral_client_version -d $scancentral_home
+    script:
+        - #where.exe /R C:\ msbuild
+        - $msBuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+        - $env:Path += ";$msBuildPath" 
+        - fcli ssc session login
+        - fcli sc-sast session login
+        - scancentral package -bt msbuild -bf IWA.NET.sln -oss -o package.zip
+        - fcli sc-sast scan start --package-file=package.zip --upload --sensor-version=$SC_SAST_SENSOR_VERSION --appversion=$SSC_AV_ID --store '?'
+        - fcli sc-sast scan wait-for '?' --interval=30s
+        - FortifyVulnerabilityExporter SSCToGitLabSAST --ssc.baseUrl=${FCLI_DEFAULT_SSC_URL} --ssc.user="${FCLI_DEFAULT_SSC_USER}" --ssc.password="${FCLI_DEFAULT_SSC_PASSWORD}" --ssc.version.id=${SSC_AV_ID}
+        - fcli sc-sast session logout
+        - fcli ssc session logout
+  allow_failure: true
+  artifacts:
+    reports:
+      sast: gl-fortify-sast.json
+    expire_in: 3 days
+    when: always
