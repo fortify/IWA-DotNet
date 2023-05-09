@@ -1,0 +1,48 @@
+# Integrate Fortify on Demand Static AppSec Testing (SAST) into your Gitlab CICD pipeline
+# The following Gitlab environment variables must be defined before using this job
+#   - $FOD_RELEASE_ID
+#   - $FOD_USER
+#   - $FOD_PAT
+#   - $FOD_TENANT
+
+fortify-test:
+    stage: test
+    extends:
+    - .shared_windows_runners
+    variables:
+        DOTNET_SDK: "https://download.visualstudio.microsoft.com/download/pr/b70ad520-0e60-43f5-aee2-d3965094a40d/667c122b3736dcbfa1beff08092dbfc3/dotnet-sdk-3.1.426-win-x64.exe"
+        scancentral_client_version: '22.2.0'
+        fod_uploader_version: '5.4.0'
+        FOD_URL: "https://ams.fortify.com"
+        FOD_API_URL: "https://api.ams.fortify.com/"
+        FOD_UPLOADER_OPTS: -ep 2 -pp 0 -I 1 -apf
+        FOD_NOTES: "Triggered by Gitlab Pipeline IID $CI_PIPELINE_IID: $CI_PIPELINE_URL"
+    before_script:
+        # Local Variables - DO NOT CHANGE
+        - $fcli_version='v1.1.0'
+        - $fortify_tools_dir="c:\fortify\tools"	
+        - $scancentral_home="$fortify_tools_dir\ScanCentral"
+        - $fod_uploader_home="$fortify_tools_dir\foduploader"
+        - $fcli_home="$fortify_tools_dir\fcli" 
+        - wget $DOTNET_SDK -UseBasicParsing -O dotnet-sdk-3.1.426-win-x64.exe
+        - .\dotnet-sdk-3.1.426-win-x64.exe /install /quiet /norestart
+        - wget "https://github.com/fortify/fcli/releases/download/$fcli_version/fcli-windows.zip" -UseBasicParsing -O fcli-windows.zip
+        - Expand-Archive fcli-windows.zip -DestinationPath "$fcli_home\bin"
+        - $env:Path += ";$fcli_home\bin;$scancentral_home\bin;$fod_uploader_home\bin" 
+        - refreshenv
+        - fcli.exe tool sc-client install $scancentral_client_version -d $scancentral_home
+        - fcli.exe tool fodupload install $fod_uploader_version -d $fod_uploader_home
+    script:
+        - #where.exe /R C:\ msbuild
+        - $msBuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+        - $env:Path += ";$msBuildPath" 
+        - msbuild -version
+        - scancentral package -bt msbuild -bf IWA.NET.sln -oss -o package.zip
+        - FoDUpload -z package.zip -aurl $FOD_API_URL -purl $FOD_URL -rid ${FOD_RELEASE_ID} -tc ${FOD_TENANT} -uc ${FOD_USER} ${FOD_PAT} $FOD_UPLOADER_OPTS -n "$FOD_NOTES"
+        - FortifyVulnerabilityExporter FoDToGitLabSAST --fod.baseUrl=$FOD_URL --fod.tenant="${FOD_TENANT}" --fod.userName="${FOD_USER}" --fod.password="${FOD_PAT}" --fod.release.id=${FOD_RELEASE_ID}
+  allow_failure: true
+  artifacts:
+    reports:
+      sast: gl-fortify-sast.json
+    expire_in: 3 days
+    when: always

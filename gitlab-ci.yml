@@ -1,0 +1,23 @@
+include:
+  - local: '/devops-integrations/gitlab/fortify-sast.yml'
+
+image: mcr.microsoft.com/dotnet/sdk:3.1
+.shared_windows_runners:
+  tags:
+    - shared-windows
+    - windows
+    - windows-1809
+    
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - test
+
+build-job:       # This job runs in the build stage, which runs first.
+  stage: build
+  script:
+    - echo "Compiling the code..."
+    - 'dotnet tool install --global dotnet-ef --version 3.1.8'
+    - 'dotnet restore IWA.NET.sln'
+    - 'dotnet tool restore'
+    - 'dotnet msbuild IWA.NET.sln /p:Configuration=Debug /t:Clean,Build'
+    - echo "Compile complete."
