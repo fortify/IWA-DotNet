@@ -45,7 +45,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
             if (!String.IsNullOrEmpty(keywords) && (!String.IsNullOrEmpty(UserId)))
             {
                 query = "DELETE FROM ProductSearch where UserId='" + UserId + "'; INSERT INTO ProductSearch (SearchText,UserId) VALUES ('" + keywords + "', '" + UserId + "')";
-                _context.Database.ExecuteSqlCommand(query);
+                _context.Database.ExecuteSqlRaw(query);
             }
             return Ok(query);
         }
@@ -62,7 +62,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
                 " Description LIKE '%" + keywords + "%')";
             try
             {
-                var products1 = _context.Database.ExecuteSqlCommand(query);
+                var products1 = _context.Database.ExecuteSqlRaw(query);
             }catch (Exception ex)
             {
                 
