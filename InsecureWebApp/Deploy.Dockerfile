@@ -1,6 +1,6 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 20
 EXPOSE 21
@@ -12,7 +12,7 @@ ENV ConnectionStrings:DefaultConnection="Server=db;Database=aspnet-iwa-dev;User=
 ENV FTP_USER=testuser
 ENV FTP_PASS=Pa$$w0rd
 
-FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["InsecureWebApp/InsecureWebApp.csproj", "InsecureWebApp/"]
 COPY ["InsecureWebApp/wwwroot", "InsecureWebApp/wwwroot"]
