@@ -55,12 +55,12 @@ namespace MicroFocus.InsecureWebApp.Pages.Products
             ProductCount = _context.Product.Count();
             //var products = productDAL.GetAllProduct(Keywords);
 
-            //var products = from p in _context.Product select p;
-            //if (!string.IsNullOrEmpty(Keywords))
-            //{
-                var products = productBAL.GetAllProduct(Keywords, _iconfiguration);
-            //products = products.Where(s => s.Name.Contains(Keywords));
-            //}
+            var products = from p1 in _context.Product select p1;
+            if (!string.IsNullOrEmpty(Keywords))
+            {
+                //var products = productBAL.GetAllProduct(Keywords, _iconfiguration);
+                products = products.Where(s => s.Name.Contains(Keywords));
+            }
 
             //Product = await products.ToListAsync();
             Product = products.ToList();

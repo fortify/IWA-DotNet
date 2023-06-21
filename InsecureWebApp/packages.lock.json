@@ -2,6 +2,12 @@
   "version": 1,
   "dependencies": {
     "net6.0": {
+      "EnumStringValues": {
+        "type": "Direct",
+        "requested": "[4.0.1, )",
+        "resolved": "4.0.1",
+        "contentHash": "eVbgOBqoYl/LzCa7gOL/dwjSUOdt0YIALziSQY3kEikbbEBN8sQb4daYoswJfX5egQE7xKhniDuTwW5NrLsirA=="
+      },
       "HotChocolate.AspNetCore": {
         "type": "Direct",
         "requested": "[12.13.1, )",
@@ -92,6 +98,15 @@
           "Microsoft.EntityFrameworkCore.Relational": "6.0.0"
         }
       },
+      "Microsoft.EntityFrameworkCore.InMemory": {
+        "type": "Direct",
+        "requested": "[6.0.0, )",
+        "resolved": "6.0.0",
+        "contentHash": "WJmphvCn0wue9AX+Wvqj3XZ3ehNi9oyYBFNLtHVNvKqZrcimXBOqLo5RNf1fJWYSLWhOia/vzG4JtkAeZxZ8FQ==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "6.0.0"
+        }
+      },
       "Microsoft.EntityFrameworkCore.SqlServer": {
         "type": "Direct",
         "requested": "[6.0.0, )",
@@ -133,6 +148,16 @@
         "resolved": "2.19.2",
         "contentHash": "KaUFDyS1ph6R5LvD0ubSN9FM0ycvF+bOp6DoiNxT+bKJ5kUwUXIGHLeKdDKJng7dPAysGikFn36YtIt6vGl70g=="
       },
+      "net.sf.mpxj-for-csharp": {
+        "type": "Direct",
+        "requested": "[10.14.0, )",
+        "resolved": "10.14.0",
+        "contentHash": "qjiR114vVgtGjoUf1gKvvmdcpSHN/S7x7oFTLS6BVppfDg+Wtkd8zCNXQdFO4ispiBJ4rTs1L9+YBCRICBdXLQ==",
+        "dependencies": {
+          "net.sf.mpxj-common": "10.14.0",
+          "net.sf.mpxj-ikvm": "10.14.0"
+        }
+      },
       "SharpZipLib": {
         "type": "Direct",
         "requested": "[1.4.0, )",
@@ -168,6 +193,21 @@
         "dependencies": {
           "System.Private.ServiceModel": "4.6.0"
         }
+      },
+      "TGServiceInterface": {
+        "type": "Direct",
+        "requested": "[3.2.1, )",
+        "resolved": "3.2.1",
+        "contentHash": "88zdd4QieXgR6Heq9+cBkDxgIjWUxNpoSzMFym1pyB2HDWueAoSu12uHmRjAC54dLNK8CE1kd7qhPKqzFOQ9qg==",
+        "dependencies": {
+          "Newtonsoft.Json": "10.0.3"
+        }
+      },
+      "TinyMCE": {
+        "type": "Direct",
+        "requested": "[5.10.7, )",
+        "resolved": "5.10.7",
+        "contentHash": "CvfWLCniaZ9GmOaB5OsNsFWRvRBy4yxYrhsSJQE6xIcuX6q+0USrcOyoITCncfxxgIw8kv1yK54u59IEfRKiRA=="
       },
       "GreenDonut": {
         "type": "Transitive",
@@ -987,6 +1027,19 @@
         "contentHash": "mtVirZr++rq+XCDITMUdnETD59XoeMxSpLRIII7JRI6Yj0LEDiO1pPn0ktlnIj12Ix8bfvQqQDMMIF9wC98oCA==",
         "dependencies": {
           "Microsoft.NETCore.Platforms": "3.1.0"
+        }
+      },
+      "net.sf.mpxj-common": {
+        "type": "Transitive",
+        "resolved": "10.14.0",
+        "contentHash": "ItWxlVbWsWmzGSwe9uFoT9ynhxxqW2DOkZcZJIkdrZqsMRLLhiJS5pzXLynbL6/BF1MOsgVAtxYgoG5rRdJSKg=="
+      },
+      "net.sf.mpxj-ikvm": {
+        "type": "Transitive",
+        "resolved": "10.14.0",
+        "contentHash": "aClMUQgD2jIsNjAxXEDawtVti2Zrzat571+YwEqGSkPFXVf/1W47Jo+33y/x79QeQQ9Lx8lj3Fmx+czB9cwjgg==",
+        "dependencies": {
+          "System.Configuration.ConfigurationManager": "4.7.0"
         }
       },
       "NETStandard.Library": {
