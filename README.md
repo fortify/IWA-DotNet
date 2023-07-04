@@ -110,7 +110,8 @@ you need to package and upload the source code to Fortify on Demand. To package 
 you can use the `scancentral` command utility as following:
 
 ```aidl
-scancentral package -bt msbuild -bf IWA.NET.sln --output fod.zip
+"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+scancentral package --build-tool msbuild --build-file IWA.NET.sln --output fod.zip
 ```
 
 You can then upload this manually using the Fortify on Demand UI or you can use the FoDUploader utility to upload the file 
