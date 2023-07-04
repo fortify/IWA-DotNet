@@ -65,12 +65,12 @@ msbuild IWA.NET.sln /p:Configuration=Debug /t:Clean,Build
 To create docker image:
 
 ```
-docker build . --file InsecureWebApp/Dockerfile
+docker build --tag iwa.net --file InsecureWebApp/Dockerfile .
 ```
 To create and test locally, no support of SSL, use httpport=44331 to test i.e., http://localhost:44331/:
 
 ```
-docker-compose pull && docker-compose up -d
+docker run -d -p 44331:80 iwa.net
 ```
 
 
@@ -79,119 +79,29 @@ docker-compose pull && docker-compose up -d
 You can run the application from within Visual Studio or use the provided Azure DevOps pipeline 
 [azure-pipelines.yml](azure-pipelines.yml) to deploy it to an Azure Website.
 
-### Creating an environment (.env) file
-
-Most of the following examples need environment and user specific credentials. These are loaded from a file called `.env`
-in the project root directory. This file is not created by default (and should never be stored in source control). An example
-with all of the possible settings for the following scenarios is illustrated below:
-
-```aidl
-APP_URL=http://localhost:8080
-SSC_URL=http://localhost:9090/ssc
-SSC_USERNAME=admin
-SSC_PASSWORD=admin
-SSC_AUTH_TOKEN=6b16aa46-35d7-4ea6-98c1-8b780851fb37
-SSC_APP_NAME=IWA.NET
-SSC_APP_VER_NAME=master
-SCANCENTRAL_CTRL_URL=http://localhost:9090/scancentral-ctrl
-SCANCENTRAL_CTRL_TOKEN=96846342-1349-4e36-b94f-11ed96b9a1e3
-SCANCENTRAL_POOL_ID=00000000-0000-0000-0000-000000000002
-SCANCENTRAL_EMAIL=info@microfocus.com
-SCANCENTRAL_DAST_API=http://localhost:8088/api/
-NEXUS_IQ_URL=http://localhost:8090
-NEXUS_IQ_AUTH=gTvvcLQ3:NDZ6bIzhFTRIyT9UtPaQaSEc0HaDsQd3ELvXnkohBGmK
-NEXUS_IQ_APP_ID=IWA
-FOD_API_URL=https://api.emea.fortify.com
-FOD_API_KEY=89795c5f-798c-48d5-8c4a-de999692cdd4
-FOD_API_SECRET=XXXXX
-DisableSSLSecurity=true
-```
-
 ### SAST using Fortify SCA command line
 
-There is an example PowerShell script [fortify-sca.ps1](bin/fortify-sca.ps1) that you can use to execute static application security testing
+There is an example batch script [fortify-sca.ps1](bin/fortify-sca.ps1) that you can use to execute static application security testing
 via [Fortify SCA](https://www.microfocus.com/en-us/products/static-code-analysis-sast/overview).
 
 ```aidl
-.\bin\fortify-sca.ps1
+FortifyScanCommands.bat
+```
+OR directly run the below commands to execute SAST
+
+```aidl
+sourceanalyzer -b iwa -clean
+sourceanalyzer -b iwa -debug -logfile trans.log dotnet build IWA.NET.sln
+sourceanalyzer -b iwa -debug -logfile scan.log -scan -f iwa.fpr
+start "" "iwa.fpr"
 ```
 
-This script runs a "sourceanalyzer" translation and scan on the project's source code. It creates a Fortify Project Results file called `IWA.NET.fpr`
+This script runs a "sourceanalyzer" translation and scan on the project's source code. It creates a Fortify Project Results file called `IWA.fpr`
 which you can open using the Fortify `auditworkbench` tool:
 
 ```aidl
-auditworkbench.cmd .\IWA.fpr
+auditworkbench IWA.fpr
 ```
-
-It also creates a PDF report called `IWA.NET.pdf` and optionally
-uploads the results to [Fortify Software Security Center](https://www.microfocus.com/en-us/products/software-security-assurance-sdlc/overview) (SSC).
-
-In order to upload to SSC you will need to have entries in the `.env` similar to the following:
-
-```aidl
-SSC_URL=http://localhost:9090/ssc
-SSC_AUTH_TOKEN=28145aad-c40d-426d-942b-f6d6aec9c56f
-SSC_APP_NAME=IWA.NET
-SSC_APP_VER_NAME=master
-```
-
-The `SSC_AUTH_TOKEN` entry should be set to the value of a 'CIToken' created in SSC _"Administration->Token Management"_.
-
-### SAST using Fortify ScanCentral SAST
-
-There is a PowerShell script [fortify-scancentral-sast.ps1](bin\fortify-scancentral-sast.ps1) that you can use to package
-up the project and initiate a remote scan using Fortify ScanCentral SAST:
-
-```aidl
-.\bin\fortify-scancentral-sast.ps1
-```
-
-In order to use ScanCentral SAST you will need to have entries in the `.env` similar to the following:
-
-```aidl
-SSC_URL=http://localhost:9090/ssc
-SSC_AUTH_TOKEN=6b16aa46-35d7-4ea6-98c1-8b780851fb37
-SSC_APP_NAME=IWA.NET
-SSC_APP_VER_NAME=master
-SCANCENTRAL_CTRL_URL=http://localhost:9090/scancentral-ctrl
-SCANCENTRAL_CTRL_TOKEN=96846342-1349-4e36-b94f-11ed96b9a1e3
-SCANCENTRAL_POOL_ID=00000000-0000-0000-0000-000000000002
-SCANCENTRAL_EMAIL=test@test.com
-```
-
-The `SCANCENTRAL_CTRL_TOKEN` entry should be set to the value of a 'ScanCentralCtrlToken ' created in SSC _"Administration->Token Management"_.
-
-Once the scan has been initiated you can check its status from the SSC User Interface or using the command:
-
-```aidl
- scancentral -url [your-controller-url] status -token [returned-token]
-```
-
-where `[returned-token]` is the value of the token displayed after the scan request has been submitted.
-
-### Open Source Software Composition Analysis using Sonatype Nexus
-
-There is a PowerShell script [fortify-sourceandlibscanner.ps1](bin\fortify-sourceandlibscanner.ps1) that you can use to carry out
-Open Source Software Composition Analysis (using [Sonatype Nexus](https://www.sonatype.com/products/open-source-security-dependency-management) 
-and upload the results to SSC:
-
-```aidl
-.\bin\fortify-sourceandlibscanner.ps1
-```
-
-In order to user Nexus IQ Server you will need to have entries in the `.env` similar to the following:
-
-```aidl
-SSC_URL=http://localhost:9090/ssc
-SSC_AUTH_TOKEN=6b16aa46-35d7-4ea6-98c1-8b780851fb37
-SSC_APP_NAME=IWA.NET
-SSC_APP_VER_NAME=master
-NEXUS_IQ_URL=http://nexus-iq-server:8080
-NEXUS_IQ_AUTH=XXX:YYY
-NEXUS_IQ_APP_ID=IWA
-```
-
-where `NEXUS_IQ_AUTH` is an encoded User token created in the Nexus IQ Server UI, e.g. "User Code:Passcode". 
 
 ### SAST using Fortify on Demand
 
@@ -200,15 +110,16 @@ you need to package and upload the source code to Fortify on Demand. To package 
 you can use the `scancentral` command utility as following:
 
 ```aidl
-scancentral package -bt msbuild -bf IWA.NET.sln --output fod.zip
+"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+scancentral package --build-tool msbuild --build-file IWA.NET.sln --output fod.zip
 ```
 
-You can then upload this manually using the Fortify on Demand UI or you can use the PowerShell script file [fortify-fod.ps1](bin/fortify-fod.ps1) 
-provided to upload the file and start a Fortify on Demand static scan as follows:
+You can then upload this manually using the Fortify on Demand UI or you can use the FoDUploader utility to upload the file 
+and start a Fortify on Demand static scan as follows:
 
-```PowerShell
-.\bin\fortify-fod.ps1 -ZipFile '.\fod.zip' -ApplicationName 'IWA.NET' -ReleaseName 'master' -Notes 'PowerShell initiated scan' `
-    -FodApiUri 'https://api.emea.fortify.com' -FodApiKey 'FOD_ACCESS_KEY' -FodApiSecret 'FOD_SECRET_KEY'
+```Cmd
+java -jar FodUpload.jar -z fod.zip -aurl 'https://api.emea.fortify.com' -purl 'https://emea.fortify.com' -rid 'FOD_RELEASE_ID' -tc 'FOD_TENANT'
+	-uc 'FOD_CREDENTIALS' -ep 2 -pp 0 -I 1 -apf -n "command-line initiated scan"
 ``` 
 
 where `FOD_ACCESS_KEY` and `FOD_SECRET_KEY` are the values of an API Key and Secret you have created in the Fortify on
@@ -230,40 +141,6 @@ Once completed you can open the WebInspect "Desktop Client" and navigate to the 
 called `IWA.NET-DAST.fpr` will also be available - you can open it with `auditworkbench` (or generate a
 PDF report from using `ReportGenerator`). You could also upload it to Fortify SSC or Fortify on Demand.
 
-There is an example PowerShell script file [fortify-webinspect.ps1](bin\fortify-webinspect.ps1) that you can run to 
-execute the scan and upload the results to SSC:
-
-```aidl
-.\bin\fortify-webinspect.ps1
-```
-
-### DAST using Fortify ScanCentral DAST
-
-To carry out a ScanCentral DAST scan you should first "run" the application using one of the steps described above.
-Then you can start a scan using the provided PowerShell script [fortify-scancentral-dast.ps1](bin\fortify-scancentral-dast.ps1).
-It can be invoked via the following from a PowerShell prompt:
-
-```PowerShell
-.\bin\fortify-scancentral-dast.ps1 -ApiUri 'SCANCENTRAL_DAST_API' -Username 'SSC_USERNAME' -Password 'SSC_PASSWORD' `
-    -CiCdToken 'CICD_TOKEN_ID'
-``` 
-
-where `SCANCENTRAL_DAST_API` is the URL of the ScanCentral DAST API configured in SSC and
-`SSC_USERNAME` and `SSC_PASSWORD` are the login credentials of a Software Security Center user who is permitted to
-run scans. Finally, `CICD_TOKEN_ID` is the "CICD identifier" of the "Scan Settings" you have previously created from the UI.
-
-### DAST using Fortify on Demand
-
-You can invoke a Fortify on Demand dynamic scan using the [PowerShellForFOD](https://github.com/fortify-community-plugins/PowerShellForFOD) PowerShell module.
-For examples on how to achieve this see [here](https://github.com/fortify-community-plugins/PowerShellForFOD/blob/master/USAGE.md#starting-a-dynamic-scan).
-
-### API Security Testing using Fortify WebInspect and Postman
-
-TBD
-
-### API Security Testing using ScanCentral DAST and Postman
-
-TBD
 
 ## Build and Pipeline Integrations
 
@@ -272,10 +149,6 @@ TBD
 An Azure Devops pipeline [azure-pipelines.yml](azure-pipelines.yml) is provided and has user
 selected variables such as "UseFoD" or "UseScanCentralDAST" which can be set to True or False depending
 on which application security testing integration you require.
-
-## Developing and Contributing
-
-TBD
 
 ## Licensing
 

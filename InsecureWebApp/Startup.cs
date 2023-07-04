@@ -36,8 +36,9 @@ namespace MicroFocus.InsecureWebApp
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                options.UseInMemoryDatabase(databaseName: "IWADb"));
+                //options.UseSqlServer(
+                //    Configuration.GetConnectionString("DefaultConnection")));
             //GRAPH QL IMPLEMENTATION
             services.AddGraphQLServer()
                 .AddQueryType<Query>()
