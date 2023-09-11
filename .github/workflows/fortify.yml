@@ -48,7 +48,7 @@ jobs:
       - name: Download Fortify ScanCentral Client
         uses: fortify/gha-setup-scancentral-client@v2
         with:
-          version: 23.2
+          version: 23.1
       - name: Package Code + Dependencies
         run: scancentral package -bt msbuild -bf IWA.Net.sln -o package.zip -oss
 
@@ -70,7 +70,7 @@ jobs:
       # Once scan completes, pull SAST issues from Fortify on Demand and generate SARIF output.
       - name: Export results to GitHub-optimized SARIF
         id: export
-        if: '!cancelled()'
+        if: ${{ !cancelled() && (steps.scan.conclusion == 'success' || steps.scan.conclusion == 'failure')}}
         uses: fortify/gha-export-vulnerabilities@v1
         with:
           fod_base_url: "https://ams.fortify.com/"
