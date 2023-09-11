@@ -48,7 +48,7 @@ jobs:
       - name: Download Fortify ScanCentral Client
         uses: fortify/gha-setup-scancentral-client@v2
         with:
-          version: 22.1.2
+          version: 23.2
       - name: Package Code + Dependencies
         run: scancentral package -bt msbuild -bf IWA.Net.sln -o package.zip -oss
 
@@ -56,6 +56,7 @@ jobs:
       - name: Download Fortify on Demand Universal CI Tool
         uses: fortify/gha-setup-fod-uploader@v1
       - name: Perform SAST Scan
+        id: scan
         run: java -jar ${env:FOD_UPLOAD_JAR} -z package.zip -aurl ${env:FOD_API_URL} -purl ${env:FOD_URL} -rid ${env:FOD_RELEASE_ID} -tc ${env:FOD_TENANT} -uc ${env:FOD_USER} ${env:FOD_PAT} -n ${env:FOD_UPLOADER_NOTES} -ep 2 -pp 0 -I 1
         env:
           FOD_URL: "https://ams.fortify.com/"
@@ -68,6 +69,8 @@ jobs:
 
       # Once scan completes, pull SAST issues from Fortify on Demand and generate SARIF output.
       - name: Export results to GitHub-optimized SARIF
+        id: export
+        if: '!cancelled()'
         uses: fortify/gha-export-vulnerabilities@v1
         with:
           fod_base_url: "https://ams.fortify.com/"
@@ -78,6 +81,7 @@ jobs:
 
       # Import Fortify on Demand results to GitHub Security Code Scanning
       - name: Import Results from Fortify on Demand
+        if: ${{ !cancelled() && steps.export.conclusion == 'success' }}
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ./gh-fortify-sast.sarif
