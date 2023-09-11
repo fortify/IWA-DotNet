@@ -47,8 +47,6 @@ jobs:
       # Prepare source+dependencies for upload. The default example is for a Maven project that uses pom.xml. ScanCentral Client documentation is located at https://www.microfocus.com/documentation/fortify-software-security-center/
       - name: Download Fortify ScanCentral Client
         uses: fortify/gha-setup-scancentral-client@v2
-        with:
-          version: 23.1
       - name: Package Code + Dependencies
         run: scancentral package -bt msbuild -bf IWA.Net.sln -o package.zip -oss
 
