@@ -15,9 +15,8 @@ name: Fortify on Demand Scan
 
 on:
   workflow_dispatch:
-  push:
-    branches: 
-      - 'main'
+  pull_request:
+    types: [opened, reopened]
 
 jobs:
   FoD-SAST-Scan:
@@ -55,7 +54,7 @@ jobs:
       - name: Download Fortify on Demand Universal CI Tool
         uses: fortify/gha-setup-fod-uploader@v1
       - name: Perform SAST Scan
-        run: java -jar ${env:FOD_UPLOAD_JAR} -z package.zip -aurl ${env:FOD_API_URL} -purl ${env:FOD_URL} -rid ${env:FOD_RELEASE_ID} -tc ${env:FOD_TENANT} -uc ${env:FOD_USER} ${env:FOD_PAT} -n ${env:FOD_UPLOADER_NOTES} -ep 2 -pp 0 -I 1 -apf
+        run: java -jar ${env:FOD_UPLOAD_JAR} -z package.zip -aurl ${env:FOD_API_URL} -purl ${env:FOD_URL} -rid ${env:FOD_RELEASE_ID} -tc ${env:FOD_TENANT} -uc ${env:FOD_USER} ${env:FOD_PAT} -n ${env:FOD_UPLOADER_NOTES} -ep 2 -pp 0 -I 1
         env:
           FOD_URL: "https://ams.fortify.com/"
           FOD_API_URL: "https://api.ams.fortify.com/"
