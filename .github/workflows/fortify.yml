@@ -14,9 +14,12 @@
 name: Fortify on Demand Scan
 
 on:
-  workflow_dispatch:
+  push:
+    branches: ["main", "pr-scan-test-branch"]
   pull_request:
-    types: [opened, reopened]
+    # The branches below must be a subset of the branches above
+    branches: ["main", "pr-scan-test-branch"]
+  workflow_dispatch:  
 
 jobs:
   FoD-SAST-Scan:
@@ -42,18 +45,18 @@ jobs:
           java-version: 11
           distribution: 'temurin'
 
-      # Prepare source+dependencies for upload. The default example is for a Maven project that uses pom.xml. ScanCentral Client documentation is located at https://www.microfocus.com/documentation/fortify-software-security-center/
+      # Prepare source+dependencies for upload. ScanCentral Client documentation is located at https://www.microfocus.com/documentation/fortify-software-security-center/
       - name: Download Fortify ScanCentral Client
         uses: fortify/gha-setup-scancentral-client@v2
       - name: Package Code + Dependencies
-        run: scancentral package -bt msbuild -bf IWA.Net.sln -o package.zip -oss
+        run: scancentral package -bf IWA.Net.sln -o package.zip -oss
 
       # Start Fortify on Demand SAST scan and wait until results complete. For more information on FoDUploader commands, see https://github.com/fod-dev/fod-uploader-java
       - name: Download Fortify on Demand Universal CI Tool
         uses: fortify/gha-setup-fod-uploader@v1
       - name: Perform SAST Scan
         id: scan
-        run: java -jar ${env:FOD_UPLOAD_JAR} -z package.zip -aurl ${env:FOD_API_URL} -purl ${env:FOD_URL} -rid ${env:FOD_RELEASE_ID} -tc ${env:FOD_TENANT} -uc ${env:FOD_USER} ${env:FOD_PAT} -n ${env:FOD_UPLOADER_NOTES} -ep 2 -pp 0 -I 1
+        run: java -jar ${env:FOD_UPLOAD_JAR} -z package.zip -aurl ${env:FOD_API_URL} -purl ${env:FOD_URL} -rid ${env:FOD_RELEASE_ID} -tc ${env:FOD_TENANT} -uc ${env:FOD_USER} ${env:FOD_PAT} -n ${env:FOD_UPLOADER_NOTES} -ep 2 -pp 0 -I 1 -apf
         env:
           FOD_URL: "https://ams.fortify.com/"
           FOD_API_URL: "https://api.ams.fortify.com/"
@@ -65,8 +68,6 @@ jobs:
 
       # Once scan completes, pull SAST issues from Fortify on Demand and generate SARIF output.
       - name: Export results to GitHub-optimized SARIF
-        id: export
-        if: ${{ !cancelled() && (steps.scan.conclusion == 'success' || steps.scan.conclusion == 'failure')}}
         uses: fortify/gha-export-vulnerabilities@v1
         with:
           fod_base_url: "https://ams.fortify.com/"
@@ -77,7 +78,6 @@ jobs:
 
       # Import Fortify on Demand results to GitHub Security Code Scanning
       - name: Import Results from Fortify on Demand
-        if: ${{ !cancelled() && steps.export.conclusion == 'success' }}
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ./gh-fortify-sast.sarif
