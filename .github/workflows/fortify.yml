@@ -11,8 +11,6 @@
 # assistance with configuration, feel free to create a help ticket in the Fortify on Demand portal.   
 ################################################################################################################################################
 
-# Update for test
-
 name: Fortify on Demand Scan
 
 on:
