@@ -8,16 +8,18 @@
 # GitHub Security Code Scanning Alerts. Existing customers should review inputs and environment variables below to configure scanning against  #
 # an existing application in your Fortify on Demand tenant. Additional information is available in the comments throughout the workflow, the   #
 # documentation for the Fortify actions used, and the Fortify on Demand / ScanCentral Client product documentation. If you need additional     #
-# assistance with configuration, feel free to create a help ticket in the Fortify on Demand portal.                                            #
+# assistance with configuration, feel free to create a help ticket in the Fortify on Demand portal.   
 ################################################################################################################################################
 
 name: Fortify on Demand Scan
 
 on:
-  workflow_dispatch:
   push:
-    branches: 
-      - 'main'
+    branches: ["main", "pr-scan-test-branch"]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: ["main", "pr-scan-test-branch"]
+  workflow_dispatch:  
 
 jobs:
   FoD-SAST-Scan:
@@ -43,18 +45,17 @@ jobs:
           java-version: 11
           distribution: 'temurin'
 
-      # Prepare source+dependencies for upload. The default example is for a Maven project that uses pom.xml. ScanCentral Client documentation is located at https://www.microfocus.com/documentation/fortify-software-security-center/
+      # Prepare source+dependencies for upload. ScanCentral Client documentation is located at https://www.microfocus.com/documentation/fortify-software-security-center/
       - name: Download Fortify ScanCentral Client
         uses: fortify/gha-setup-scancentral-client@v2
-        with:
-          version: 22.1.2
       - name: Package Code + Dependencies
-        run: scancentral package -bt msbuild -bf IWA.Net.sln -o package.zip -oss
+        run: scancentral package -bf IWA.Net.sln -o package.zip -oss
 
       # Start Fortify on Demand SAST scan and wait until results complete. For more information on FoDUploader commands, see https://github.com/fod-dev/fod-uploader-java
       - name: Download Fortify on Demand Universal CI Tool
         uses: fortify/gha-setup-fod-uploader@v1
       - name: Perform SAST Scan
+        id: scan
         run: java -jar ${env:FOD_UPLOAD_JAR} -z package.zip -aurl ${env:FOD_API_URL} -purl ${env:FOD_URL} -rid ${env:FOD_RELEASE_ID} -tc ${env:FOD_TENANT} -uc ${env:FOD_USER} ${env:FOD_PAT} -n ${env:FOD_UPLOADER_NOTES} -ep 2 -pp 0 -I 1 -apf
         env:
           FOD_URL: "https://ams.fortify.com/"
