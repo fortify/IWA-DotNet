@@ -21,7 +21,7 @@ on:
   workflow_dispatch:  
 
 jobs:
-  FoD-SAST-Scan:
+  Fortify-AST-Scan:
     # Use the appropriate runner for building your source code.
     runs-on: windows-latest
     permissions:
