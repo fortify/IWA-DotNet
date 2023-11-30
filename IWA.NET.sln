@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		devops-integrations\azure\templates\build-project.yml = devops-integrations\azure\templates\build-project.yml
 		etc\FoDToGitHub.yml = etc\FoDToGitHub.yml
 		README.md = README.md
+		devops-integrations\azure\templates\test-project.yml = devops-integrations\azure\templates\test-project.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecureProductService", "InsecureProductService\InsecureProductService.csproj", "{D9C33705-D886-43D9-B5CA-E0ABF57F0970}"
