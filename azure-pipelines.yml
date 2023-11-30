@@ -111,6 +111,7 @@ stages:
         pool: 'Fortify'
         project: 'InsecureWebapp/*.csproj'
   - template: devops-integrations/azure/templates/test-project.yml
+    parameters:
         name: 'InsecureWebAppTests'
         pool: 'Fortify'
         project: 'InsecureWebappTests/*.csproj'
