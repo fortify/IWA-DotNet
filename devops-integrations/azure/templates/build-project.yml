@@ -20,8 +20,8 @@ parameters:
 jobs:
 - job: ${{ parameters.name }}
   pool: 
-    name: ${{ parameters.vmImage }}
-    vmImage: ${{ parameters.pool }}
+    name: ${{ parameters.pool }}
+    vmImage: ${{ parameters.vmImage }}
   steps:
     - task: UseDotNet@2
       inputs:
