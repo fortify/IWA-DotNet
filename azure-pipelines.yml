@@ -68,9 +68,10 @@ variables:
   # SSCApplicationVersion: 'Your SSC application version'
   # SSCAuthToken: 'Your SSC CI Authentication Token'
   # ScanCentralVersion: 'The version of ScanCentral being used'
+  # VsEdition: 'Community'
 
   solution: '**/*.sln'
-  vsDevCmd: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat' # location of visual studio VsDevCmd batch file on Agent
+  vsDevCmd: 'C:\Program Files\Microsoft Visual Studio\2022\$(VsEdition)\Common7\Tools\VsDevCmd.bat' # location of visual studio VsDevCmd batch file on Agent
   buildConfiguration: 'Debug'
   publishProfile: 'iwanet - Web Deploy'
   fortifyUploadDir: 'fod' # directory to be created containing all dependencies uploaded to FOD for static analysis
@@ -115,7 +116,6 @@ stages:
         command: 'build'
         configuration: $(buildConfiguration)
         projects: '$(solution)'
-        
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(build.artifactStagingDirectory)'
@@ -141,20 +141,17 @@ stages:
     - task: UseDotNet@2
       inputs:
         version: '6.0.202'
-
     - task: DotNetCoreCLI@2
       displayName: 'dotnet build'
       inputs:
         command: 'build'
         configuration: $(buildConfiguration)
         projects: '$(solution)'
-
     - task: BatchScript@1
       displayName: 'Set Visual Studio environment'
       inputs:
         filename: "$(vsDevCmd)"
         modifyEnvironment: true
-
     - task: FortifyScanCentralSAST@7
       inputs:
         scanCentralCtrlUrl: '$(ScanCentralCtrlUrl)'
