@@ -116,9 +116,9 @@ stages:
         pool: 'Fortify'
         project: 'InsecureWebappTests/*.csproj'
 
-- #
-  # Static Application Security Testing with ScanCentral SAST (on premise)
-- #
+#
+# Static Application Security Testing with ScanCentral SAST (on premise)
+#
 - stage: ScanCentral_SAST
   displayName: 'ScanCentral SAST'
   condition: eq(variables['UseScanCentralSAST'], 'true')
