@@ -5,7 +5,9 @@ parameters:
 - name: name
   default: 'Build Project'
 - name: vmImage
+  default: 'windows-2022'
 - name: pool
+  default: ''
 - name: project
   default: '**/*.csproj'
 - name: dotnetVersion

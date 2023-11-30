@@ -112,9 +112,8 @@ stages:
     # Build InsecureWebApp
   - template: devops-integrations/azure/templates/build-project.yml
     parameters:
-        name: 'Build InsecureWebApp'
+        name: 'Build_InsecureWebApp'
         pool: 'Fortify'
-        vmImage: 'windows-2022' 
         project: 'InsecureWebapp/*.csproj'
   #- job: Web
   #  steps:   
