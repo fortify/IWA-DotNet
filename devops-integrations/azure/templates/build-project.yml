@@ -2,6 +2,8 @@
 
 # defaults for any parameters that aren't specified
 parameters: 
+- name: name
+  default: 'Build Project'
 - name: vmImage
   default: ''
 - name: pool
@@ -18,10 +20,8 @@ parameters:
 jobs:
 - job: ${{ parameters.name }}
   pool: 
-    if ${{ if eq(parameters.vmImage, '') }}:
-        name: ${{ parameters.pool }}
-    if ${{ if eq(parameters.pool, '') }}:
-        vmImage: ${{ parameters.vmImage }}
+    name: ${{ parameters.vmImage }}
+    vmImage: ${{ parameters.pool }}
   steps:
     - task: UseDotNet@2
       inputs:

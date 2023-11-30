@@ -112,6 +112,7 @@ stages:
     # Build InsecureWebApp
   - template: devops-integrations/azure/templates/build-project.yml
     parameters:
+        name: 'Build InsecureWebApp'
         pool: Fortify
         project: 'InsecureWebapp/*.csproj'
   #- job: Web
