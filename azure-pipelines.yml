@@ -101,29 +101,33 @@ stages:
   #
 - stage: BuildAndUnitTest
   displayName: 'Build and Unit Test'
-  pool:
+  #pool:
     # use Azure DevOps provided agent
     #vmImage: 'windows-2022'
     # or uncomment to use a local Agent pool named 'Fortify' with Fortify software installed
-    name: Fortify
+  #  name: Fortify
   jobs:
-    # Build web application component
-  - job: Web
-    steps:   
-    - task: UseDotNet@2
-      inputs:
-        version: '6.x'
-    - task: DotNetCoreCLI@2
-      displayName: 'dotnet build'
-      inputs:
-        command: 'build'
-        configuration: $(buildConfiguration)
-        projects: '$(solution)'
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: '$(build.artifactStagingDirectory)'
-        artifact: 'InsecureWebApp-Web'
-        publishLocation: 'pipeline'    
+    # Build InsecureWebApp
+  - template: templates/build-project.yml
+    parameters:
+        pool: Fortify
+        project: 'InsecureWebapp/*.csproj'
+  #- job: Web
+  #  steps:   
+  #  - task: UseDotNet@2
+  #    inputs:
+  #      version: '6.x'
+  #  - task: DotNetCoreCLI@2
+  #    displayName: 'dotnet build'
+  #    inputs:
+  #      command: 'build'
+  #      configuration: $(buildConfiguration)
+  #      projects: '$(solution)'
+  #  - task: PublishPipelineArtifact@1
+  #    inputs:
+  #      targetPath: '$(build.artifactStagingDirectory)'
+  #      artifact: 'InsecureWebApp-Web'
+  #      publishLocation: 'pipeline'    
 
 #
 # Static Application Security Testing with ScanCentral SAST (on premise)

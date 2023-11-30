@@ -1,0 +1,39 @@
+# File: templates/build-and-test.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: vmImage
+  default: ''
+- name: pool
+  default: ''
+- name: project
+  default: '**/*.csproj'
+- name: dotnetVersion
+  default: '6.x'
+- name: buildConfiguration
+  default: 'Debug'
+- name: publishArtifact
+  default: ''
+
+jobs:
+- job: ${{ parameters.name }}
+  pool: 
+    if ${{ if eq(parameters.vmImage, '') }}:
+        name: ${{ parameters.pool }}
+    if ${{ if eq(parameters.pool, '') }}:
+        vmImage: ${{ parameters.vmImage }}
+  steps:
+    - task: UseDotNet@2
+      inputs:
+        version: ${{ parameters.dotnetVersion }}
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet build'
+      inputs:
+        command: 'build'
+        configuration: ${{ parameters.buildConfiguration }}
+        projects: ${{ parameters.project }}
+    #- task: PublishPipelineArtifact@1
+    #  inputs:
+    #    targetPath: '$(build.artifactStagingDirectory)'
+    #    artifact:  ${{ parameters.publishArtifact }}
+    #    publishLocation: 'pipeline'    
