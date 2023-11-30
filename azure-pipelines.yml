@@ -5,6 +5,7 @@ trigger:
   branches:
     include:
     - main
+    - develop
     - features/*
     - releases/*
     exclude:
@@ -98,7 +99,9 @@ stages:
   displayName: 'Build and Unit Test'
   pool:
     # use Azure DevOps provided agent
-    vmImage: 'ubuntu-latest'
+    #vmImage: 'ubuntu-latest'
+    # or uncomment to use a local Agent pool named 'Fortify' with Fortify software installed
+    name: Fortify
   jobs:
     # Build web application component
   - job: Web
@@ -128,9 +131,9 @@ stages:
   dependsOn: BuildAndUnitTest
   pool:
     # use Azure DevOps provided agent
-    vmImage: 'windows-2022'
+    #vmImage: 'windows-2022'
     # or uncomment to use a local Agent pool named 'Fortify' with Fortify software installed
-    # name: Fortify
+    name: Fortify
   jobs:
   - job: UploadAndScan
     displayName: 'Upload and Scan'
@@ -183,14 +186,14 @@ stages:
   dependsOn: BuildAndUnitTest
   pool:
     # use Azure DevOps provided agent
-    vmImage: 'windows-2022'
+    #vmImage: 'windows-2022'
     # or uncomment to use a local Agent pool named 'Fortify'
-    #name: Fortify
+    name: Fortify
   jobs:
   - job: UploadAndScan
     displayName: "Upload and Scan"
     steps:
-     - task: UseDotNet@2
+    - task: UseDotNet@2
       displayName: 'Set DotNet environment'
       inputs:
         version: '6.0.202'
@@ -198,11 +201,10 @@ stages:
       inputs:
         command: build
         projects: '$(solution)'
-        configuration: '$(buildConfiguration)'     
-
+        configuration: '$(buildConfiguration)'
     - task: JavaToolInstaller@0
       inputs:
-        versionSpec: "11"
+        versionSpec: "17"
         jdkArchitectureOption: x64
         jdkSourceOption: PreInstalled
     - task: BatchScript@1
@@ -210,7 +212,6 @@ stages:
       inputs:
         filename: "$(vsDevCmd)"
         modifyEnvironment: true
-
     - task: FortifyOnDemandStatic@8
       # Carry out a Fortify on Demand static assessment
       inputs:
@@ -241,9 +242,9 @@ stages:
   displayName: 'Deploy to Azure'
   pool:
     # use Azure DevOps provided agent
-    vmImage: 'windows-2019'
+    #vmImage: 'windows-2019'
     # use local Agent pool named 'Fortify'
-    #name: Fortify
+    name: Fortify
   jobs: 
   - job: DownloadAndDeploy
     displayName: 'Download and Deploy'
@@ -286,9 +287,9 @@ stages:
   dependsOn: DeployToAzure
   pool:
     # use Azure DevOps provided agent
-    vmImage: 'windows-2019'
+    #vmImage: 'windows-2019'
     # use local Agent pool named 'Fortify'
-    #name: Fortify
+    name: Fortify
   jobs:
   - job: RunScan
     displayName: 'Run Scan'
@@ -309,9 +310,9 @@ stages:
   dependsOn: DeployToAzure
   pool:
     # use Azure DevOps provided agent
-    vmImage: 'windows-2019'
+    #vmImage: 'windows-2019'
     # use local Agent pool named 'Fortify'
-    #name: Fortify
+    name: Fortify
   jobs:
   - job: RunScan
     displayName: 'Run Scan'
