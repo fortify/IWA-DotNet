@@ -42,14 +42,14 @@ variables:
   # 
   # ADOBaseURL: 'Your Azure DevOps Base URL'
   # ADOPAT: 'Your Azure DevOps Personal Access Token'
-  # ADOProject: 'IWA.NET'
+  # ADOProject: 'IWA-DotNet'
   # AppUrl: 'URL of deployed application'
   # AzureDBServer: 'Hostname of database server'
   # AzureDBName: 'Database Name'
   # AzureDBUser: 'Database User Login'
   # AzureDBPassword: ' Database Password'
-  # FoDApplicationName: 'IWA.NET'
-  # FoDBaseUrl: 'https://api.emea.fortify.com'
+  # FoDApplicationName: 'IWA-DotNet'
+  # FoDBaseUrl: 'https://api.ams.fortify.com'
   # FoDBugTrackerVersion: '4.2'
   # FoDClientId: 'Your FoD API Client Id'
   # FoDClientSecret: 'You FoD API Client Secret'
@@ -64,20 +64,23 @@ variables:
   # ScanCentralDASTCICDAuthToken: 'Your ScanCentral DAST CICD Authentication Token'
   # ScanCentralDASTCICDIdentifier: 'Your ScanCentral DAST CICD Identifier'
   # SSCUrl: 'Your SSC URL'
-  # SSCApplicationName: 'IWA.NET'
+  # SSCApplicationName: 'IWA-DotNet'
   # SSCApplicationVersion: 'Your SSC application version'
   # SSCAuthToken: 'Your SSC CI Authentication Token'
   # ScanCentralVersion: 'The version of ScanCentral being used'
+  # VsVersion: '2022'
   # VsEdition: 'Community'
 
   solution: '**/*.sln'
-  vsDevCmd: 'C:\Program Files\Microsoft Visual Studio\2022\$(VsEdition)\Common7\Tools\VsDevCmd.bat' # location of visual studio VsDevCmd batch file on Agent
+  vsDevCmd: 'C:\Program Files\Microsoft Visual Studio\$(VsVersion)\$(VsEdition)\Common7\Tools\VsDevCmd.bat' # location of visual studio VsDevCmd batch file on Agent
   buildConfiguration: 'Debug'
   publishProfile: 'iwanet - Web Deploy'
-  fortifyUploadDir: 'fod' # directory to be created containing all dependencies uploaded to FOD for static analysis
+  # IMPORTANT: please make sure your names for Service Connections to FoD and/or SSC are set to the following:
   FoDConnection: 'FODAzureDevOps' # the name of Fortify on Demand service connection configured in Project Settings
   SSCConnection: 'SSCAzureDevOps' # the name of the Fortify SSC "generic" connection configured in Project Settings
   ScanCentralLogsDir: 'C:\Users\VssAdministrator\AppData\Local\Fortify\scancentral-$(ScanCentralVersion)\log' # where ScanCentral logs will be written to
+
+  # IMPORTANT: please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
 
   # get the source branch name
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features/') }}:
@@ -100,7 +103,7 @@ stages:
   displayName: 'Build and Unit Test'
   pool:
     # use Azure DevOps provided agent
-    #vmImage: 'ubuntu-latest'
+    #vmImage: 'windows-2022'
     # or uncomment to use a local Agent pool named 'Fortify' with Fortify software installed
     name: Fortify
   jobs:
@@ -165,12 +168,12 @@ stages:
         buildFile: 'IWA.NET.sln'
         email: '$(ScanCentralNotificationEmail)'
         block: true
-        outputFile: 'IWA.NET.fpr'
-        logFile: 'IWA.NET.log'
+        outputFile: 'IWA-DotNet.fpr'
+        logFile: 'IWA-DotNet.log'
         overwrite: true
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: '$(Build.SourcesDirectory)/IWA.NET.fpr'
+        targetPath: '$(Build.SourcesDirectory)/IWA-DotNet.fpr'
         artifact: 'Fortify Results (FPR)'
         publishLocation: 'pipeline'
 
@@ -239,7 +242,7 @@ stages:
   displayName: 'Deploy to Azure'
   pool:
     # use Azure DevOps provided agent
-    #vmImage: 'windows-2019'
+    #vmImage: 'windows-2022'
     # use local Agent pool named 'Fortify'
     name: Fortify
   jobs: 
@@ -284,7 +287,7 @@ stages:
   dependsOn: DeployToAzure
   pool:
     # use Azure DevOps provided agent
-    #vmImage: 'windows-2019'
+    #vmImage: 'windows-2022'
     # use local Agent pool named 'Fortify'
     name: Fortify
   jobs:
@@ -307,7 +310,7 @@ stages:
   dependsOn: DeployToAzure
   pool:
     # use Azure DevOps provided agent
-    #vmImage: 'windows-2019'
+    #vmImage: 'windows-2022'
     # use local Agent pool named 'Fortify'
     name: Fortify
   jobs:
