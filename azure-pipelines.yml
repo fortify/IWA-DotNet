@@ -108,7 +108,7 @@ stages:
   #  name: Fortify
   jobs:
     # Build InsecureWebApp
-  - template: templates/build-project.yml
+  - template: azure/templates/build-project.yml
     parameters:
         pool: Fortify
         project: 'InsecureWebapp/*.csproj'
