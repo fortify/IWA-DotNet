@@ -297,36 +297,6 @@ stages:
         scanCentralCiCdToken: '$(ScanCentralDASTCICDIdentifier)'
         sscCiToken: '$(ScanCentralDASTCICDAuthToken)'
 
-#        
-# Dynamic Application Security Testing with Fortify on Demand
-#        
-- stage: FoD_DAST
-  displayName: 'FoD DAST'
-  # renamed from UseFOD because we have not tested FOD DAST currently
-  condition: eq(variables['UseFODXXX'], 'true')
-  dependsOn: DeployToAzure
-  pool:
-    # use Azure DevOps provided agent
-    #vmImage: 'windows-2022'
-    # use local Agent pool named 'Fortify'
-    name: Fortify
-  jobs:
-  - job: RunScan
-    displayName: 'Run Scan'
-    steps:   
-    - task: FortifyOnDemandDynamic@7
-      # renamed from UseFOD because we have not tested FOD DAST currently
-      condition: eq(variables['UseFODXXX'], 'true')
-      inputs:
-        APIUrl: '${FoDBaseUrl}'
-        ReleaseId: '${branchName}'
-        APIAuthenticationType: '1'
-        APIKey: '${FoDClientId}'
-        APISecret: '${FoDClientSecret}'
-        EntitlementPreference: '2'
-        PurchaseEntitlements: false
-        PreferRemediation: false
-
   #
   # Dynamic Application Security Testing with Fortify on Demand
   #
