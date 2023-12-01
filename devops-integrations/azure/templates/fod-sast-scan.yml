@@ -30,15 +30,6 @@ jobs:
     name: ${{ parameters.pool }}
     vmImage: ${{ parameters.vmImage }}
   steps:
-    #- bash: |
-    #    if [ -z "FODRELEASEID" || -z "SRCDIR" ]; then
-    #      echo "##vso[task.logissue type=error;]Missing template parameter \"fodReleaseId\" or \"srcDir\""
-    #      echo "##vso[task.complete result=Failed;]"
-    #    fi
-    #  env:
-    #    FODRELEASEID: ${{ parameters.fodReleaseId }}
-    #    SRCDIR: ${{ parameters.srcDir }}
-    #  displayName: Check for required parameters
   - task: UseDotNet@2
     inputs:
       version: ${{ parameters.dotnetVersion }}
@@ -53,7 +44,6 @@ jobs:
       filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
       modifyEnvironment: true
   - task: FortifyOnDemandStatic@8
-    # Carry out a Fortify on Demand static assessment
     inputs:
       FortifyProjects: ${{ parameters.srcDir }}
       FodConnection: ${{ parameters.fodConnection }}
@@ -68,9 +58,3 @@ jobs:
       BuildFile: ${{ parameters.buildFile }}
       PolicyFailAction: '0'
       PollingInterval: 5
-    #- task: DotNetCoreCLI@2
-    #  displayName: 'dotnet build'
-    #  inputs:
-    #    command: 'build'
-    #    configuration: ${{ parameters.buildConfiguration }}
-    #    projects: ${{ parameters.srcProject }}

@@ -24,7 +24,6 @@ pr:
   
 variables:
 
-  templatesDir: 'devops-integrations/azure/templates'
 
 stages:
 

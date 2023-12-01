@@ -1,0 +1,75 @@
+# File: templates/fod-sast-scan.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: vmImage
+  default: 'windows-2022'
+- name: pool
+  default: ''
+- name: baseDir
+  default: ''
+- name: buildFile
+- name: dotnetVersion
+  default: '6.x'
+- name: buildConfiguration
+  default: 'Debug'
+- name: vsVersion
+  default: '2022'
+- name: vsEdition
+  default: 'Community'
+- name: jdkVersion
+  default: '17'
+- name: jdkArch
+  default: 'x64'
+- name: scanCentralCtrlUrl
+- name: scanCentralClientToken
+- name: notificationEmail
+  default: ''
+- name: sscUrl
+- name: sscCiToken
+- name: uploadToSSC
+  type: boolean
+  default: true
+- name: sscAppName
+- name: sscAppVerName
+
+jobs:
+- job: FoDStaticScan
+  pool: 
+    name: ${{ parameters.pool }}
+    vmImage: ${{ parameters.vmImage }}
+  steps:
+  - task: UseDotNet@2
+    inputs:
+      version: ${{ parameters.dotnetVersion }}
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: ${{ parameters.jdkVersion }}
+      jdkArchitectureOption: ${{ parameters.jdkArch }}
+      jdkSourceOption: PreInstalled
+  - task: BatchScript@1
+    displayName: 'Set Visual Studio environment'
+    inputs:
+      filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
+      modifyEnvironment: true
+  - task: FortifyScanCentralSAST@7
+    inputs:
+      scanCentralCtrlUrl: ${{ parameters.scanCentralCtrlUrl }}
+      scanCentralClientToken: ${{ parameters.scanCentralClientToken }}
+      sscUrl: ${{ parameters.sscUrl }}
+      sscCiToken: ${{ parameters.sscCiToken }}
+      uploadToSSC: ${{ parameters.uploadToSSC }}
+      applicationName: ${{ parameters.sscAppName }}
+      applicationVersion: ${{ parameters.sscAppVerName }}
+      buildTool: 'msbuild'
+      buildFile: ${{ parameters.buildFile }}
+      email: ${{ parameters.notificationEmail }}
+      block: true
+      outputFile: ${{ format('scan-{0}.fpr', parameters.baseDir) }}
+      logFile: ${{ format('scan-{0}.log', parameters.baseDir) }}
+      overwrite: true
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: ${{ format('scan-{0}.fpr', parameters.projectName) }}
+      artifact: 'Fortify Results (FPR)'
+      publishLocation: 'pipeline'

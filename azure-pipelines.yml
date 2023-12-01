@@ -94,9 +94,7 @@ variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
     branchName: 'main'
   isPR: $[startsWith(variables['Build.SourceBranch'], 'refs/pull/')]
-  isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-
-  templatesDir: 'devops-integrations/azure/templates'
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
 
 stages:
 
@@ -129,110 +127,33 @@ stages:
         fodReleaseId: $(FoDReleaseId)
         pool: 'Fortify'
 
-#
-# Static Application Security Testing with ScanCentral SAST (on premise)
-#
+  #
+  # Static Application Security Testing with ScanCentral SAST (on premise)
+  #
 - stage: ScanCentral_SAST
   displayName: 'ScanCentral SAST'
   condition: eq(variables['UseScanCentralSAST'], 'true')
   dependsOn: BuildAndUnitTest
-  pool:
-    # use Azure DevOps provided agent
-    #vmImage: 'windows-2022'
-    # or uncomment to use a local Agent pool named 'Fortify' with Fortify software installed
-    name: Fortify
   jobs:
-  - job: UploadAndScan
-    displayName: 'Upload and Scan'
-    steps:
-    - task: UseDotNet@2
-      inputs:
-        version: '6.0.202'
-    - task: DotNetCoreCLI@2
-      displayName: 'dotnet build'
-      inputs:
-        command: 'build'
-        configuration: $(buildConfiguration)
-        projects: '$(solution)'
-    - task: BatchScript@1
-      displayName: 'Set Visual Studio environment'
-      inputs:
-        filename: "$(vsDevCmd)"
-        modifyEnvironment: true
-    - task: FortifyScanCentralSAST@7
-      inputs:
-        scanCentralCtrlUrl: '$(ScanCentralCtrlUrl)'
-        scanCentralClientToken: '$(ScanCentralClientToken)'
-        sscUrl: '$(SSCUrl)'
-        sscCiToken: '$(SSCAuthToken)'
-        uploadToSSC: true
-        applicationName: '$(SSCApplicationName)'
-        applicationVersion: '$(SSCApplicationVersion)'
-        buildTool: 'msbuild'
-        buildFile: 'IWA.NET.sln'
-        email: '$(ScanCentralNotificationEmail)'
-        block: true
-        outputFile: 'IWA-DotNet.fpr'
-        logFile: 'IWA-DotNet.log'
-        overwrite: true
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: '$(Build.SourcesDirectory)/IWA-DotNet.fpr'
-        artifact: 'Fortify Results (FPR)'
-        publishLocation: 'pipeline'
+    # Run ScanCentral SAST Scan on Project
+  - template: 'devops-integrations/azure/templates/scancentral-sast-scan.yml'
+    parameters:
+        baseDir: 'InsecureWebApp' 
+        buildFile: 'InsecureWebApp.csproj'
+        scanCentralCtrlUrl: $(ScanCentralCtrlUrl)
+        scanCentralClientToken: $(ScanCentralClientToken)
+        sscUrl: $(SSCUrl)
+        sscCiToken: $(SSCAuthToken)
+        sscAppName: $(SSCApplicationName)
+        sscAppVerName: $(branchName)
+        notificationEmail: $(ScanCentralNotificationEmail)
+        pool: 'Fortify'
 
-
-
-  #pool:
-    # use Azure DevOps provided agent
-    #vmImage: 'windows-2022'
-    # or uncomment to use a local Agent pool named 'Fortify'
-    #name: Fortify
-  #jobs:
-  #- job: UploadAndScan
-  #  displayName: "Upload and Scan"
-  #  steps:
-  #  - task: UseDotNet@2
-  #    displayName: 'Set DotNet environment'
-  #    inputs:
-  #      version: '6.0.202'
-  #  - task: DotNetCoreCLI@2
-  #    inputs:
-  #      command: build
-  #      projects: '$(solution)'
-  #      configuration: '$(buildConfiguration)'
-  #  - task: JavaToolInstaller@0
-  #    inputs:
-  #      versionSpec: "17"
-  #      jdkArchitectureOption: x64
-  #      jdkSourceOption: PreInstalled
-  #  - task: BatchScript@1
-  #    displayName: 'Set Visual Studio environment'
- #     inputs:
-  #      filename: "$(vsDevCmd)"
-  #      modifyEnvironment: true
-  #  - task: FortifyOnDemandStatic@8
-  #    # Carry out a Fortify on Demand static assessment
-  #    inputs:
-  #      FortifyProjects: '.'
-  #      FodConnection: '$(FoDConnection)'
-  #      ReleaseOptions: '0'
-  #      ReleaseId: $(FoDReleaseId)
-  #      EntitlementSelection: '1'
-  #      EntitlementPreference: '1'
-  #      OverrideScanSettings: '2'
-  #      InProgressScanActionType: '2'
-  #      RemediationScanPreference: '2'
-  #      BuildType: 'msbuild'
-  #      BuildFile: 'IWA.NET.sln'
-  #      PolicyFailAction: '0'
-  #      PollingInterval: 5
-
-# 
-# Deploy the application
-#
+  # 
+  # Deploy the application
+  #
 - stage: DeployToAzure
-  condition: eq(variables.isMaster, true)
+  condition: eq(variables.isMain, true)
   #condition: always()
   dependsOn: 
     - BuildAndUnitTest
