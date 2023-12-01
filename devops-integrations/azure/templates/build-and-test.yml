@@ -14,11 +14,12 @@ parameters:
   default: '6.x'
 - name: buildConfiguration
   default: 'Debug'
-- name: publishArtifact
-  default: ''
+- name: runTests
+  type: boolean
+  default: true
 
 jobs:
-- job: ${{ parameters.name }}
+- job: Build
   pool: 
     name: ${{ parameters.pool }}
     vmImage: ${{ parameters.vmImage }}
@@ -40,13 +41,19 @@ jobs:
         command: 'build'
         configuration: ${{ parameters.buildConfiguration }}
         projects: ${{ parameters.srcProject }}
+- job: UnitTest
+  dependsOn: Build
+  condition: eq('${{ parameters.runTests }}', true)
+  pool: 
+    name: ${{ parameters.pool }}
+    vmImage: ${{ parameters.vmImage }}
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        version: ${{ parameters.dotnetVersion }}
     - task: DotNetCoreCLI@2
       displayName: 'dotnet test'
       inputs:
         command: 'test'
+        configuration: ${{ parameters.buildConfiguration }}
         projects: ${{ parameters.testProject }}
-    #- task: PublishPipelineArtifact@1
-    #  inputs:
-    #    targetPath: '$(build.artifactStagingDirectory)'
-    #    artifact:  ${{ parameters.publishArtifact }}
-    #    publishLocation: 'pipeline'    
