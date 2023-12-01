@@ -62,7 +62,7 @@ jobs:
       applicationName: ${{ parameters.sscAppName }}
       applicationVersion: ${{ parameters.sscAppVerName }}
       buildTool: 'msbuild'
-      buildFile: ${{ format(''{0}\{1}', parameters.baseDir, parameters.buildFile) }}
+      buildFile: ${{ format('{0}\{1}', parameters.baseDir, parameters.buildFile) }}
       email: ${{ parameters.notificationEmail }}
       block: true
       outputFile: ${{ format('scan-{0}.fpr', parameters.baseDir) }}
