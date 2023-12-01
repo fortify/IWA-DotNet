@@ -1,0 +1,111 @@
+# Example Continuous Delivery Pipeline with Fortify on Premise (SCA/SSC) and/or Fortify on Demand (FOD) support
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - develop
+    - features/*
+    - releases/*
+    exclude:
+    - experimental/*
+  paths:
+    exclude:
+    - InsecureWebApp/
+    - InsecurePaymentService/
+    - InsecureShippingService/
+    - README.md
+    - bin/*
+    - lib/*
+    - etc/*
+    - media/*
+
+pr:
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - InsecureWebApp/
+    - InsecurePaymentService/
+    - InsecureShippingService/
+    - README.md
+    - bin/*
+    - lib/*
+    - etc/*
+    - media/*
+  
+variables:
+  #
+  # In order for the Pipeline to execute successfully you should create the following variables in the Pipeline UI (or uncomment and hard-code here)
+  # 
+  # ADOBaseURL: 'Your Azure DevOps Base URL'
+  # ADOPAT: 'Your Azure DevOps Personal Access Token'
+  # ADOProject: 'IWA-DotNet'
+  # AppUrl: 'URL of deployed application'
+  # AzureDBServer: 'Hostname of database server'
+  # AzureDBName: 'Database Name'
+  # AzureDBUser: 'Database User Login'
+  # AzureDBPassword: ' Database Password'
+  # FoDApplicationName: 'IWA-DotNet'
+  # FoDBaseUrl: 'https://api.ams.fortify.com'
+  # FoDBugTrackerVersion: '4.2'
+  # FoDClientId: 'Your FoD API Client Id'
+  # FoDClientSecret: 'You FoD API Client Secret'
+  # FoDParentRelease: 'main'
+  # FoDReleaseId: 'Your FOD Release Id'
+  # FoDUsername: 'You FoD username'
+  # FoDTenant: 'Your FoD tenant'
+  # ScanCentralCtrlUrl: 'Your ScanCentral Controller URL'
+  # ScanCentralClientToken: 'Your ScanCentral Client Token'
+  # ScanCentralNotificationEmail: 'Your Email Address'
+  # ScanCentralDASTApiUrl: 'Your ScanCentral DAST API URL'
+  # ScanCentralDASTCICDAuthToken: 'Your ScanCentral DAST CICD Authentication Token'
+  # ScanCentralDASTCICDIdentifier: 'Your ScanCentral DAST CICD Identifier'
+  # SSCUrl: 'Your SSC URL'
+  # SSCApplicationName: 'IWA-DotNet'
+  # SSCApplicationVersion: 'Your SSC application version'
+  # SSCAuthToken: 'Your SSC CI Authentication Token'
+  # ScanCentralVersion: 'The version of ScanCentral being used'
+  # VsVersion: '2022'
+  # VsEdition: 'Community'
+
+  solution: '**/*.sln'
+  vsDevCmd: 'C:\Program Files\Microsoft Visual Studio\$(VsVersion)\$(VsEdition)\Common7\Tools\VsDevCmd.bat' # location of visual studio VsDevCmd batch file on Agent
+  buildConfiguration: 'Debug'
+  publishProfile: 'iwanet - Web Deploy'
+  # IMPORTANT: please make sure your names for Service Connections to FoD and/or SSC are set to the following:
+  FoDConnection: 'FODAzureDevOps' # the name of Fortify on Demand service connection configured in Project Settings
+  SSCConnection: 'SSCAzureDevOps' # the name of the Fortify SSC "generic" connection configured in Project Settings
+  ScanCentralLogsDir: 'C:\Users\VssAdministrator\AppData\Local\Fortify\scancentral-$(ScanCentralVersion)\log' # where ScanCentral logs will be written to
+
+  # IMPORTANT: please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
+
+  # get the source branch name
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features/') }}:
+    branchName: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', '') ]
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases/') }}:
+    branchName: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', '') ]
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}:
+    branchName: $[ replace(variables['System.PullRequest.TargetBranch'], 'refs/heads/', '') ]
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+    branchName: 'main'
+  isPR: $[startsWith(variables['Build.SourceBranch'], 'refs/pull/')]
+  isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+
+  templatesDir: 'devops-integrations/azure/templates'
+
+stages:
+
+  #
+  # Build and Unit Test the application components
+  #
+- stage: BuildAndUnitTest
+  displayName: 'Build and Unit Test'
+  jobs:
+    # Build InsecurePaymentService and run its tests
+  - template: 'devops-integrations/azure/templates/build-and-test.yml'
+    parameters:
+        srcProject: 'InsecurePaymentService/InsecurePaymentService.csproj' 
+        pool: 'Fortify'
