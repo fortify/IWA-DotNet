@@ -107,7 +107,7 @@ stages:
   displayName: 'Build and Unit Test'
   jobs:
     # Build InsecureWebApp and run its tests
-  - template: '$(templatesDir)/build-and-test.yml'
+  - template: 'devops-integrations/azure/templates/build-and-test.yml'
     parameters:
         srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
         testProject: 'InsecureWebAppTests/InsecureWebAppTests.csproj'
