@@ -1,5 +1,7 @@
 # Example Continuous Delivery Pipeline with Fortify on Premise (SCA/SSC) and/or Fortify on Demand (FOD) support
 
+name: InsecureWebApp
+
 trigger:
   batch: true
   branches:
@@ -105,7 +107,7 @@ stages:
   displayName: 'Build and Unit Test'
   jobs:
     # Build InsecureWebApp and run its tests
-  - template: 'devops-integrations/azure/templates/build-and-test.yml'
+  - template: '$(templatesDir)/build-and-test.yml'
     parameters:
         srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
         testProject: 'InsecureWebAppTests/InsecureWebAppTests.csproj'
