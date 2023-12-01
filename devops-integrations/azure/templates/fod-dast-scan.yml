@@ -1,0 +1,36 @@
+# File: templates/fod-dast-scan.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: vmImage
+  default: 'windows-2022'
+- name: pool
+  default: ''
+- name: fodApiUrl
+  default: 'https://api.ams.fortify.com'
+- name: fodApiKey
+- name: fodApiSecret
+- name: fodReleaseId
+- name: skip
+  type: boolean
+  default: false
+
+jobs:
+- job: FoDDynamicScan
+  pool: 
+    name: ${{ parameters.pool }}
+    vmImage: ${{ parameters.vmImage }}
+  steps:
+  - ${{ if ne(parameters.skip, true) }}:
+    - task: FortifyOnDemandDynamic@7
+      inputs:
+        APIUrl: ${{ parameters.fodApiUrl }}
+        ReleaseId: ${{ parameters.fodReleaseId }}
+        APIAuthenticationType: '1'
+        APIKey: ${{ parameters.fodApiKey }}
+        APISecret: ${{ parameters.fodApiSecret }}
+        EntitlementPreference: '2'
+        PurchaseEntitlements: false
+        PreferRemediation: false
+  - ${{ if ne(parameters.skip, true) }}:
+    - script: echo "Skipping DAST..."

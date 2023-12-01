@@ -326,3 +326,20 @@ stages:
         EntitlementPreference: '2'
         PurchaseEntitlements: false
         PreferRemediation: false
+
+  #
+  # Dynamic Application Security Testing with Fortify on Demand
+  #
+- stage: FoD_DAST
+  displayName: 'FoD DAST'
+  condition: eq(variables['UseFoD'], 'true') 
+  dependsOn: DeployToAzure
+  jobs:
+    # Run FoD DAST Scan on Project
+  - template: 'devops-integrations/azure/templates/fod-dast-scan.yml'
+    parameters:
+        fodApiKey: '${FoDClientId}' 
+        fodApiSecret: '${FoDClientSecret}'
+        fodReleaseId: $(FoDReleaseId)
+        pool: 'Fortify'
+        skip: true
