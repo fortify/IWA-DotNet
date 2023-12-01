@@ -1,6 +1,6 @@
 # Example Continuous Delivery Pipeline with Fortify on Premise (SCA/SSC) and/or Fortify on Demand (FOD) support
 
-name: InsecureWebApp
+name: InsecureWebApp-CI
 
 trigger:
   batch: true
