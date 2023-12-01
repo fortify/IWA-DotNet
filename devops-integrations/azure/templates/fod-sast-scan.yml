@@ -27,15 +27,15 @@ jobs:
     name: ${{ parameters.pool }}
     vmImage: ${{ parameters.vmImage }}
     steps:
-    - bash: |
-        if [ -z "FODRELEASEID" || -z "SRCDIR" ]; then
-          echo "##vso[task.logissue type=error;]Missing template parameter \"fodReleaseId\" or \"srcDir\""
-          echo "##vso[task.complete result=Failed;]"
-        fi
-      env:
-        FODRELEASEID: ${{ parameters.fodReleaseId }}
-        SRCDIR: ${{ parameters.srcDir }}
-      displayName: Check for required parameters
+    #- bash: |
+    #    if [ -z "FODRELEASEID" || -z "SRCDIR" ]; then
+    #      echo "##vso[task.logissue type=error;]Missing template parameter \"fodReleaseId\" or \"srcDir\""
+    #      echo "##vso[task.complete result=Failed;]"
+    #    fi
+    #  env:
+    #    FODRELEASEID: ${{ parameters.fodReleaseId }}
+    #    SRCDIR: ${{ parameters.srcDir }}
+    #  displayName: Check for required parameters
     - task: UseDotNet@2
       inputs:
         version: ${{ parameters.dotnetVersion }}
