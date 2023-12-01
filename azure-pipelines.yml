@@ -107,8 +107,8 @@ stages:
     # Build InsecureWebApp and run its tests
   - template: 'devops-integrations/azure/templates/build-and-test.yml'
     parameters:
-        srcProject: 'InsecureWebApp/*.csproj' 
-        testProject: 'InsecureWebAppTests/*.csproj'
+        srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
+        testProject: 'InsecureWebAppTests/InsecureWebAppTests.csproj'
         pool: 'Fortify'
 
   #
@@ -123,6 +123,7 @@ stages:
   - template: 'devops-integrations/azure/templates/fod-sast-scan.yml'
     parameters:
         srcDir: 'InsecureWebApp' 
+        buildFile: 'InsecureWebApp/InsecureWebApp.csproj'
         fodReleaseId: $(FoDReleaseId)
         pool: 'Fortify'
 

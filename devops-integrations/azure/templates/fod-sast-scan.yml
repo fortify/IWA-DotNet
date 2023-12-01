@@ -7,6 +7,7 @@ parameters:
 - name: pool
   default: ''
 - name: srcDir
+- name: buildFile
 - name: dotnetVersion
   default: '6.x'
 - name: buildConfiguration
@@ -64,7 +65,7 @@ jobs:
       InProgressScanActionType: '2'
       RemediationScanPreference: '2'
       BuildType: 'msbuild'
-      BuildFile: '*.csproj'
+      BuildFile: ${{ parameters.buildFile }}
       PolicyFailAction: '0'
       PollingInterval: 5
     #- task: DotNetCoreCLI@2
