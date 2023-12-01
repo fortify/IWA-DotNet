@@ -170,6 +170,7 @@ stages:
   displayName: 'FoD SAST'
   condition: eq(variables['UseFoD'], 'true') 
   dependsOn: BuildAndUnitTest
+  jobs:
     # Run FoD SAST Scan on Project
   - template: devops-integrations/azure/templates/fod-sast-scan.yml
     parameters:
