@@ -70,6 +70,6 @@ jobs:
       overwrite: true
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: ${{ format('scan-{0}.fpr', parameters.projectName) }}
+      targetPath: ${{ format('scan-{0}.fpr', parameters.baseDir) }}
       artifact: 'Fortify Results (FPR)'
       publishLocation: 'pipeline'
