@@ -105,10 +105,25 @@ stages:
   displayName: 'Build and Unit Test'
   jobs:
     # Build InsecureWebApp and run its tests
-  - template: "devops-integrations/azure/templates/build-and-test.yml"
+  - template: 'devops-integrations/azure/templates/build-and-test.yml'
     parameters:
         srcProject: 'InsecureWebApp/*.csproj' 
         testProject: 'InsecureWebAppTests/*.csproj'
+        pool: 'Fortify'
+
+  #
+  # Static Application Security Testing with Fortify on Demand
+  #
+- stage: FoD_SAST
+  displayName: 'FoD SAST'
+  condition: eq(variables['UseFoD'], 'true') 
+  dependsOn: BuildAndUnitTest
+  jobs:
+    # Run FoD SAST Scan on Project
+  - template: 'devops-integrations/azure/templates/fod-sast-scan.yml'
+    parameters:
+        srcDir: 'InsecureWebApp' 
+        fodReleaseId: $(FoDReleaseId)
         pool: 'Fortify'
 
 #
@@ -163,20 +178,7 @@ stages:
         artifact: 'Fortify Results (FPR)'
         publishLocation: 'pipeline'
 
-  #
-  # Static Application Security Testing with Fortify on Demand
-  #
-- stage: FoD_SAST
-  displayName: 'FoD SAST'
-  condition: eq(variables['UseFoD'], 'true') 
-  dependsOn: BuildAndUnitTest
-  jobs:
-    # Run FoD SAST Scan on Project
-  - template: devops-integrations/azure/templates/fod-sast-scan.yml
-    parameters:
-        srcDir: 'InsecureWebApp' 
-        fodReleaseId: $(FoDReleaseId)
-        pool: 'Fortify'
+
 
   #pool:
     # use Azure DevOps provided agent
