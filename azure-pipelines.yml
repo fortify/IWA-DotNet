@@ -175,7 +175,6 @@ stages:
   - template: devops-integrations/azure/templates/fod-sast-scan.yml
     parameters:
         srcDir: 'InsecureWebApp' 
-        testProject: 'InsecureWebAppTests/*.csproj'
         fodReleaseId: $(FoDReleaseId)
         pool: 'Fortify'
 

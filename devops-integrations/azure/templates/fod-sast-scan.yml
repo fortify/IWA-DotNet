@@ -20,7 +20,6 @@ parameters:
 - name: fodConnection
   default: 'FODAzureDevOps'
 - name: fodReleaseId
-  type: number
 
 jobs:
 - job: FoDUploadAndScan
