@@ -1,0 +1,74 @@
+# File: templates/fod-sast-scan.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: vmImage
+  default: 'windows-2022'
+- name: pool
+  default: ''
+- name: srcDir
+- name: dotnetVersion
+  default: '6.x'
+- name: buildConfiguration
+  default: 'Debug'
+- name: vsVersion
+  default: '2022'
+- name: vsEdition
+  default: 'Community'
+- name: jdkVersion
+  default: 17
+- name: fodConnection
+  default: 'FODAzureDevOps'
+- name: fodReleaseId
+  type: number
+
+jobs:
+- job: FoDUploadAndScan
+  pool: 
+    name: ${{ parameters.pool }}
+    vmImage: ${{ parameters.vmImage }}
+    steps:
+    - bash: |
+        if [ -z "FODRELEASEID" || -z "SRCDIR" ]; then
+          echo "##vso[task.logissue type=error;]Missing template parameter \"fodReleaseId\" or \"srcDir\""
+          echo "##vso[task.complete result=Failed;]"
+        fi
+      env:
+        FODRELEASEID: ${{ parameters.fodReleaseId }}
+        SRCDIR: ${{ parameters.srcDir }}
+      displayName: Check for required parameters
+    - task: UseDotNet@2
+      inputs:
+        version: ${{ parameters.dotnetVersion }}
+    - task: JavaToolInstaller@0
+      inputs:
+        versionSpec: "17"
+        jdkArchitectureOption: x64
+        jdkSourceOption: PreInstalled
+    - task: BatchScript@1
+      displayName: 'Set Visual Studio environment'
+      inputs:
+        filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
+        modifyEnvironment: true
+    - task: FortifyOnDemandStatic@8
+      # Carry out a Fortify on Demand static assessment
+      inputs:
+        FortifyProjects: ${{ parameters.srcDir }}
+        FodConnection: ${{ parameters.fodConnection }}
+        ReleaseOptions: '0'
+        ReleaseId: ${{ parameters.fodReleaseId }}
+        EntitlementSelection: '1'
+        EntitlementPreference: '1'
+        OverrideScanSettings: '2'
+        InProgressScanActionType: '2'
+        RemediationScanPreference: '2'
+        BuildType: 'msbuild'
+        BuildFile: '*.csproj'
+        PolicyFailAction: '0'
+        PollingInterval: 5
+    #- task: DotNetCoreCLI@2
+    #  displayName: 'dotnet build'
+    #  inputs:
+    #    command: 'build'
+    #    configuration: ${{ parameters.buildConfiguration }}
+    #    projects: ${{ parameters.srcProject }}
