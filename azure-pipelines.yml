@@ -104,17 +104,12 @@ stages:
 - stage: BuildAndUnitTest
   displayName: 'Build and Unit Test'
   jobs:
-    # Build InsecureWebApp
-  - template: devops-integrations/azure/templates/build-project.yml
+    # Build InsecureWebApp and run its tests
+  - template: devops-integrations/azure/templates/build-and-test.yml
     parameters:
-        name: 'InsecureWebApp'
+        srcProject: 'InsecureWebApp/*.csproj' 
+        testProject: 'InsecureWebAppTests/*.csproj'
         pool: 'Fortify'
-        project: 'InsecureWebapp/*.csproj'
-  - template: devops-integrations/azure/templates/test-project.yml
-    parameters:
-        name: 'InsecureWebAppTests'
-        pool: 'Fortify'
-        project: 'InsecureWebappTests/*.csproj'
 
 - #
   # Static Application Security Testing with ScanCentral SAST (on premise)

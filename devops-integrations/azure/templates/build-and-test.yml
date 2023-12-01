@@ -2,14 +2,14 @@
 
 # defaults for any parameters that aren't specified
 parameters: 
-- name: name
-  default: 'Build Project'
 - name: vmImage
   default: 'windows-2022'
 - name: pool
   default: ''
-- name: project
+- name: srcProject
   default: '**/*.csproj'
+- name: testProject
+  default: ''
 - name: dotnetVersion
   default: '6.x'
 - name: buildConfiguration
@@ -22,7 +22,15 @@ jobs:
   pool: 
     name: ${{ parameters.pool }}
     vmImage: ${{ parameters.vmImage }}
-  steps:
+    steps:
+    - bash: |
+        if [ -z "SRCPROJECT" ]; then
+          echo "##vso[task.logissue type=error;]Missing template parameter \"srcProject\""
+          echo "##vso[task.complete result=Failed;]"
+        fi
+      env:
+        SRCPROJECT: ${{ parameters.srcProject }}
+      displayName: Check for required parameters
     - task: UseDotNet@2
       inputs:
         version: ${{ parameters.dotnetVersion }}
@@ -31,7 +39,12 @@ jobs:
       inputs:
         command: 'build'
         configuration: ${{ parameters.buildConfiguration }}
-        projects: ${{ parameters.project }}
+        projects: ${{ parameters.srcProject }}
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet test'
+      inputs:
+        command: 'test'
+        projects: ${{ parameters.testProject }}
     #- task: PublishPipelineArtifact@1
     #  inputs:
     #    targetPath: '$(build.artifactStagingDirectory)'

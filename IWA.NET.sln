@@ -10,7 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1957714E-BC03-4D95-9E4E-D960D85A0ECE}"
 	ProjectSection(SolutionItems) = preProject
 		azure-pipelines.yml = azure-pipelines.yml
-		devops-integrations\azure\templates\build-project.yml = devops-integrations\azure\templates\build-project.yml
+		devops-integrations\azure\templates\build-and-test.yml = devops-integrations\azure\templates\build-and-test.yml
 		etc\FoDToGitHub.yml = etc\FoDToGitHub.yml
 		README.md = README.md
 		devops-integrations\azure\templates\test-project.yml = devops-integrations\azure\templates\test-project.yml
