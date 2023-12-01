@@ -135,7 +135,7 @@ stages:
   condition: eq(variables['UseScanCentralSAST'], 'true')
   dependsOn: BuildAndUnitTest
   jobs:
-    # Run ScanCentral SAST Scan on Project
+    # Run Scancentral SAST Scan on Project
   - template: 'devops-integrations/azure/templates/scancentral-sast-scan.yml'
     parameters:
         baseDir: 'InsecureWebApp' 
@@ -145,7 +145,7 @@ stages:
         sscUrl: $(SSCUrl)
         sscCiToken: $(SSCAuthToken)
         sscAppName: $(SSCApplicationName)
-        sscAppVerName: $(branchName)
+        sscAppVerName: 'main' # $(branchName)
         notificationEmail: $(ScanCentralNotificationEmail)
         pool: 'Fortify'
 

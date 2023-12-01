@@ -1,4 +1,4 @@
-# File: templates/fod-sast-scan.yml
+# File: templates/scancentral-sast-scan.yml
 
 # defaults for any parameters that aren't specified
 parameters: 
@@ -34,7 +34,7 @@ parameters:
 - name: sscAppVerName
 
 jobs:
-- job: FoDStaticScan
+- job: ScanCentralStaticScan
   pool: 
     name: ${{ parameters.pool }}
     vmImage: ${{ parameters.vmImage }}
@@ -62,7 +62,7 @@ jobs:
       applicationName: ${{ parameters.sscAppName }}
       applicationVersion: ${{ parameters.sscAppVerName }}
       buildTool: 'msbuild'
-      buildFile: ${{ parameters.buildFile }}
+      buildFile: ${{ format(''{0}\{1}', parameters.baseDir, parameters.buildFile }}
       email: ${{ parameters.notificationEmail }}
       block: true
       outputFile: ${{ format('scan-{0}.fpr', parameters.baseDir) }}
