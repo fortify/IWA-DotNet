@@ -163,9 +163,9 @@ stages:
         artifact: 'Fortify Results (FPR)'
         publishLocation: 'pipeline'
 
-#
-# Static Application Security Testing with Fortify on Demand
-#
+  #
+  # Static Application Security Testing with Fortify on Demand
+  #
 - stage: FoD_SAST
   displayName: 'FoD SAST'
   condition: eq(variables['UseFoD'], 'true') 
@@ -176,6 +176,8 @@ stages:
         srcDir: 'InsecureWebApp' 
         testProject: 'InsecureWebAppTests/*.csproj'
         fodReleaseId: $(FoDReleaseId)
+        pool: 'Fortify'
+
   #pool:
     # use Azure DevOps provided agent
     #vmImage: 'windows-2022'
