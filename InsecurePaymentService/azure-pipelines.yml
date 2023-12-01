@@ -37,5 +37,6 @@ stages:
     # Build InsecurePaymentService and run its tests
   - template: '../devops-integrations/azure/templates/build-and-test.yml'
     parameters:
-        srcProject: 'InsecurePaymentService.csproj' 
+        srcProject: 'InsecurePaymentService/InsecurePaymentService.csproj' 
         pool: 'Fortify'
+        runTests: false

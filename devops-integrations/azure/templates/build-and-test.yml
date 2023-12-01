@@ -24,6 +24,7 @@ jobs:
     name: ${{ parameters.pool }}
     vmImage: ${{ parameters.vmImage }}
   steps: 
+  - script: dir
   #- bash: |
   #    if [ -z "SRCPROJECT" ]; then
   #      echo "##vso[task.logissue type=error;]Missing template parameter \"srcProject\""
