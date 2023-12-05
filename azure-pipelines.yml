@@ -176,7 +176,7 @@ stages:
 - stage: ScanCentral_DAST
   displayName: 'ScanCentral DAST'
   condition: eq(variables['UseScanCentralDAST'], 'true')
-  dependsOn: DeployToAzure
+  dependsOn: DeployApp
   pool:
     # use Azure DevOps provided agent
     #vmImage: 'windows-2022'
@@ -198,7 +198,7 @@ stages:
 - stage: FoD_DAST
   displayName: 'FoD DAST'
   condition: eq(variables['UseFoD'], 'true') 
-  dependsOn: DeployToAzure
+  dependsOn: DeployApp
   jobs:
     # Run FoD DAST Scan on Project
   - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
