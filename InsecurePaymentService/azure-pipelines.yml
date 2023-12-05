@@ -1,5 +1,7 @@
 # Example Continuous Delivery Pipeline with Fortify on Premise (SCA/SSC) and/or Fortify on Demand (FOD) support
 
+name: InsecurePaymentService-CI
+
 trigger:
   batch: true
   branches:

@@ -49,7 +49,8 @@ variables:
   # AzureDBServer: 'Hostname of database server'
   # AzureDBName: 'Database Name'
   # AzureDBUser: 'Database User Login'
-  # AzureDBPassword: ' Database Password'
+  # AzureDBPassword: 'Database Password'
+  # AzureSubscription: 'Name of Azure Subscription in Service Connections'
   # FoDApplicationName: 'IWA-DotNet'
   # FoDBaseUrl: 'https://api.ams.fortify.com'
   # FoDBugTrackerVersion: '4.2'
@@ -73,14 +74,13 @@ variables:
   # VsVersion: '2022'
   # VsEdition: 'Community'
 
-  solution: '**/*.sln'
-  vsDevCmd: 'C:\Program Files\Microsoft Visual Studio\$(VsVersion)\$(VsEdition)\Common7\Tools\VsDevCmd.bat' # location of visual studio VsDevCmd batch file on Agent
-  buildConfiguration: 'Debug'
-  publishProfile: 'iwanet - Web Deploy'
+
+  #publishProfile: 'iwanet - Web Deploy'
+  
   # IMPORTANT: please make sure your names for Service Connections to FoD and/or SSC are set to the following:
   FoDConnection: 'FODAzureDevOps' # the name of Fortify on Demand service connection configured in Project Settings
   SSCConnection: 'SSCAzureDevOps' # the name of the Fortify SSC "generic" connection configured in Project Settings
-  ScanCentralLogsDir: 'C:\Users\VssAdministrator\AppData\Local\Fortify\scancentral-$(ScanCentralVersion)\log' # where ScanCentral logs will be written to
+  AzureConnection: 'iwa-arm' # the name of the Azure Resource Manager connection
 
   # IMPORTANT: please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
 
@@ -105,7 +105,7 @@ stages:
   displayName: 'Build and Unit Test'
   jobs:
     # Build InsecureWebApp and run its tests
-  - template: 'devops-integrations/azure/templates/build-and-test.yml'
+  - template: 'devops-integrations/azure-pipelines/templates/build-and-test.yml'
     parameters:
         srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
         testProject: 'InsecureWebAppTests/InsecureWebAppTests.csproj'
@@ -120,7 +120,7 @@ stages:
   dependsOn: BuildAndUnitTest
   jobs:
     # Run FoD SAST Scan on Project
-  - template: 'devops-integrations/azure/templates/fod-sast-scan.yml'
+  - template: 'devops-integrations/azure-pipelines/templates/fod-sast-scan.yml'
     parameters:
         srcDir: 'InsecureWebApp' 
         buildFile: 'InsecureWebApp.csproj'
@@ -136,7 +136,7 @@ stages:
   dependsOn: BuildAndUnitTest
   jobs:
     # Run Scancentral SAST Scan on Project
-  - template: 'devops-integrations/azure/templates/scancentral-sast-scan.yml'
+  - template: 'devops-integrations/azure-pipelines/templates/scancentral-sast-scan.yml'
     parameters:
         baseDir: 'InsecureWebApp' 
         buildFile: 'InsecureWebApp.csproj'
@@ -150,11 +150,10 @@ stages:
         pool: 'Fortify'
 
   # 
-  # Deploy the application
+  # Deploy the application - this is an example of deploying a web application and its database to Azure
   #
 - stage: DeployToAzure
-  condition: eq(variables.isMain, true)
-  #condition: always()
+  condition: eq(variables['deployToAzure'], 'true')
   dependsOn: 
     - BuildAndUnitTest
     - ScanCentral_SAST
@@ -175,13 +174,19 @@ stages:
         artifactName: 'InsecureWebApp-DB'
         itemPattern: '**/*'
         targetPath: '$(Pipeline.Workspace)'    
+    - task: DotNetCoreCLI@2
+      displayName: 'Create migration'
+      inputs:
+        command: custom
+        custom: ef
+        arguments: 'migrations script -i -p InsecureWebApp -o $(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
     - task: SqlAzureDacpacDeployment@1
       inputs:
-        azureSubscription: 'iwa-arm'
+        azureSubscription: $(AzureSubscription)
         AuthenticationType: 'connectionString'
         ConnectionString: 'Data Source=tcp:$(AzureDBServer),1433;Initial Catalog=$(AzureDBName);User Id=$(AzureDBUser);Password=$(AzureDBPassword)'
         deployType: 'SqlTask'
-        SqlFile: '$(Pipeline.Workspace)/InsecureWebApp.sql'
+        SqlFile: '$(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
         IpDetectionMethod: 'AutoDetect'
     - task: DownloadPipelineArtifact@2
       inputs:
@@ -192,7 +197,7 @@ stages:
     - task: AzureRmWebAppDeployment@4
       inputs:
         ConnectionType: 'AzureRM'
-        azureSubscription: 'iwa-arm'
+        azureSubscription: $(AzureSubscription)
         appType: 'webApp'
         WebAppName: 'iwanet'
         packageForLinux: '$(Pipeline.Workspace)/InsecureWebApp.zip'
@@ -229,7 +234,7 @@ stages:
   dependsOn: DeployToAzure
   jobs:
     # Run FoD DAST Scan on Project
-  - template: 'devops-integrations/azure/templates/fod-dast-scan.yml'
+  - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
     parameters:
         fodApiKey: '${FoDClientId}' 
         fodApiSecret: '${FoDClientSecret}'

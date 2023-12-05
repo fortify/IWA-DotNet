@@ -38,6 +38,9 @@ jobs:
       versionSpec: ${{ parameters.jdkVersion }}
       jdkArchitectureOption: ${{ parameters.jdkArch }}
       jdkSourceOption: PreInstalled
+  - task: FcliInstaller@0
+    inputs:
+    version: 'latest'
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'
     inputs:
