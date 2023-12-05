@@ -40,7 +40,7 @@ jobs:
       jdkSourceOption: PreInstalled
   - task: FcliInstaller@0
     inputs:
-    version: 'latest'
+      version: 'latest'
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'
     inputs:
