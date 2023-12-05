@@ -15,7 +15,7 @@ jobs:
 - job: Build
   pool: 
     name: ${{ parameters.pool }}
-    demands: ${{ parameters.demands }}
+    #demands: ${{ parameters.demands }}
     vmImage: ${{ parameters.vmImage }}
   steps: 
   - task: CmdLine@2
