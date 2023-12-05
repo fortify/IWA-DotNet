@@ -1,0 +1,66 @@
+# File: templates/build-and-test.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: vmImage
+  default: 'windows-2022'
+- name: pool
+  default: ''
+- name: srcProject
+  default: '**/*.csproj'
+- name: testProject
+  default: ''
+- name: dotnetVersion
+  default: '6.x'
+- name: buildConfiguration
+  default: 'Debug'
+- name: runTests
+  type: boolean
+  default: true
+
+jobs:
+- job: Build
+  pool: 
+    name: ${{ parameters.pool }}
+    vmImage: ${{ parameters.vmImage }}
+  steps: 
+  - script: dir
+  #- bash: |
+  #    if [ -z "SRCPROJECT" ]; then
+  #      echo "##vso[task.logissue type=error;]Missing template parameter \"srcProject\""
+  #      echo "##vso[task.complete result=Failed;]"
+  #    fi
+  #  env:
+  #    SRCPROJECT: ${{ parameters.srcProject }}
+  #  displayName: Check for required parameters
+  - task: UseDotNet@2
+    inputs:
+      version: ${{ parameters.dotnetVersion }}
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build'
+    inputs:
+      command: 'build'
+      configuration: ${{ parameters.buildConfiguration }}
+      projects: ${{ parameters.srcProject }}  
+  - task: DotNetCoreCLI@2
+    displayName: 'Create migration'
+    inputs:
+      command: custom
+      custom: ef
+      arguments: 'migrations script -i -p InsecureWebApp -o $(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
+  - task: SqlAzureDacpacDeployment@1
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      AuthenticationType: 'connectionString'
+      ConnectionString: 'Data Source=tcp:$(AzureDBServer),1433;Initial Catalog=$(AzureDBName);User Id=$(AzureDBUser);Password=$(AzureDBPassword)'
+      deployType: 'SqlTask'
+      SqlFile: '$(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
+      IpDetectionMethod: 'AutoDetect'  
+  - task: AzureRmWebAppDeployment@4
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: $(AzureSubscription)
+      appType: 'webApp'
+      WebAppName: 'iwanet'
+      packageForLinux: '$(Pipeline.Workspace)/InsecureWebApp.zip'
+      #JSONFiles: 'appsettings.json'

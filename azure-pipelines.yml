@@ -152,56 +152,23 @@ stages:
   # 
   # Deploy the application - this is an example of deploying a web application and its database to Azure
   #
-- stage: DeployToAzure
-  condition: eq(variables['deployToAzure'], 'true')
+- stage: DeployApp
+  displayName: 'Deploy Application'
   dependsOn: 
     - BuildAndUnitTest
     - ScanCentral_SAST
     - FoD_SAST
-  displayName: 'Deploy to Azure'
-  pool:
-    # use Azure DevOps provided agent
-    #vmImage: 'windows-2022'
-    # use local Agent pool named 'Fortify'
-    name: Fortify
   jobs: 
-  - job: DownloadAndDeploy
-    displayName: 'Download and Deploy'
-    steps:    
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'InsecureWebApp-DB'
-        itemPattern: '**/*'
-        targetPath: '$(Pipeline.Workspace)'    
-    - task: DotNetCoreCLI@2
-      displayName: 'Create migration'
-      inputs:
-        command: custom
-        custom: ef
-        arguments: 'migrations script -i -p InsecureWebApp -o $(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
-    - task: SqlAzureDacpacDeployment@1
-      inputs:
-        azureSubscription: $(AzureSubscription)
-        AuthenticationType: 'connectionString'
-        ConnectionString: 'Data Source=tcp:$(AzureDBServer),1433;Initial Catalog=$(AzureDBName);User Id=$(AzureDBUser);Password=$(AzureDBPassword)'
-        deployType: 'SqlTask'
-        SqlFile: '$(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
-        IpDetectionMethod: 'AutoDetect'
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'InsecureWebApp-Web'
-        itemPattern: '**/*'
-        targetPath: '$(Pipeline.Workspace)'    
-    - task: AzureRmWebAppDeployment@4
-      inputs:
-        ConnectionType: 'AzureRM'
-        azureSubscription: $(AzureSubscription)
-        appType: 'webApp'
-        WebAppName: 'iwanet'
-        packageForLinux: '$(Pipeline.Workspace)/InsecureWebApp.zip'
-        #JSONFiles: 'appsettings.json'
+    # Simulate deployment
+  - template: 'devops-integrations/azure-pipelines/templates/simulate-deployment.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp'
+        pool: 'Fortify'
+    # Deploy the application - to Azure
+#  - template: 'devops-integrations/azure-pipelines/templates/deploy-to-azure.yml'
+#    parameters:
+#        srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
+#        pool: 'Fortify'
 
 #
 # Dynamic Application Security Testing with ScanCentral DAST (on-premise)
