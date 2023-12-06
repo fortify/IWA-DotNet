@@ -100,10 +100,10 @@ stages:
 
 - stage: Init
   displayName: Initialization
+  pool:
+    name: Fortify
   jobs:
-    job: SetVariables
-    pool:
-      name: Fortify
+  - job:
     steps:
     - task: CmdLine@2
       inputs:
