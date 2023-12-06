@@ -78,40 +78,63 @@ variables:
   #publishProfile: 'iwanet - Web Deploy'
   
   # IMPORTANT: please make sure your names for Service Connections to FoD and/or SSC are set to the following:
-  FoDConnection: 'FODAzureDevOps' # the name of Fortify on Demand service connection configured in Project Settings
-  SSCConnection: 'SSCAzureDevOps' # the name of the Fortify SSC "generic" connection configured in Project Settings
-  AzureConnection: 'iwa-arm' # the name of the Azure Resource Manager connection
+  #FoDConnection: 'FODAzureDevOps' # the name of Fortify on Demand service connection configured in Project Settings
+  #SSCConnection: 'SSCAzureDevOps' # the name of the Fortify SSC "generic" connection configured in Project Settings
+  #AzureConnection: 'iwa-arm' # the name of the Azure Resource Manager connection
 
   # IMPORTANT: please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
 
-  # get the source branch name
-  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features/') }}:
-    branchName: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', '') ]
-  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases/') }}:
-    branchName: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', '') ]
-  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}:
-    branchName: $[ replace(variables['System.PullRequest.TargetBranch'], 'refs/heads/', '') ]
-  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-    branchName: 'main'
-  isPR: $[startsWith(variables['Build.SourceBranch'], 'refs/pull/')]
-  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+- name: FORTIFY_APP_NAME
+  value: $(Build.Repository.Name)
+- name: FORTIFY_RELEASE_NAME
+  value: $[replace(variables['Build.SourceBranch'], 'refs/heads/', '')]
 
 stages:
 
 - stage: Init
-  displayName: Initialization
+  displayName: Initialize Environment
   pool:
     name: Fortify
   jobs:
-  - job:
+  - job: Fortify_Init
+    displayName: Get Fortify Release Id
     steps:
-    - task: CmdLine@2
+    - task: FcliInstaller@0
       inputs:
+        version: 'latest'
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
         script: |
-          echo "$(Build.Repository.Name)"
-          echo "$(branchName)"
-          echo "$(isPR)"
-          echo "$(isMain)"
+          $App="$(FORTIFY_APP_NAME)"
+          $Rel="$(FORTIFY_RELEASE_NAME)"
+          if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
+            Write-Host "##[command]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
+            Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
+            $App="${env:FORTIFY_APP_NAME_OVERRIDE}"
+          } else {
+            Write-Host "##[command]Using FORTIFY_APP_NAME ${App}"
+          }
+          if (${env:FORTIFY_RELEASE_NAME_OVERRIDE}) {
+            Write-Host "##[command]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+            Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+            $Rel=${env:FORTIFY_RELEASE_NAME_OVERRIDE}
+          } else {
+            Write-Host "##[command]Using FORTIFY_RELEASE_NAME ${Rel}"
+          }   
+          fcli fod session login --url $(FOD_API_URL) --client-id $(FOD_CLIENT_ID) --client-secret $(FOD_CLIENT_SECRET)
+          $REL_ID=(fcli fod release get "${App}:${Rel}" -o "expr={releaseId}")
+          Write-Host "##[command]Setting FORTIFY_RELEASE_ID to $REL_ID"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_ID]$REL_ID"
+        showWarnings: true
+      name: GetReleaseId
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "FORTIFY_APP_NAME=$(FORTIFY_APP_NAME)"
+          Write-Host "FORTIFY_RELEASE_NAME=$(FORTIFY_RELEASE_NAME)"
+          Write-Host FORTIFY_RELEASE_ID=$(FORTIFY_RELEASE_ID)"
 
   #
   # Build and Unit Test the application components
@@ -132,14 +155,16 @@ stages:
 - stage: FoD_SAST
   displayName: 'FoD SAST'
   condition: eq(variables['UseFoD'], 'true') 
-  dependsOn: BuildAndUnitTest
+  dependsOn: 
+    - Init
+    - BuildAndUnitTest
   jobs:
     # Run FoD SAST Scan on Project
   - template: 'devops-integrations/azure-pipelines/templates/fod-sast-scan.yml'
     parameters:
         srcDir: 'InsecureWebApp' 
         buildFile: 'InsecureWebApp.csproj'
-        fodReleaseId: $(FoDReleaseId)
+        fodReleaseId: $[stageDependencies.Init.FortifyInit.outputs['GetReleaseId.FORTIFY_RELEASE_ID']]
         pool: 'Fortify'
 
   #
@@ -148,7 +173,9 @@ stages:
 - stage: ScanCentral_SAST
   displayName: 'ScanCentral SAST'
   condition: eq(variables['UseScanCentralSAST'], 'true')
-  dependsOn: BuildAndUnitTest
+  dependsOn:
+    - Init
+    - BuildAndUnitTest
   jobs:
     # Run Scancentral SAST Scan on Project
   - template: 'devops-integrations/azure-pipelines/templates/scancentral-sast-scan.yml'
