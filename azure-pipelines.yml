@@ -134,7 +134,7 @@ stages:
         script: |
           Write-Host "FORTIFY_APP_NAME=$(FORTIFY_APP_NAME)"
           Write-Host "FORTIFY_RELEASE_NAME=$(FORTIFY_RELEASE_NAME)"
-          Write-Host FORTIFY_RELEASE_ID=$(FORTIFY_RELEASE_ID)"
+          Write-Host "FORTIFY_RELEASE_ID=$(FORTIFY_RELEASE_ID)"
 
   #
   # Build and Unit Test the application components
