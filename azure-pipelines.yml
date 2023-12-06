@@ -98,6 +98,21 @@ variables:
 
 stages:
 
+- stage: Init
+  displayName: Initialization
+  jobs:
+    job: SetVariables
+    pool:
+      name: Fortify
+    steps:
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo "$(Build.Repository.Name)"
+          echo "$(branchName)"
+          echo "$(isPR)"
+          echo "$(isMain)"
+
   #
   # Build and Unit Test the application components
   #
