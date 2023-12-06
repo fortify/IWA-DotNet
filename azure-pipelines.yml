@@ -82,6 +82,13 @@ variables:
   #SSCConnection: 'SSCAzureDevOps' # the name of the Fortify SSC "generic" connection configured in Project Settings
   #AzureConnection: 'iwa-arm' # the name of the Azure Resource Manager connection
 
+  # FOD_API_URL
+  # FOD_CLIENT_ID
+  # FOD_CLIENT_SECRET
+  #
+  # FORTIFY_APP_NAME_OVERRIDE
+  # FORTIFY_RELEASE_NAME_OVERRIDE
+  
   # IMPORTANT: please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
 
 - name: FORTIFY_APP_NAME
@@ -96,7 +103,7 @@ stages:
   pool:
     name: Fortify
   jobs:
-  - job: Fortify_Init
+  - job: FortifyInit
     steps:
     - task: FcliInstaller@0
       inputs:
@@ -125,6 +132,7 @@ stages:
           $REL_ID=(fcli fod release get "${App}:${Rel}" -o "expr={releaseId}")
           Write-Host "##[command]Setting FORTIFY_RELEASE_ID to $REL_ID"
           Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_ID]$REL_ID"
+          # Create release if it doesn't exist
         showWarnings: true
       name: GetReleaseId
     - task: PowerShell@2
