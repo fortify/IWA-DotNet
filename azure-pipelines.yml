@@ -97,7 +97,6 @@ stages:
     name: Fortify
   jobs:
   - job: Fortify_Init
-    displayName: Get Fortify Release Id
     steps:
     - task: FcliInstaller@0
       inputs:
