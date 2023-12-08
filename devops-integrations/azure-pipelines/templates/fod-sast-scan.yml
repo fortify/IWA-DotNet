@@ -66,7 +66,7 @@ jobs:
         } else {
           Write-Host "##[command]Using FORTIFY_RELEASE_NAME ${Rel}"
         }   
-        fcli fod session login --url "${env.FOD_API_URL}"" --client-id "${env.FOD_CLIENT_ID}" --client-secret "${env.FOD_CLIENT_SECRET}" --session azure-pipelines
+        fcli fod session login --url "${env.FOD_API_URL}" --client-id "${env.FOD_CLIENT_ID}" --client-secret "${env.FOD_CLIENT_SECRET}" --session azure-pipelines
         fcli fod release list --app "${App}" --session azure-pipelines
         $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env.FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --session azure-pipelines)
         #$RelId=(fcli fod release get "${App}:${Rel}" -o "expr={releaseId}")
