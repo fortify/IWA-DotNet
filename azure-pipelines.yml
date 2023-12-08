@@ -126,15 +126,15 @@ stages:
     parameters:
         workingDirectory: 'InsecureWebApp' 
         projectFile: 'InsecureWebApp.csproj'
-        fodApiUrl: "$(FOD_API_URL)"
-        fodClientId: "$(FOD_CLIENT_ID)"
-        fodClientSecret: "$(FOD_CLIENT_SECRET)"
+        fodApiUrl: $(FOD_API_URL)
+        fodClientId: $(FOD_CLIENT_ID)
+        fodClientSecret: $(FOD_CLIENT_SECRET)
         #fodConnection: "FoDAzureDevops"
         fodAppName: "$(FORTIFY_APP_NAME)"
         fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
         pool:
-            name: 'Fortify'
-            #vmImage: ${{ parameters.vmImage }}
+            name: 'Fortify' # use self-hosted named pool or uncomment for:
+            #vmImage: 'windows-2022'
 
   #
   # Static Application Security Testing with ScanCentral SAST (on premise)
