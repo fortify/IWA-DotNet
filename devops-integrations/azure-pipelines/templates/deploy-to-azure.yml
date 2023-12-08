@@ -1,18 +1,23 @@
-# File: templates/build-and-test.yml
+# File: templates/deploy-to-azure.yml
 
 # defaults for any parameters that aren't specified
 parameters: 
 - name: 'pool'
   type: object
   default: {}
+- name: projectName
 - name: srcProject
   default: '**/*.csproj'
-- name: testProject
-  default: ''
 - name: dotnetVersion
   default: '6.x'
 - name: buildConfiguration
   default: 'Debug'
+- name: azureSubscription
+- name: azureDbServer
+- name: azureDbPort
+  default: 1433
+- name: azureDbUser
+- name: azureDbPassword
 
 jobs:
 - job: Build
@@ -32,20 +37,23 @@ jobs:
     inputs:
       command: custom
       custom: ef
-      arguments: 'migrations script -i -p InsecureWebApp -o $(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
+      #arguments: 'migrations script -i -p InsecureWebApp -o $(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
+      arguments: format('migrations script -i -p {0} -o {1}', parameters.projectName, $(Build.ArtifactStagingDirectory)/Migrations/migration.sql)
   - task: SqlAzureDacpacDeployment@1
     inputs:
-      azureSubscription: $(AzureSubscription)
+      azureSubscription: ${{ parameters.azureSubscription }}
       AuthenticationType: 'connectionString'
-      ConnectionString: 'Data Source=tcp:$(AzureDBServer),1433;Initial Catalog=$(AzureDBName);User Id=$(AzureDBUser);Password=$(AzureDBPassword)'
+      #ConnectionString: 'Data Source=tcp:$(AzureDBServer),1433;Initial Catalog=$(AzureDBName);User Id=$(AzureDBUser);Password=$(AzureDBPassword)'
+      ConnectionString: format('Data Source=tcp:{0},{1};Initial Catalog={2};User Id={3};Password={4}', parameters.azureDbServer, parameters.azureDbPort, parameters.azureDbUser, parameters.azureDbPassword)
       deployType: 'SqlTask'
       SqlFile: '$(Build.ArtifactStagingDirectory)/Migrations/migration.sql'
       IpDetectionMethod: 'AutoDetect'  
   - task: AzureRmWebAppDeployment@4
     inputs:
       ConnectionType: 'AzureRM'
-      azureSubscription: $(AzureSubscription)
+      azureSubscription: ${{ parameters.azureSubscription }}
       appType: 'webApp'
       WebAppName: 'iwanet'
-      packageForLinux: '$(Pipeline.Workspace)/InsecureWebApp.zip'
+      #packageForLinux: '$(Pipeline.Workspace)/InsecureWebApp.zip'
+      packageForWindows: format('{0}/{1}.zip', $(Pipeline.Workspace), parameters.projectName)
       #JSONFiles: 'appsettings.json'

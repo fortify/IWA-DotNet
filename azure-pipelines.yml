@@ -1,6 +1,5 @@
-# Example Continuous Delivery Pipeline with Fortify on Premise (SCA/SSC) and/or Fortify on Demand (FOD) support
-
-name: InsecureWebApp-CI
+# Example Continuous Delivery Pipeline with Fortify on Demand (FoD) and Fortify ScanCentral support
+name: InsecureWebApp-CD
 
 trigger:
   batch: true
@@ -67,7 +66,7 @@ variables:
 - name: USE_FOD_DAST
   value: false
 - name: USE_SCANCENTRAL_SAST
-  value: true
+  value: false
 - name: USE_SCANCENTRAL_DAST
   value: false
 
