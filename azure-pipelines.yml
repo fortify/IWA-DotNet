@@ -98,49 +98,6 @@ variables:
 
 stages:
 
-- stage: Init
-  displayName: Initialize Environment
-  pool:
-    name: Fortify
-  jobs:
-  - job: FortifyInit
-    steps:
-    - task: FcliInstaller@0
-      inputs:
-        version: 'latest'
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'
-        script: |
-          $App="$(FORTIFY_APP_NAME)"
-          $Rel="$(FORTIFY_RELEASE_NAME)"
-          if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
-            Write-Host "##[command]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
-            Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
-            $App="${env:FORTIFY_APP_NAME_OVERRIDE}"
-          } else {
-            Write-Host "##[command]Using FORTIFY_APP_NAME ${App}"
-          }
-          if (${env:FORTIFY_RELEASE_NAME_OVERRIDE}) {
-            Write-Host "##[command]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
-            Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
-            $Rel=${env:FORTIFY_RELEASE_NAME_OVERRIDE}
-          } else {
-            Write-Host "##[command]Using FORTIFY_RELEASE_NAME ${Rel}"
-          }   
-          if ($USE_FOD) {
-            fcli fod session login --url $(FOD_API_URL) --client-id $(FOD_CLIENT_ID) --client-secret $(FOD_CLIENT_SECRET)
-            $REL_ID=(fcli fod release get "${App}:${Rel}" -o "expr={releaseId}")
-            Write-Host "##[command]Setting FORTIFY_RELEASE_ID to $REL_ID"
-            Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_ID]$REL_ID"
-            # Create release if it doesn't exist
-          } elseif ($USE_SCANCENTRAL) {
-
-          } else {
-              Write-Host "##[command]Not using FoD or ScanCentral - nothing to do"
-          }
-        showWarnings: true
-
   #
   # Build and Unit Test the application components
   #
@@ -161,7 +118,6 @@ stages:
   displayName: 'FoD SAST'
   condition: eq(variables['UseFoD'], 'true') 
   dependsOn: 
-    - Init
     - BuildAndUnitTest
   jobs:
     # Run FoD SAST Scan on Project
@@ -169,7 +125,8 @@ stages:
     parameters:
         srcDir: 'InsecureWebApp' 
         buildFile: 'InsecureWebApp.csproj'
-        fodReleaseId: $[stageDependencies.Init.FortifyInit.outputs['GetReleaseId.FORTIFY_RELEASE_ID']]
+        fodAppName: "$(FORTIFY_APP_NAME)"
+        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
         pool: 'Fortify'
 
   #
@@ -179,7 +136,6 @@ stages:
   displayName: 'ScanCentral SAST'
   condition: eq(variables['UseScanCentralSAST'], 'true')
   dependsOn:
-    - Init
     - BuildAndUnitTest
   jobs:
     # Run Scancentral SAST Scan on Project

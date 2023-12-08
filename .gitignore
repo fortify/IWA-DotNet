@@ -373,3 +373,5 @@ FodyWeavers.xsd
 /fod.zip
 /FoDPackage.zip
 *.env
+/package.ip.zip
+/IWA-DotNet.KAL.zip

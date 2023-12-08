@@ -22,7 +22,10 @@ parameters:
   default: 'x64'
 - name: fodConnection
   default: 'FODAzureDevOps'
-- name: fodReleaseId
+- name: fodAppName
+- name: fodReleaseName
+- name: fodParentReleaseName
+  default: 'main'
 
 jobs:
 - job: FoDStaticScan
@@ -41,17 +44,56 @@ jobs:
   - task: FcliInstaller@0
     inputs:
       version: 'latest'
+  - task: PowerShell@2
+    displayName: 'FoD Check Release'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $App="${env.FORTIFY_APP_NAME}"
+        $Rel="${env.FORTIFY_RELEASE_NAME}"
+        if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
+          Write-Host "##[command]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
+          $App="${env:FORTIFY_APP_NAME_OVERRIDE}"
+        } else {
+          Write-Host "##[command]Using FORTIFY_APP_NAME ${App}"
+        }
+        if (${env:FORTIFY_RELEASE_NAME_OVERRIDE}) {
+          Write-Host "##[command]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          $Rel=${env:FORTIFY_RELEASE_NAME_OVERRIDE}
+        } else {
+          Write-Host "##[command]Using FORTIFY_RELEASE_NAME ${Rel}"
+        }   
+        fcli fod session login --url "${env.FOD_API_URL}"" --client-id "${env.FOD_CLIENT_ID}" --client-secret "${env.FOD_CLIENT_SECRET}"" --session azure-pipelines
+        fcli fod release list --app "${App}" --session azure-pipelines
+        $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env.FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --session azure-pipelines)
+        #$RelId=(fcli fod release get "${App}:${Rel}" -o "expr={releaseId}")
+        Write-Host "##[command]Setting fodReleaseId to $RelId"
+        Write-Host "##vso[task.setvariable variable=fodReleaseId]$RelId"
+      showWarnings: true
+    env:
+      FOD_API_URL: ${{ parameters.fodApiUrl }}
+      FOD_CLIENT_ID: ${{ parameters.fodClientId }}
+      FOD_CLIENT_SECRET: ${{ parameters.fodClientSecret }}
+      FOD_APP_NAME: ${{ parameters.fodAppName }}
+      FOD_RELEASE_NAME: ${{ parameters.fodReleaseName }}
+      FOD_PARENT_RELEASE_NAME: ${{ parameters.fodParentReleaseName }}
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'
     inputs:
       filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
       modifyEnvironment: true
+  #
+  # Change the invocation of FortifyOnDemandStatic to your required configuration.
+  # Default is to use an existing release as we are checking it exists above.
+  #
   - task: FortifyOnDemandStatic@8
     inputs:
       FortifyProjects: ${{ parameters.srcDir }}
       FodConnection: ${{ parameters.fodConnection }}
       ReleaseOptions: '0'
-      ReleaseId: ${{ parameters.fodReleaseId }}
+      ReleaseId: $(fodReleaseId)
       EntitlementSelection: '1'
       EntitlementPreference: '1'
       OverrideScanSettings: '2'
@@ -61,3 +103,9 @@ jobs:
       BuildFile: ${{ parameters.buildFile }}
       PolicyFailAction: '0'
       PollingInterval: 5
+  - task: PowerShell@2
+    displayName: 'FoD Logout'
+    inputs:
+      targetType: 'inline'
+      script: |
+        fcli fod session logout --session azure-pipelines
