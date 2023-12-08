@@ -2,10 +2,9 @@
 
 # defaults for any parameters that aren't specified
 parameters: 
-- name: vmImage
-  default: 'windows-2022'
-- name: pool
-  default: ''
+- name: 'pool'
+  type: object
+  default: {}
 - name: srcProject
   default: '**/*.csproj'
 - name: testProject
@@ -20,19 +19,8 @@ parameters:
 
 jobs:
 - job: Build
-  pool: 
-    name: ${{ parameters.pool }}
-    vmImage: ${{ parameters.vmImage }}
+  pool: ${{ parameters.pool }}
   steps: 
-  - script: dir
-  #- bash: |
-  #    if [ -z "SRCPROJECT" ]; then
-  #      echo "##vso[task.logissue type=error;]Missing template parameter \"srcProject\""
-  #      echo "##vso[task.complete result=Failed;]"
-  #    fi
-  #  env:
-  #    SRCPROJECT: ${{ parameters.srcProject }}
-  #  displayName: Check for required parameters
   - task: UseDotNet@2
     inputs:
       version: ${{ parameters.dotnetVersion }}

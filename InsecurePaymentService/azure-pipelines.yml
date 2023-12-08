@@ -39,5 +39,7 @@ stages:
   - template: '../devops-integrations/azure/templates/build-and-test.yml'
     parameters:
         srcProject: 'InsecurePaymentService/InsecurePaymentService.csproj' 
-        pool: 'Fortify'
         runTests: false
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool

@@ -2,21 +2,15 @@
 
 # defaults for any parameters that aren't specified
 parameters: 
-- name: vmImage
-  default: 'windows-2022'
-- name: pool
-  default: ''
-- name: demands
-  default: ''
+- name: 'pool'
+  type: object
+  default: {}
 - name: workingDirectory
   default: $(Build.SourcesDirectory).
 
 jobs:
 - job: Build
-  pool: 
-    name: ${{ parameters.pool }}
-    #demands: ${{ parameters.demands }}
-    vmImage: ${{ parameters.vmImage }}
+  pool: ${{ parameters.pool }}
   steps: 
   - task: CmdLine@2
     inputs:

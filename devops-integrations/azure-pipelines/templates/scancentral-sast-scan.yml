@@ -2,10 +2,9 @@
 
 # defaults for any parameters that aren't specified
 parameters: 
-- name: vmImage
-  default: 'windows-2022'
-- name: pool
-  default: ''
+- name: 'pool'
+  type: object
+  default: {}
 - name: baseDir
   default: ''
 - name: buildFile
@@ -35,9 +34,7 @@ parameters:
 
 jobs:
 - job: ScanCentralStaticScan
-  pool: 
-    name: ${{ parameters.pool }}
-    vmImage: ${{ parameters.vmImage }}
+  pool: ${{ parameters.pool }}
   steps:
   - task: UseDotNet@2
     inputs:
