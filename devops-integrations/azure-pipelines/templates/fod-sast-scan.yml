@@ -6,8 +6,8 @@ parameters:
   default: 'windows-2022'
 - name: pool
   default: ''
-- name: srcDir
-- name: buildFile
+- name: workingDirectory
+- name: projectFile
 - name: dotnetVersion
   default: '6.x'
 - name: buildConfiguration
@@ -20,6 +20,10 @@ parameters:
   default: '17'
 - name: jdkArch
   default: 'x64'
+- name: fodApiUrl
+  default: 'https://api.emea.fortify.com'
+- name: fodClientId
+- name: fodClientSecret
 - name: fodConnection
   default: 'FODAzureDevOps'
 - name: fodAppName
@@ -90,7 +94,7 @@ jobs:
   #
   - task: FortifyOnDemandStatic@8
     inputs:
-      FortifyProjects: ${{ parameters.srcDir }}
+      FortifyProjects: ${{ parameters.workingDirectory }}
       FodConnection: ${{ parameters.fodConnection }}
       ReleaseOptions: '0'
       ReleaseId: $(fodReleaseId)
@@ -100,7 +104,7 @@ jobs:
       InProgressScanActionType: '2'
       RemediationScanPreference: '2'
       BuildType: 'msbuild'
-      BuildFile: ${{ parameters.buildFile }}
+      BuildFile: ${{ parameters.projectFile }}
       PolicyFailAction: '0'
       PollingInterval: 5
   - task: PowerShell@2
