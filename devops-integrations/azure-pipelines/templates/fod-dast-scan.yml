@@ -2,10 +2,9 @@
 
 # defaults for any parameters that aren't specified
 parameters: 
-- name: vmImage
-  default: 'windows-2022'
-- name: pool
-  default: ''
+- name: 'pool'
+  type: object
+  default: {}
 - name: fodApiUrl
   default: 'https://api.ams.fortify.com'
 - name: fodApiKey
@@ -17,9 +16,7 @@ parameters:
 
 jobs:
 - job: FoDDynamicScan
-  pool: 
-    name: ${{ parameters.pool }}
-    vmImage: ${{ parameters.vmImage }}
+  pool: ${{ parameters.pool }}
   steps:
   - ${{ if ne(parameters.skip, true) }}:
     - task: FortifyOnDemandDynamic@7
