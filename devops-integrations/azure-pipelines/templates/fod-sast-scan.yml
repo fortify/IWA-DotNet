@@ -6,6 +6,7 @@ parameters:
   type: object
   default: {}
 - name: workingDirectory
+  default: ''
 - name: projectFile
 - name: dotnetVersion
   default: '6.x'
@@ -53,24 +54,26 @@ jobs:
         $App="${env:FORTIFY_APP_NAME}"
         $Rel="${env:FORTIFY_RELEASE_NAME}"
         if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
-          Write-Host "##[command]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
+          Write-Host "##[debug]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
           Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
           $App="${env:FORTIFY_APP_NAME_OVERRIDE}"
         } else {
           Write-Host "##[command]Using FORTIFY_APP_NAME ${App}"
         }
         if (${env:FORTIFY_RELEASE_NAME_OVERRIDE}) {
-          Write-Host "##[command]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          Write-Host "##[debug]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
           Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
           $Rel=${env:FORTIFY_RELEASE_NAME_OVERRIDE}
         } else {
-          Write-Host "##[command]Using FORTIFY_RELEASE_NAME ${Rel}"
-        }   
-        fcli fod session login --url "${env:FOD_API_URL}" --client-id "${env:FOD_CLIENT_ID}" --client-secret "${env:FOD_CLIENT_SECRET}" --session azure-pipelines
+          Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
+        }
+        Write-Host "##[command]fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines"
+        fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines
+        Write-Host "##[command]fcli fod release list --app "${App}" --session azure-pipelines"
         fcli fod release list --app "${App}" --session azure-pipelines
+        Write-Host "##[command]fcli fod release create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --copy-from ""${App}:${env:FOD_PARENT_RELEASE_NAME}"" --status Development --skip-if-exists -o expr=""{releaseId}"" --session azure-pipelines"
         $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --session azure-pipelines)
-        #$RelId=(fcli fod release get "${App}:${Rel}" -o "expr={releaseId}")
-        Write-Host "##[command]Setting fodReleaseId to $RelId"
+        Write-Host "##[debug]Setting fodReleaseId to $RelId"
         Write-Host "##vso[task.setvariable variable=fodReleaseId]$RelId"
       showWarnings: true
     env:
@@ -110,4 +113,5 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        Write-Host "##[command]fcli fod session logout --session azure-pipelines"
         fcli fod session logout --session azure-pipelines

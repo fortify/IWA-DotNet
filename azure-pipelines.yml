@@ -40,63 +40,39 @@ pr:
     - media/*
   
 variables:
+
   #
-  # In order for the Pipeline to execute successfully you should create the following variables in the Pipeline UI (or uncomment and hard-code here)
+  # In order for the pipeline to execute successfully you should create the following variables in the Pipeline UI.
   # 
-  # ADOBaseURL: 'Your Azure DevOps Base URL'
-  # ADOPAT: 'Your Azure DevOps Personal Access Token'
-  # ADOProject: 'IWA-DotNet'
-  # AppUrl: 'URL of deployed application'
-  # AzureDBServer: 'Hostname of database server'
-  # AzureDBName: 'Database Name'
-  # AzureDBUser: 'Database User Login'
-  # AzureDBPassword: 'Database Password'
-  # AzureSubscription: 'Name of Azure Subscription in Service Connections'
-  # FoDApplicationName: 'IWA-DotNet'
-  # FoDBaseUrl: 'https://api.ams.fortify.com'
-  # FoDBugTrackerVersion: '4.2'
-  # FoDClientId: 'Your FoD API Client Id'
-  # FoDClientSecret: 'You FoD API Client Secret'
-  # FoDParentRelease: 'main'
-  # FoDReleaseId: 'Your FOD Release Id'
-  # FoDUsername: 'You FoD username'
-  # FoDTenant: 'Your FoD tenant'
-  # ScanCentralCtrlUrl: 'Your ScanCentral Controller URL'
-  # ScanCentralClientToken: 'Your ScanCentral Client Token'
-  # ScanCentralNotificationEmail: 'Your Email Address'
-  # ScanCentralDASTApiUrl: 'Your ScanCentral DAST API URL'
-  # ScanCentralDASTCICDAuthToken: 'Your ScanCentral DAST CICD Authentication Token'
-  # ScanCentralDASTCICDIdentifier: 'Your ScanCentral DAST CICD Identifier'
-  # SSCUrl: 'Your SSC URL'
-  # SSCApplicationName: 'IWA-DotNet'
-  # SSCApplicationVersion: 'Your SSC application version'
-  # SSCAuthToken: 'Your SSC CI Authentication Token'
-  # ScanCentralVersion: 'The version of ScanCentral being used'
-  # VsVersion: '2022'
-  # VsEdition: 'Community'
-
-
-  #publishProfile: 'iwanet - Web Deploy'
+  # For FoD:
+  #   FOD_API_URL               - FoD API URL, e.g. "https://api.ams.fortify.com"
+  #   FOD_CLIENT_ID             - FoD API Client Id
+  #   FOD_CLIENT_SECRET         - FoD API Client Secret
+  #
+  # For SSC:
+  #   SSC_URL                   - SSC URL
+  #   SSC_CI_TOKEN              - SSC CIToken
+  #
+  # For ScanCentral SAST:
+  #   SCANCENTRAL_CTRL_URL      - ScanCentral SAST Controller URL
+  #   SCANCENTRAL_CLIENT_TOKEN  - ScanCentral SAST Client Authentication Token
+  #
+  # For ScanCentral DAST:
   
-  # IMPORTANT: please make sure your names for Service Connections to FoD and/or SSC are set to the following:
-  #FoDConnection: 'FODAzureDevOps' # the name of Fortify on Demand service connection configured in Project Settings
-  #SSCConnection: 'SSCAzureDevOps' # the name of the Fortify SSC "generic" connection configured in Project Settings
-  #AzureConnection: 'iwa-arm' # the name of the Azure Resource Manager connection
-
-  # FOD_API_URL
-  # FOD_CLIENT_ID
-  # FOD_CLIENT_SECRET
-  # FOD_CONNECTION
+  #
+  # By default the FoD/SSC application name is set to the name of the Git repository
+  # By default the FoD/SSC release/application version name is set to the name of the Git branch
+  # If you wish to override any of these please set the following variables from the pipelines UI:
   #
   # FORTIFY_APP_NAME_OVERRIDE
   # FORTIFY_RELEASE_NAME_OVERRIDE
-
-  # IMPORTANT: please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
-
+  #
 - name: FORTIFY_APP_NAME
   value: $(Build.Repository.Name)
 - name: FORTIFY_RELEASE_NAME
   value: $[replace(variables['Build.SourceBranch'], 'refs/heads/', '')]
+
+  # IMPORTANT: if using a self-hosted agent, please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
 
 stages:
 
@@ -151,15 +127,15 @@ stages:
     # Run Scancentral SAST Scan on Project
   - template: 'devops-integrations/azure-pipelines/templates/scancentral-sast-scan.yml'
     parameters:
-        baseDir: 'InsecureWebApp' 
-        buildFile: 'InsecureWebApp.csproj'
-        scanCentralCtrlUrl: $(ScanCentralCtrlUrl)
-        scanCentralClientToken: $(ScanCentralClientToken)
-        sscUrl: $(SSCUrl)
-        sscCiToken: $(SSCAuthToken)
-        sscAppName: $(SSCApplicationName)
-        sscAppVerName: 'main' # $(branchName)
-        notificationEmail: $(ScanCentralNotificationEmail)
+        workingDirectory: 'InsecureWebApp' 
+        projectFile: 'InsecureWebApp.csproj'
+        scanCentralCtrlUrl: $(SCANCENTRAL_CTRL_URL)
+        scanCentralClientToken: $(SCANCENTRAL_CLIENT_TOKEN)
+        sscUrl: $(SSC_URL)
+        sscCiToken: $(SSC_CI_TOKEN)
+        sscAppName: "$(FORTIFY_APP_NAME)"
+        sscAppVerName: "$(FORTIFY_RELEASE_NAME)"
+        #notificationEmail: 'your_email_address'
         pool:
             name: 'Fortify' # use named self-hosted pool 
             #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool

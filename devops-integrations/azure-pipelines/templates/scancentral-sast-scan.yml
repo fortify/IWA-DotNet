@@ -5,9 +5,9 @@ parameters:
 - name: 'pool'
   type: object
   default: {}
-- name: baseDir
+- name: workingDirectory
   default: ''
-- name: buildFile
+- name: projectFile
 - name: dotnetVersion
   default: '6.x'
 - name: buildConfiguration
@@ -31,6 +31,8 @@ parameters:
   default: true
 - name: sscAppName
 - name: sscAppVerName
+- name: sscParentAppVerName
+  default: 'main'
 
 jobs:
 - job: ScanCentralStaticScan
@@ -47,6 +49,43 @@ jobs:
   - task: FcliInstaller@0
     inputs:
       version: 'latest'
+  - task: PowerShell@2
+    displayName: 'SSC Check AppVersion'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $App="${env:FORTIFY_APP_NAME}"
+        $Rel="${env:FORTIFY_RELEASE_NAME}"
+        if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
+          Write-Host "##[debug]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
+          $App="${env:FORTIFY_APP_NAME_OVERRIDE}"
+        } else {
+          Write-Host "##[command]Using FORTIFY_APP_NAME ${App}"
+        }
+        if (${env:FORTIFY_RELEASE_NAME_OVERRIDE}) {
+          Write-Host "##[debug]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          $Rel=${env:FORTIFY_RELEASE_NAME_OVERRIDE}
+        } else {
+          Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
+        }
+        Write-Host "##[command]fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines"
+        fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines
+        Write-Host "##[command]fcli ssc appversion list -q ""application.name=='${App}'"""
+        fcli ssc appversion list -q "application.name=='${App}'" --session azure-pipelines
+        Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists -o expr=""{releaseId}"" --session azure-pipelines"
+        $AppVerId=(fcli ssc appver create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists -o expr="{id}" --session azure-pipelines)
+        Write-Host "##[debug]Setting sscAppVerId to $AppVerId"
+        Write-Host "##vso[task.setvariable variable=sscAppVerId]$AppVerId"
+      showWarnings: true
+    env:
+      SSC_URL: ${{ parameters.fodApiUrl }}
+      SSC_CI_TOKEN: ${{ parameters.fodClientId }}
+      FOD_CLIENT_SECRET: ${{ parameters.fodClientSecret }}
+      FOD_APP_NAME: ${{ parameters.fodAppName }}
+      FOD_RELEASE_NAME: ${{ parameters.fodReleaseName }}
+      FOD_PARENT_RELEASE_NAME: ${{ parameters.fodParentReleaseName }}
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'
     inputs:
@@ -62,14 +101,21 @@ jobs:
       applicationName: ${{ parameters.sscAppName }}
       applicationVersion: ${{ parameters.sscAppVerName }}
       buildTool: 'msbuild'
-      buildFile: ${{ format('{0}\{1}', parameters.baseDir, parameters.buildFile) }}
+      projectFile: ${{ format('{0}\{1}', parameters.workingDirectory, parameters.projectFile) }}
       email: ${{ parameters.notificationEmail }}
       block: true
-      outputFile: ${{ format('scan-{0}.fpr', parameters.baseDir) }}
-      logFile: ${{ format('scan-{0}.log', parameters.baseDir) }}
+      outputFile: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}
+      logFile: ${{ format('scan-{0}.log', parameters.workingDirectory) }}
       overwrite: true
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: ${{ format('scan-{0}.fpr', parameters.baseDir) }}
+      targetPath: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}
       artifact: 'Fortify Results (FPR)'
       publishLocation: 'pipeline'
+  - task: PowerShell@2
+    displayName: 'SSC Logout'
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##[command]fcli ssc session logout --session azure-pipelines"
+        fcli ssc session logout --session azure-pipelines
