@@ -83,7 +83,7 @@ jobs:
       SSC_URL: ${{ parameters.sscUrl }}
       SSC_CI_TOKEN: ${{ parameters.sscCiToken }}
       SSC_APP_NAME: ${{ parameters.sscAppName }}
-      SSC_APPVER_NAME: ${{ parametesr.sscAppVerName }}
+      SSC_APPVER_NAME: ${{ parameters.sscAppVerName }}
       SSC_PARENT_APPVER_NAME: ${{ parameters.sscParentAppVerName }}
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'
