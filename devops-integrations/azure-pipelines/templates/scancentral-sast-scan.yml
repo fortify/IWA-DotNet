@@ -75,7 +75,7 @@ jobs:
         Write-Host "##[command]fcli ssc appversion list -q ""application.name=='${App}'"""
         fcli ssc appversion list -q "application.name=='${App}'" --session azure-pipelines
         Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists -o expr=""{releaseId}"" --session azure-pipelines"
-        $AppVerId=(fcli ssc appver create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists -o expr="{id}" --session azure-pipelines)
+        $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists -o expr="{id}" --session azure-pipelines)
         Write-Host "##[debug]Setting sscAppVerId to $AppVerId"
         Write-Host "##vso[task.setvariable variable=sscAppVerId]$AppVerId"
       showWarnings: true
