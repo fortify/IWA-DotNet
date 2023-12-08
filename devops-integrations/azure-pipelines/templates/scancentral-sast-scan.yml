@@ -54,8 +54,8 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        $App="${env:FORTIFY_APP_NAME}"
-        $Rel="${env:FORTIFY_RELEASE_NAME}"
+        $App="${env:SSC_APP_NAME}"
+        $Rel="${env:SSC_APPVER_NAME}"
         if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
           Write-Host "##[debug]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
           Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
@@ -80,12 +80,11 @@ jobs:
         Write-Host "##vso[task.setvariable variable=sscAppVerId]$AppVerId"
       showWarnings: true
     env:
-      SSC_URL: ${{ parameters.fodApiUrl }}
-      SSC_CI_TOKEN: ${{ parameters.fodClientId }}
-      FOD_CLIENT_SECRET: ${{ parameters.fodClientSecret }}
-      FOD_APP_NAME: ${{ parameters.fodAppName }}
-      FOD_RELEASE_NAME: ${{ parameters.fodReleaseName }}
-      FOD_PARENT_RELEASE_NAME: ${{ parameters.fodParentReleaseName }}
+      SSC_URL: ${{ parameters.sscUrl }}
+      SSC_CI_TOKEN: ${{ parameters.sscCiToken }}
+      SSC_APP_NAME: ${{ parameters.sscAppName }}
+      SSC_APPVER_NAME: ${{ parametesr.sscAppVerName }}
+      SSC_PARENT_APPVER_NAME: ${{ parameters.sscParentAppVerName }}
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'
     inputs:
@@ -98,8 +97,8 @@ jobs:
       sscUrl: ${{ parameters.sscUrl }}
       sscCiToken: ${{ parameters.sscCiToken }}
       uploadToSSC: ${{ parameters.uploadToSSC }}
-      applicationName: ${{ parameters.sscAppName }}
-      applicationVersion: ${{ parameters.sscAppVerName }}
+      applicationName: $(FORTIFY_APP_NAME)
+      applicationVersion: $(FORTIFY_RELEASE_NAME)
       buildTool: 'msbuild'
       projectFile: ${{ format('{0}\{1}', parameters.workingDirectory, parameters.projectFile) }}
       email: ${{ parameters.notificationEmail }}
