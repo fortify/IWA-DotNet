@@ -97,10 +97,14 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        Write-Host "##[command]scancentral package -bt msbuild -f ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}"
         scancentral package -bt msbuild -f ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
-        fcli fod sast-scan start --release "${env:FOD_RELEASE_ID}" --notes "${env:FOD_SCAN_NOTES}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
+        Write-Host "##[command]fcli fod sast-scan start --release $(fodReleaseId) --notes ""${env:FOD_SCAN_NOTES}"" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
+        fcli fod sast-scan start --release $(fodReleaseId) --notes "${env:FOD_SCAN_NOTES}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
         $ScanId=(fcli util var get ::curScan::)
+        Write-Host "##[debug]Scan Id is: $ScanId"
         Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
+        Write-Host "##[command]fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines"
         fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
