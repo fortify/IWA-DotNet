@@ -183,20 +183,17 @@ stages:
   displayName: 'ScanCentral DAST'
   condition: eq(variables['USE_SCANCENTRAL_DAST'], 'true')
   dependsOn: DeployApp
-  pool:
-    # use Azure DevOps provided agent
-    #vmImage: 'windows-2022'
-    # use local Agent pool named 'Fortify'
-    name: Fortify
   jobs:
-  - job: RunScan
-    displayName: 'Run Scan'
-    steps:   
-    - task: FortifyScanCentralDAST@7
-      inputs:
-        scanCentralDastApiUrl: '$(ScanCentralDASTApiUrl)'
-        scanCentralCiCdToken: '$(ScanCentralDASTCICDIdentifier)'
-        sscCiToken: '$(ScanCentralDASTCICDAuthToken)'
+    # Run ScanCentral DAST Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
+    parameters:
+        fodApiKey: '${FoDClientId}' 
+        fodApiSecret: '${FoDClientSecret}'
+        fodReleaseId: $(FoDReleaseId)
+        skip: true
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
 
   #
   # Dynamic Application Security Testing with Fortify on Demand
