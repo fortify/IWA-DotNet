@@ -104,7 +104,7 @@ jobs:
         fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
-      PROJ_FILE: ${{ parameters.projectFile) }}
+      PROJ_FILE: ${{ parameters.projectFile }}
       FOD_RELEASE_ID: $(fodReleaseId)
       PACKAGE_FILE: "package.zip"
       FOD_SCAN_NOTES: "Triggered by Azure DevOps Pipelines"
