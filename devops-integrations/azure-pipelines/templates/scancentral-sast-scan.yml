@@ -33,7 +33,6 @@ parameters:
 - name: sscAppVerName
 - name: sscParentAppVerName
   default: 'main'
-- name: scClientAuthToken
 
 jobs:
 - job: ScanCentralStaticScan
@@ -88,7 +87,7 @@ jobs:
       SSC_APP_NAME: ${{ parameters.sscAppName }}
       SSC_APPVER_NAME: ${{ parameters.sscAppVerName }}
       SSC_PARENT_APPVER_NAME: ${{ parameters.sscParentAppVerName }}
-      SC_CLIENT_AUTH_TOKEN: ${{ parametsr.scClientAuthToken }}
+      SC_CLIENT_AUTH_TOKEN: ${{ parameters.scanCentralClientToken }}
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'
     inputs:
