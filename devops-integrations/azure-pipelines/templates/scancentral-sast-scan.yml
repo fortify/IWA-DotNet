@@ -33,6 +33,7 @@ parameters:
 - name: sscAppVerName
 - name: sscParentAppVerName
   default: 'main'
+- name: scClientAuthToken
 
 jobs:
 - job: ScanCentralStaticScan
@@ -78,6 +79,8 @@ jobs:
         $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists -o expr="{id}" --session azure-pipelines)
         Write-Host "##[debug]Setting sscAppVerId to $AppVerId"
         Write-Host "##vso[task.setvariable variable=sscAppVerId]$AppVerId"
+        fcli tool sc-client install -y -t "${env:SC_CLIENT_AUTH_TOKEN}" -d $(Build.SourcesDirectory)\sc-client
+        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\sc-client\bin"
       showWarnings: true
     env:
       SSC_URL: ${{ parameters.sscUrl }}
@@ -85,27 +88,37 @@ jobs:
       SSC_APP_NAME: ${{ parameters.sscAppName }}
       SSC_APPVER_NAME: ${{ parameters.sscAppVerName }}
       SSC_PARENT_APPVER_NAME: ${{ parameters.sscParentAppVerName }}
+      SC_CLIENT_AUTH_TOKEN: ${{ parametsr.scClientAuthToken }}
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'
     inputs:
       filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
       modifyEnvironment: true
-  - task: FortifyScanCentralSAST@7
+  - task: PowerShell@2
+    displayName: 'Fortify ScanCentral SAST scan'
     inputs:
-      scanCentralCtrlUrl: ${{ parameters.scanCentralCtrlUrl }}
-      scanCentralClientToken: ${{ parameters.scanCentralClientToken }}
-      sscUrl: ${{ parameters.sscUrl }}
-      sscCiToken: ${{ parameters.sscCiToken }}
-      uploadToSSC: ${{ parameters.uploadToSSC }}
-      applicationName: $(FORTIFY_APP_NAME)
-      applicationVersion: $(FORTIFY_RELEASE_NAME)
-      buildTool: 'msbuild'
-      projectFile: ${{ format('{0}\{1}', parameters.workingDirectory, parameters.projectFile) }}
-      email: ${{ parameters.notificationEmail }}
-      block: true
-      outputFile: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}
-      logFile: ${{ format('scan-{0}.log', parameters.workingDirectory) }}
-      overwrite: true
+      targetType: 'inline'
+      script: |
+        scancentral package -bt msbuild -f ${env:PROJ_FILE} -o package.zip
+      workingDirectory: ${{ parameters.workingDirectory }}
+    env:
+      PROJ_FILE: ${{ parameters.projectFile) }}
+  #- task: FortifyScanCentralSAST@7
+  #  inputs:
+  #    scanCentralCtrlUrl: ${{ parameters.scanCentralCtrlUrl }}
+  #    scanCentralClientToken: ${{ parameters.scanCentralClientToken }}
+  #    sscUrl: ${{ parameters.sscUrl }}
+  #    sscCiToken: ${{ parameters.sscCiToken }}
+  #    uploadToSSC: ${{ parameters.uploadToSSC }}
+  #    applicationName: $(FORTIFY_APP_NAME)
+  #    applicationVersion: $(FORTIFY_RELEASE_NAME)
+  #    buildTool: 'msbuild'
+  #    projectFile: ${{ format('{0}\{1}', parameters.workingDirectory, parameters.projectFile) }}
+  #    email: ${{ parameters.notificationEmail }}
+  #    block: true
+  #    outputFile: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}
+  #    logFile: ${{ format('scan-{0}.log', parameters.workingDirectory) }}
+  #    overwrite: true
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}

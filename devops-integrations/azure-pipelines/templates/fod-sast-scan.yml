@@ -77,6 +77,8 @@ jobs:
         $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --session azure-pipelines)
         Write-Host "##[debug]Setting fodReleaseId to $RelId"
         Write-Host "##vso[task.setvariable variable=fodReleaseId]$RelId"
+        fcli tool sc-client install -y -d $(Build.SourcesDirectory)\sc-client
+        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\sc-client\bin"
       showWarnings: true
     env:
       FOD_API_URL: ${{ parameters.fodApiUrl }}
@@ -90,26 +92,42 @@ jobs:
     inputs:
       filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
       modifyEnvironment: true
+  - task: PowerShell@2
+    displayName: 'FoD SAST Scan'
+    inputs:
+      targetType: 'inline'
+      script: |
+        scancentral package -bt msbuild -f ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
+        fcli fod sast-scan start --release "${env:FOD_RELEASE_ID}" --notes "${env:FOD_SCAN_NOTES}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
+        $ScanId=(fcli util var get ::curScan::)
+        Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
+        fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines
+      workingDirectory: ${{ parameters.workingDirectory }}
+    env:
+      PROJ_FILE: ${{ parameters.projectFile) }}
+      FOD_RELEASE_ID: $(fodReleaseId)
+      PACKAGE_FILE: "package.zip"
+      FOD_SCAN_NOTES: "Triggered by Azure DevOps Pipelines"
   #
   # Change the invocation of FortifyOnDemandStatic to your required configuration.
   # Default is to use an existing release as we are checking it exists above, creating if not and using its release id.
   #
-  - task: FortifyOnDemandStatic@8
-    displayName: 'FoD Static Scan'
-    inputs:
-      FortifyProjects: ${{ parameters.workingDirectory }}
-      FodConnection: ${{ parameters.fodConnection }}
-      ReleaseOptions: '0'
-      ReleaseId: $(fodReleaseId)
-      EntitlementSelection: '1'
-      EntitlementPreference: '1'
-      OverrideScanSettings: '2'
-      InProgressScanActionType: '2'
-      RemediationScanPreference: '2'
-      BuildType: 'msbuild'
-      BuildFile: ${{ parameters.projectFile }}
-      PolicyFailAction: '0'
-      PollingInterval: 5
+  #- task: FortifyOnDemandStatic@8
+  #  displayName: 'FoD Static Scan'
+  #  inputs:
+  #    FortifyProjects: ${{ parameters.workingDirectory }}
+  #    FodConnection: ${{ parameters.fodConnection }}
+  #    ReleaseOptions: '0'
+  #    ReleaseId: $(fodReleaseId)
+  #    EntitlementSelection: '1'
+  #    EntitlementPreference: '1'
+  #    OverrideScanSettings: '2'
+  #    InProgressScanActionType: '2'
+  #    RemediationScanPreference: '2'
+  #    BuildType: 'msbuild'
+  #    BuildFile: ${{ parameters.projectFile }}
+  #    PolicyFailAction: '0'
+  #    PollingInterval: 5
   - task: PowerShell@2
     displayName: 'FoD Logout'
     inputs:

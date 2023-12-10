@@ -375,3 +375,4 @@ FodyWeavers.xsd
 *.env
 /package.ip.zip
 /IWA-DotNet.KAL.zip
+/InsecureWebApp/package.zip
