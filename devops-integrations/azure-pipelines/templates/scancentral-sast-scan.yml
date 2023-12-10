@@ -102,7 +102,7 @@ jobs:
         scancentral package -bt msbuild -f ${env:PROJ_FILE} -o package.zip
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
-      PROJ_FILE: ${{ parameters.projectFile) }}
+      PROJ_FILE: ${{ parameters.projectFile }}
   #- task: FortifyScanCentralSAST@7
   #  inputs:
   #    scanCentralCtrlUrl: ${{ parameters.scanCentralCtrlUrl }}
