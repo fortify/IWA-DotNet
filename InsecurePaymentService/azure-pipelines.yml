@@ -40,7 +40,6 @@ variables:
   #   SSC_CI_TOKEN                  - SSC CIToken
   #
   # For ScanCentral SAST:
-  #   SCANCENTRAL_CTRL_URL          - ScanCentral SAST Controller URL
   #   SCANCENTRAL_CLIENT_AUTH_TOKEN - ScanCentral SAST Client Authentication Token
   #
   # For ScanCentral DAST:
@@ -53,7 +52,7 @@ variables:
 - name: USE_FOD_DAST
   value: false
 - name: USE_SCANCENTRAL_SAST
-  value: true
+  value: false
 - name: USE_SCANCENTRAL_DAST
   value: false
 
@@ -69,7 +68,6 @@ variables:
   value: $(Build.Repository.Name)
 - name: FORTIFY_RELEASE_NAME
   value: $[replace(variables['Build.SourceBranch'], 'refs/heads/', '')]
-
 
   # IMPORTANT: if using a self-hosted agent, please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
 

@@ -138,7 +138,6 @@ stages:
   - template: 'devops-integrations/azure-pipelines/templates/fod-oss-scan.yml'
     parameters:
         workingDirectory: 'InsecureWebApp' 
-        projectFile: 'InsecureWebApp.csproj'
         fodApiUrl: $(FOD_API_URL)
         fodClientId: $(FOD_CLIENT_ID)
         fodClientSecret: $(FOD_CLIENT_SECRET)
