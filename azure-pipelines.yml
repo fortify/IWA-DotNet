@@ -1,4 +1,5 @@
 # Example Continuous Delivery Pipeline with Fortify on Demand (FoD) and Fortify ScanCentral support
+
 name: InsecureWebApp-CD
 
 trigger:
@@ -119,7 +120,6 @@ stages:
         fodApiUrl: $(FOD_API_URL)
         fodClientId: $(FOD_CLIENT_ID)
         fodClientSecret: $(FOD_CLIENT_SECRET)
-        #fodConnection: "FoDAzureDevops" # this is defaulted but can be overriden here if connection name is different
         fodAppName: "$(FORTIFY_APP_NAME)"
         fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
         pool:
@@ -127,7 +127,7 @@ stages:
             #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
 
   #
-  # Static Application Security Testing with ScanCentral SAST (on premise)
+  # Static Application Security Testing with ScanCentral SAST
   #
 - stage: ScanCentral_SAST
   displayName: 'ScanCentral SAST'
@@ -152,7 +152,7 @@ stages:
             #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
 
   # 
-  # Deploy the application - this is an example of deploying a web application and its database to Azure
+  # Deploy the application - use an appropriate set of tasks for your application/environment here
   #
 - stage: DeployApp
   displayName: 'Deploy Application'
@@ -168,32 +168,13 @@ stages:
         pool:
             name: 'Fortify' # use named self-hosted pool 
             #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
-    # More likely you will use something like the following to deploy the application to Azure
+# More likely you will use something like the following to deploy the application to Azure
 #  - template: 'devops-integrations/azure-pipelines/templates/deploy-to-azure.yml'
 #    parameters:
 #        srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
 #        pool:
 #            name: 'Fortify' # use named self-hosted pool 
 #            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
-
-#
-# Dynamic Application Security Testing with ScanCentral DAST (on-premise)
-#        
-- stage: ScanCentral_DAST
-  displayName: 'ScanCentral DAST'
-  condition: eq(variables['USE_SCANCENTRAL_DAST'], 'true')
-  dependsOn: DeployApp
-  jobs:
-    # Run ScanCentral DAST Scan on Project
-  - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
-    parameters:
-        fodApiKey: '${FoDClientId}' 
-        fodApiSecret: '${FoDClientSecret}'
-        fodReleaseId: $(FoDReleaseId)
-        skip: true
-        pool:
-            name: 'Fortify' # use named self-hosted pool 
-            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
 
   #
   # Dynamic Application Security Testing with Fortify on Demand
@@ -204,6 +185,25 @@ stages:
   dependsOn: DeployApp
   jobs:
     # Run FoD DAST Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
+    parameters:
+        fodApiKey: '${FoDClientId}' 
+        fodApiSecret: '${FoDClientSecret}'
+        fodReleaseId: $(FoDReleaseId)
+        skip: true
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+
+#
+# Dynamic Application Security Testing with ScanCentral DAST
+#        
+- stage: ScanCentral_DAST
+  displayName: 'ScanCentral DAST'
+  condition: eq(variables['USE_SCANCENTRAL_DAST'], 'true')
+  dependsOn: DeployApp
+  jobs:
+    # Run ScanCentral DAST Scan on Project
   - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
     parameters:
         fodApiKey: '${FoDClientId}' 

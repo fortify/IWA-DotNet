@@ -21,11 +21,9 @@ parameters:
 - name: jdkArch
   default: 'x64'
 - name: fodApiUrl
-  default: 'https://api.emea.fortify.com'
+  default: 'https://api.ams.fortify.com'
 - name: fodClientId
 - name: fodClientSecret
-- name: fodConnection
-  default: 'FODAzureDevOps'
 - name: fodAppName
 - name: fodReleaseName
 - name: fodParentReleaseName
@@ -112,26 +110,6 @@ jobs:
       FOD_RELEASE_ID: $(fodReleaseId)
       PACKAGE_FILE: "package.zip"
       FOD_SCAN_NOTES: "Triggered by Azure DevOps Pipelines"
-  #
-  # Change the invocation of FortifyOnDemandStatic to your required configuration.
-  # Default is to use an existing release as we are checking it exists above, creating if not and using its release id.
-  #
-  #- task: FortifyOnDemandStatic@8
-  #  displayName: 'FoD Static Scan'
-  #  inputs:
-  #    FortifyProjects: ${{ parameters.workingDirectory }}
-  #    FodConnection: ${{ parameters.fodConnection }}
-  #    ReleaseOptions: '0'
-  #    ReleaseId: $(fodReleaseId)
-  #    EntitlementSelection: '1'
-  #    EntitlementPreference: '1'
-  #    OverrideScanSettings: '2'
-  #    InProgressScanActionType: '2'
-  #    RemediationScanPreference: '2'
-  #    BuildType: 'msbuild'
-  #    BuildFile: ${{ parameters.projectFile }}
-  #    PolicyFailAction: '0'
-  #    PollingInterval: 5
   - task: PowerShell@2
     displayName: 'FoD Logout'
     inputs:
