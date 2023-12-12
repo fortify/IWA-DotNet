@@ -20,20 +20,16 @@ parameters:
   default: '17'
 - name: jdkArch
   default: 'x64'
-- name: scanCentralCtrlUrl
-- name: scanCentralClientToken
 - name: notificationEmail
-  default: ''
+  default: 'somebody@somewhere.com'
 - name: sscUrl
 - name: sscCiToken
-- name: uploadToSSC
-  type: boolean
-  default: true
 - name: sscAppName
 - name: sscAppVerName
 - name: sscParentAppVerName
   default: 'main'
-- name: scClientAuthToken
+- name: sscIssueTemplate
+  default: 'Prioritized-HighRisk-Project-Template'
 
 jobs:
 - job: ScanCentralDynamicScan
@@ -71,16 +67,14 @@ jobs:
         } else {
           Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
         }
-        Write-Host "##[command]fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines"
-        fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines
+        Write-Host "##[command]fcli sc-dast session login --ssc-url ""${env:SSC_URL}"" --ssc-ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines"
+        fcli sc-dast session login --ssc-url "${env:SSC_URL}" --ssc-ci-token "${env:SSC_CI_TOKEN}" --session azure-pipelines
         Write-Host "##[command]fcli ssc appversion list -q ""application.name=='${App}'"""
         fcli ssc appversion list -q "application.name=='${App}'" --session azure-pipelines
-        Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists -o expr=""{releaseId}"" --session azure-pipelines"
-        $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists -o expr="{id}" --session azure-pipelines)
+        Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr=""{releaseId}"" --session azure-pipelines"
+        $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr="{id}" --session azure-pipelines)
         Write-Host "##[debug]Setting sscAppVerId to $AppVerId"
         Write-Host "##vso[task.setvariable variable=sscAppVerId]$AppVerId"
-        fcli tool sc-client install -y -t "${env:SC_CLIENT_AUTH_TOKEN}" -d $(Build.SourcesDirectory)\sc-client
-        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\sc-client\bin"
       showWarnings: true
     env:
       SSC_URL: ${{ parameters.sscUrl }}
@@ -88,46 +82,23 @@ jobs:
       SSC_APP_NAME: ${{ parameters.sscAppName }}
       SSC_APPVER_NAME: ${{ parameters.sscAppVerName }}
       SSC_PARENT_APPVER_NAME: ${{ parameters.sscParentAppVerName }}
-      SC_CLIENT_AUTH_TOKEN: ${{ parametsr.scClientAuthToken }}
-  - task: BatchScript@1
-    displayName: 'Set Visual Studio environment'
-    inputs:
-      filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
-      modifyEnvironment: true
+      SSC_ISSUE_TEMPLATE: ${{ parameters.sscIssueTemplate }}
   - task: PowerShell@2
-    displayName: 'Fortify ScanCentral SAST scan'
+    displayName: 'Fortify ScanCentral DAST scan'
     inputs:
       targetType: 'inline'
       script: |
-        scancentral package -bt msbuild -f ${env:PROJ_FILE} -o package.zip
+        Write-Host "##[debug]Not yet implemented"
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
-      PROJ_FILE: ${{ parameters.projectFile) }}
-  #- task: FortifyScanCentralSAST@7
-  #  inputs:
-  #    scanCentralCtrlUrl: ${{ parameters.scanCentralCtrlUrl }}
-  #    scanCentralClientToken: ${{ parameters.scanCentralClientToken }}
-  #    sscUrl: ${{ parameters.sscUrl }}
-  #    sscCiToken: ${{ parameters.sscCiToken }}
-  #    uploadToSSC: ${{ parameters.uploadToSSC }}
-  #    applicationName: $(FORTIFY_APP_NAME)
-  #    applicationVersion: $(FORTIFY_RELEASE_NAME)
-  #    buildTool: 'msbuild'
-  #    projectFile: ${{ format('{0}\{1}', parameters.workingDirectory, parameters.projectFile) }}
-  #    email: ${{ parameters.notificationEmail }}
-  #    block: true
-  #    outputFile: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}
-  #    logFile: ${{ format('scan-{0}.log', parameters.workingDirectory) }}
-  #    overwrite: true
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}
-      artifact: 'Fortify Results (FPR)'
-      publishLocation: 'pipeline'
+      SSC_URL: ${{ parameters.sscUrl }}
+      SSC_APPVER_ID: $(sscAppVerId)
+      SSC_CI_TOKEN: ${{ parameters.sscCiToken }}
+      NOTIFY_EMAIL: ${{ parameters.notificationEmail }}
   - task: PowerShell@2
     displayName: 'SSC Logout'
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##[command]fcli ssc session logout --session azure-pipelines"
-        fcli ssc session logout --session azure-pipelines
+        Write-Host "##[command]fcli sc-dast session logout --no-revoke-token --session azure-pipelines"
+        fcli sc-dast session logout --no-revoke-token --session azure-pipelines

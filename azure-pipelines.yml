@@ -54,18 +54,17 @@ variables:
   #   SSC_CI_TOKEN                  - SSC CIToken
   #
   # For ScanCentral SAST:
-  #   SCANCENTRAL_CTRL_URL          - ScanCentral SAST Controller URL
   #   SCANCENTRAL_CLIENT_AUTH_TOKEN - ScanCentral SAST Client Authentication Token
   #
   # For ScanCentral DAST:
   
   # Change these variables depending on which parts of the pipeline to execute:
 - name: USE_FOD_SAST
-  value: false
+  value: true
 - name: USE_FOD_OSS
-  value: false
+  value: true
 - name: USE_FOD_DAST
-  value: false
+  value: true
 - name: USE_SCANCENTRAL_SAST
   value: true
 - name: USE_SCANCENTRAL_DAST
@@ -163,7 +162,6 @@ stages:
     parameters:
         workingDirectory: 'InsecureWebApp' 
         projectFile: 'InsecureWebApp.csproj'
-        scanCentralCtrlUrl: $(SCANCENTRAL_CTRL_URL)
         scanCentralClientToken: $(SCANCENTRAL_CLIENT_AUTH_TOKEN)
         sscUrl: $(SSC_URL)
         sscCiToken: $(SSC_CI_TOKEN)
@@ -181,8 +179,7 @@ stages:
   displayName: 'Deploy Application'
   dependsOn: 
     - BuildAndUnitTest
-    - ScanCentral_SAST
-    - FoD_SAST
+    - FoD_OSS # just an example for better visualisation
   jobs: 
     # This is a simulated deployment and does nothing
   - template: 'devops-integrations/azure-pipelines/templates/simulate-deployment.yml'
@@ -210,10 +207,11 @@ stages:
     # Run FoD DAST Scan on Project
   - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
     parameters:
-        fodApiKey: '${FoDClientId}' 
-        fodApiSecret: '${FoDClientSecret}'
-        fodReleaseId: $(FoDReleaseId)
-        skip: true
+        fodApiUrl: $(FOD_API_URL)
+        fodClientId: $(FOD_CLIENT_ID)
+        fodClientSecret: $(FOD_CLIENT_SECRET)
+        fodAppName: "$(FORTIFY_APP_NAME)"
+        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
         pool:
             name: 'Fortify' # use named self-hosted pool 
             #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
@@ -227,12 +225,12 @@ stages:
   dependsOn: DeployApp
   jobs:
     # Run ScanCentral DAST Scan on Project
-  - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
+  - template: 'devops-integrations/azure-pipelines/templates/scancentral-dast-scan.yml'
     parameters:
-        fodApiKey: '${FoDClientId}' 
-        fodApiSecret: '${FoDClientSecret}'
-        fodReleaseId: $(FoDReleaseId)
-        skip: true
+        sscUrl: $(SSC_URL)
+        sscCiToken: $(SSC_CI_TOKEN)
+        sscAppName: "$(FORTIFY_APP_NAME)"
+        sscAppVerName: "$(FORTIFY_RELEASE_NAME)"
         pool:
             name: 'Fortify' # use named self-hosted pool 
             #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool

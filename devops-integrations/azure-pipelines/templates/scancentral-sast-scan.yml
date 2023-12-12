@@ -20,7 +20,6 @@ parameters:
   default: '17'
 - name: jdkArch
   default: 'x64'
-- name: scanCentralCtrlUrl
 - name: scanCentralClientToken
 - name: scanCentralSensorVersion
   default: 23.1
@@ -28,9 +27,6 @@ parameters:
   default: 'somebody@somewhere.com'
 - name: sscUrl
 - name: sscCiToken
-- name: uploadToSSC
-  type: boolean
-  default: true
 - name: sscAppName
 - name: sscAppVerName
 - name: sscParentAppVerName
