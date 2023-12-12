@@ -80,7 +80,7 @@ stages:
   displayName: 'Build and Unit Test'
   jobs:
     # Build InsecurePaymentService and run its tests
-  - template: '../devops-integrations/azure/templates/build-and-test.yml'
+  - template: '../devops-integrations/azure-pipelines/templates/build-and-test.yml'
     parameters:
         srcProject: 'InsecurePaymentService/InsecurePaymentService.csproj' 
         runTests: false
