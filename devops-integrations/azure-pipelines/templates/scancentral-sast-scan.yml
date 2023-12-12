@@ -8,6 +8,7 @@ parameters:
 - name: workingDirectory
   default: ''
 - name: projectFile
+  default: '*.csproj'
 - name: dotnetVersion
   default: '6.x'
 - name: buildConfiguration
