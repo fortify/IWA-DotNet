@@ -35,6 +35,8 @@ parameters:
 - name: sscAppVerName
 - name: sscParentAppVerName
   default: 'main'
+- name: sscIssueTemplate
+  default: 'Prioritized-HighRisk-Project-Template'
 
 jobs:
 - job: ScanCentralStaticScan
@@ -76,8 +78,8 @@ jobs:
         fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines
         Write-Host "##[command]fcli ssc appversion list -q ""application.name=='${App}'"""
         fcli ssc appversion list -q "application.name=='${App}'" --session azure-pipelines
-        Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists -o expr=""{releaseId}"" --session azure-pipelines"
-        $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists -o expr="{id}" --session azure-pipelines)
+        Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr=""{releaseId}"" --session azure-pipelines"
+        $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr="{id}" --session azure-pipelines)
         Write-Host "##[debug]Setting sscAppVerId to $AppVerId"
         Write-Host "##vso[task.setvariable variable=sscAppVerId]$AppVerId"
         fcli tool sc-client install -y -t "${env:SC_CLIENT_AUTH_TOKEN}" -d $(Build.SourcesDirectory)\sc-client
@@ -89,6 +91,7 @@ jobs:
       SSC_APP_NAME: ${{ parameters.sscAppName }}
       SSC_APPVER_NAME: ${{ parameters.sscAppVerName }}
       SSC_PARENT_APPVER_NAME: ${{ parameters.sscParentAppVerName }}
+      SSC_ISSUE_TEMPLATE: ${{ parameters.sscIssueTemplate }}
       SC_CLIENT_AUTH_TOKEN: ${{ parameters.scanCentralClientToken }}
   - task: BatchScript@1
     displayName: 'Set Visual Studio environment'

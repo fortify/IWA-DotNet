@@ -114,7 +114,7 @@ jobs:
         fcli fod oss-scan wait-for ::curScan:: --session azure-pipelines
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
-      PROJ_FILE: ${{ parameters.projectFile }}
+      PACKAGE_FILE: "package.zip"
       FOD_RELEASE_ID: $(fodReleaseId)
       FOD_SCAN_NOTES: "Triggered by Azure DevOps Pipelines"
   - task: PowerShell@2
