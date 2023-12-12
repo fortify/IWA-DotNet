@@ -5,6 +5,12 @@ parameters:
 - name: 'pool'
   type: object
   default: {}
+- name: workingDirectory
+  default: ''
+- name: jdkVersion
+  default: '17'
+- name: jdkArch
+  default: 'x64'
 - name: fodApiUrl
   default: 'https://api.ams.fortify.com'
 - name: fodClientId
@@ -75,7 +81,6 @@ jobs:
         Write-Host "##[debug]Not yet implemented"
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
-      PROJ_FILE: ${{ parameters.projectFile }}
       FOD_RELEASE_ID: $(fodReleaseId)
       PACKAGE_FILE: "package.zip"
       FOD_SCAN_NOTES: "Triggered by Azure DevOps Pipelines"
