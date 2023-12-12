@@ -22,8 +22,10 @@ parameters:
   default: 'x64'
 - name: scanCentralCtrlUrl
 - name: scanCentralClientToken
+- name: scanCentralSensorVersion
+  default: 23.1
 - name: notificationEmail
-  default: ''
+  default: 'somebody@somewhere.com'
 - name: sscUrl
 - name: sscCiToken
 - name: uploadToSSC
@@ -94,35 +96,27 @@ jobs:
       filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
       modifyEnvironment: true
   - task: PowerShell@2
-    displayName: 'Fortify ScanCentral SAST scan'
+    displayName: 'Fortify ScanCentral SAST Scan'
     inputs:
       targetType: 'inline'
       script: |
-        scancentral package -bt msbuild -f ${env:PROJ_FILE} -o package.zip
+        Write-Host "##[command]scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}"
+        scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
+        Write-Host "##[command]fcli sc-sast scan start --publish-to $(AppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify ""${env:NOTIFY_EMAIL}"" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
+        fcli sc-sast scan start --publish-to $(AppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify "${env:NOTIFY_EMAIL}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
+        $ScanId=(fcli util var get ::curScan::)
+        Write-Host "##[debug]Scan Id is: $ScanId"
+        Write-Host "##vso[task.setvariable variable=scSastScanId]$ScanId"
+        Write-Host "##[command]fcli sc-sast scan wait-for ::curScan:: --session azure-pipelines"
+        fcli sc-sast scan wait-for ::curScan:: --session azure-pipelines
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
       PROJ_FILE: ${{ parameters.projectFile }}
-  #- task: FortifyScanCentralSAST@7
-  #  inputs:
-  #    scanCentralCtrlUrl: ${{ parameters.scanCentralCtrlUrl }}
-  #    scanCentralClientToken: ${{ parameters.scanCentralClientToken }}
-  #    sscUrl: ${{ parameters.sscUrl }}
-  #    sscCiToken: ${{ parameters.sscCiToken }}
-  #    uploadToSSC: ${{ parameters.uploadToSSC }}
-  #    applicationName: $(FORTIFY_APP_NAME)
-  #    applicationVersion: $(FORTIFY_RELEASE_NAME)
-  #    buildTool: 'msbuild'
-  #    projectFile: ${{ format('{0}\{1}', parameters.workingDirectory, parameters.projectFile) }}
-  #    email: ${{ parameters.notificationEmail }}
-  #    block: true
-  #    outputFile: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}
-  #    logFile: ${{ format('scan-{0}.log', parameters.workingDirectory) }}
-  #    overwrite: true
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: ${{ format('scan-{0}.fpr', parameters.workingDirectory) }}
-      artifact: 'Fortify Results (FPR)'
-      publishLocation: 'pipeline'
+      SSC_APPVER_ID: $(AppVerId)
+      SSC_CI_TOKEN: ${{ parameters.sscCiToken }}
+      SENSOR_VERSION: ${{ parameters.scanCentralSensorVersion }}
+      NOTIFY_EMAIL: ${{ parameters.notificationEmail }}
+      PACKAGE_FILE: "package.zip"
   - task: PowerShell@2
     displayName: 'SSC Logout'
     inputs:

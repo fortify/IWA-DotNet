@@ -61,13 +61,13 @@ variables:
   
   # Change these variables depending on which parts of the pipeline to execute:
 - name: USE_FOD_SAST
-  value: true
-- name: USE_FOD_OSS
   value: false
+- name: USE_FOD_OSS
+  value: true
 - name: USE_FOD_DAST
   value: false
 - name: USE_SCANCENTRAL_SAST
-  value: false
+  value: true
 - name: USE_SCANCENTRAL_DAST
   value: false
 
@@ -114,6 +114,29 @@ stages:
   jobs:
     # Run FoD SAST Scan on Project
   - template: 'devops-integrations/azure-pipelines/templates/fod-sast-scan.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp' 
+        projectFile: 'InsecureWebApp.csproj'
+        fodApiUrl: $(FOD_API_URL)
+        fodClientId: $(FOD_CLIENT_ID)
+        fodClientSecret: $(FOD_CLIENT_SECRET)
+        fodAppName: "$(FORTIFY_APP_NAME)"
+        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+
+  #
+  # Software Composition Analysis - OSSC Scan with Fortify on Demand
+  #
+- stage: FoD_OSS
+  displayName: 'FoD OSS'
+  condition: eq(variables['USE_FOD_OSS'], 'true') 
+  dependsOn: 
+    - BuildAndUnitTest
+  jobs:
+    # Run FoD OSS Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/fod-oss-scan.yml'
     parameters:
         workingDirectory: 'InsecureWebApp' 
         projectFile: 'InsecureWebApp.csproj'
