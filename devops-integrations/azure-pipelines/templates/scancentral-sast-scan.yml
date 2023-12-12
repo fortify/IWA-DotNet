@@ -105,7 +105,6 @@ jobs:
       script: |
         Write-Host "##[command]scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}"
         scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
-        fcli sc-sast session login 
         Write-Host "##[command]fcli sc-sast scan start --publish-to $(sscAppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify ""${env:NOTIFY_EMAIL}"" -p ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
         fcli sc-sast scan start --publish-to $(sscAppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify "${env:NOTIFY_EMAIL}" -p ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
         $ScanId=(fcli util var get ::curScan::)
@@ -128,5 +127,5 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##[command]fcli sc-sast session logout --session azure-pipelines"
-        fcli sc-sast session logout --session azure-pipelines
+        Write-Host "##[command]fcli sc-sast session logout --no-revoke-token --session azure-pipelines"
+        fcli sc-sast session logout --no-revoke-token --session azure-pipelines
