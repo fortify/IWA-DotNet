@@ -102,8 +102,8 @@ jobs:
       script: |
         Write-Host "##[command]scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}"
         scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
-        Write-Host "##[command]fcli sc-sast scan start --publish-to $(AppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify ""${env:NOTIFY_EMAIL}"" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
-        fcli sc-sast scan start --publish-to $(AppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify "${env:NOTIFY_EMAIL}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
+        Write-Host "##[command]fcli sc-sast scan start --publish-to $(sscAppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify ""${env:NOTIFY_EMAIL}"" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
+        fcli sc-sast scan start --publish-to $(sscAppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify "${env:NOTIFY_EMAIL}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
         $ScanId=(fcli util var get ::curScan::)
         Write-Host "##[debug]Scan Id is: $ScanId"
         Write-Host "##vso[task.setvariable variable=scSastScanId]$ScanId"
@@ -112,7 +112,7 @@ jobs:
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
       PROJ_FILE: ${{ parameters.projectFile }}
-      SSC_APPVER_ID: $(AppVerId)
+      SSC_APPVER_ID: $(sscAppVerId)
       SSC_CI_TOKEN: ${{ parameters.sscCiToken }}
       SENSOR_VERSION: ${{ parameters.scanCentralSensorVersion }}
       NOTIFY_EMAIL: ${{ parameters.notificationEmail }}

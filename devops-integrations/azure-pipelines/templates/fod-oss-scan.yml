@@ -46,7 +46,7 @@ jobs:
       version: 'latest'
   - task: DebrickedInstaller@0
     inputs:
-      version: 'latest'
+      version: 'v1.5.1'
   - task: PowerShell@2
     displayName: 'FoD Check Release'
     inputs:
