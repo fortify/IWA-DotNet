@@ -42,7 +42,7 @@ pr:
 variables:
 
   #
-  # In order for the pipeline to execute successfully you should create the following variables in the Pipeline UI.
+  # In order for the pipeline to execute successfully you should create and set the following variables in the Pipeline UI.
   # 
   # For FoD:
   #   FOD_API_URL                   - FoD API URL, e.g. "https://api.ams.fortify.com"
@@ -57,6 +57,16 @@ variables:
   #   SCANCENTRAL_CLIENT_AUTH_TOKEN - ScanCentral SAST Client Authentication Token
   #
   # For ScanCentral DAST:
+  #   Nothing Yet
+  #
+  # The pipeline job templates make use of the Fortify CLI tool (https://github.com/fortify/fcli) and Debricked CLI tool (https://github.com/debricked/cli)
+  # There are tasks which make use of preview extensions (not published to the Azure DevOps marketplace) to install these tools included, e.g.:
+  #   - FcliInstaller - https://github.com/fortify-presales/azure-pipelines-fcli-tasks
+  #   - DebrickedInstaller - https://github.com/fortify-presales/azure-pipelines-debricked-tasks
+  # Follow the instructions on the GitHub repos to install these extensions.
+  # If you are using a self-hosted agent you can install the fcli and debricked tools yourselves, add to the path and comment out the these extension tasks.
+  #
+  # IMPORTANT: if using a self-hosted agent, please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
   
   # Change these variables depending on which parts of the pipeline to execute:
 - name: USE_FOD_SAST
@@ -82,8 +92,6 @@ variables:
   value: $(Build.Repository.Name)
 - name: FORTIFY_RELEASE_NAME
   value: $[replace(variables['Build.SourceBranch'], 'refs/heads/', '')]
-
-  # IMPORTANT: if using a self-hosted agent, please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
 
 stages:
 
