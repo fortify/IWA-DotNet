@@ -78,12 +78,16 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##[debug]Not yet implemented"
+        Write-Host "##[command]fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines"
+        fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines
+        $ScanId=(fcli util var get ::curScan::)
+        Write-Host "##[debug]Scan Id is: $ScanId"
+        Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
+        Write-Host "##[command]fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines"
+        fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines
       workingDirectory: ${{ parameters.workingDirectory }}
     env:
       FOD_RELEASE_ID: $(fodReleaseId)
-      PACKAGE_FILE: "package.zip"
-      FOD_SCAN_NOTES: "Triggered by Azure DevOps Pipelines"
   - task: PowerShell@2
     displayName: 'FoD Logout'
     inputs:

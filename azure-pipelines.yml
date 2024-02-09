@@ -74,9 +74,9 @@ variables:
 - name: USE_FOD_OSS
   value: true
 - name: USE_FOD_DAST
-  value: false
-- name: USE_SCANCENTRAL_SAST
   value: true
+- name: USE_SCANCENTRAL_SAST
+  value: false
 - name: USE_SCANCENTRAL_DAST
   value: false
 
