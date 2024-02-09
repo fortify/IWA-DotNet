@@ -13,6 +13,9 @@ $.fn.NewProducts = function (options) {
                 $.each(response, function (i, row) {
                     product = _productDiv(row);
                     $data.append(product);
+                    if (i == (settings.limit-1)) {
+                        return false;
+                    }
                 });
             } else {
                 $data.append("<div class='col-12 text-center'>No products found</div>");
@@ -34,7 +37,7 @@ $.fn.NewProducts = function (options) {
         return productDiv;
     }
     async function _getProducts(limit) {
-        return await $.get(`/api/v1/products?limit=${limit}`).then();
+        return await $.get(`/api/v1/products/getproducts?limit=${limit}`).then();
     }
 
 };
