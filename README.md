@@ -45,19 +45,29 @@ In order to execute the example scenarios described here you should "fork" a cop
 does not offer this feature across organisations. As an alternative you can "clone" the repository and setup a new "remote" or ask
 permission to be added to the dedicated fork project.
 
+## Pre-Requisites
+
+ - DotNet Framework 6.0.25
+ - SQL Server Express 2019 including SQL Server LocalDB
+ - Visual Studio 2022 Community Edition (or higher)
+
 ## Building the Application
 
-To create the required database:
+
+To create/populate the required database:
 
 ```
-dotnet tool install --global dotnet-ef
+cd InsecureWebApp
+dotnet tool install --global dotnet-ef --version 6.0
 dotnet tool restore
 dotnet ef database update
 ```
 
-To build (and unit test) the application either select "Build->Build Solution" from within Visual Studio or execute the following from the command line:
+To build (and unit test) the application either select "Build->Build Solution" from within Visual Studio or execute the following from a
+Visual Studio Developers command prompt from the root directory of the project:
 
 ```
+dotnet restore
 msbuild IWA.NET.sln /p:Configuration=Debug /t:Clean,Build
 ```
 ## Docker Build

@@ -1,0 +1,97 @@
+# File: templates/fod-dast-scan.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: 'pool'
+  type: object
+  default: {}
+- name: workingDirectory
+  default: ''
+- name: jdkVersion
+  default: '17'
+- name: jdkArch
+  default: 'x64'
+- name: fodApiUrl
+  default: 'https://api.ams.fortify.com'
+- name: fodClientId
+- name: fodClientSecret
+- name: fodAppName
+- name: fodReleaseName
+- name: fodParentReleaseName
+  default: 'main'
+
+jobs:
+- job: FoDDynamicScan
+  pool: ${{ parameters.pool }}
+  steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: ${{ parameters.jdkVersion }}
+      jdkArchitectureOption: ${{ parameters.jdkArch }}
+      jdkSourceOption: PreInstalled
+  - task: FcliInstaller@0
+    inputs:
+      version: 'latest'
+  - task: PowerShell@2
+    displayName: 'FoD Check Release'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $App="${env:FOD_APP_NAME}"
+        $Rel="${env:FOD_RELEASE_NAME}"
+        if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
+          Write-Host "##[debug]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
+          $App="${env:FORTIFY_APP_NAME_OVERRIDE}"
+        } else {
+          Write-Host "##[command]Using FORTIFY_APP_NAME ${App}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${App}"
+        }
+        if (${env:FORTIFY_RELEASE_NAME_OVERRIDE}) {
+          Write-Host "##[debug]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          $Rel=${env:FORTIFY_RELEASE_NAME_OVERRIDE}
+        } else {
+          Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${Rel}"
+        }
+        Write-Host "##[command]fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines"
+        fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines
+        Write-Host "##[command]fcli fod release list --app "${App}" --session azure-pipelines"
+        fcli fod release list --app "${App}" --session azure-pipelines
+        Write-Host "##[command]fcli fod release create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --copy-from ""${App}:${env:FOD_PARENT_RELEASE_NAME}"" --status Development --skip-if-exists -o expr=""{releaseId}"" --session azure-pipelines"
+        $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --session azure-pipelines)
+        Write-Host "##[debug]Setting fodReleaseId to $RelId"
+        Write-Host "##vso[task.setvariable variable=fodReleaseId]$RelId"
+        fcli tool sc-client install -y -d $(Build.SourcesDirectory)\sc-client
+        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\sc-client\bin"
+      showWarnings: true
+    env:
+      FOD_API_URL: ${{ parameters.fodApiUrl }}
+      FOD_CLIENT_ID: ${{ parameters.fodClientId }}
+      FOD_CLIENT_SECRET: ${{ parameters.fodClientSecret }}
+      FOD_APP_NAME: ${{ parameters.fodAppName }}
+      FOD_RELEASE_NAME: ${{ parameters.fodReleaseName }}
+      FOD_PARENT_RELEASE_NAME: ${{ parameters.fodParentReleaseName }}
+  - task: PowerShell@2
+    displayName: 'FoD DAST Scan'
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##[command]fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines"
+        fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines
+        $ScanId=(fcli util var get ::curScan::)
+        Write-Host "##[debug]Scan Id is: $ScanId"
+        Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
+        Write-Host "##[command]fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines"
+        fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines
+      workingDirectory: ${{ parameters.workingDirectory }}
+    env:
+      FOD_RELEASE_ID: $(fodReleaseId)
+  - task: PowerShell@2
+    displayName: 'FoD Logout'
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##[command]fcli fod session logout --session azure-pipelines"
+        fcli fod session logout --session azure-pipelines

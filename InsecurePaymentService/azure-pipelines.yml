@@ -1,0 +1,89 @@
+# Example Continuous Delivery Pipeline with Fortify on Demand (FoD) and Fortify ScanCentral support
+
+name: InsecurePaymentService-CD
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - develop
+    - features/*
+    - releases/*
+    exclude:
+    - experimental/*
+  paths:
+    include:
+    - InsecurePaymentService/
+
+pr:
+  branches:
+    include:
+    - main
+    - develop
+  paths:
+    include:
+    - InsecurePaymentService/
+  
+variables:
+
+  #
+  # In order for the pipeline to execute successfully you should create the following variables in the Pipeline UI.
+  # 
+  # For FoD:
+  #   FOD_API_URL                   - FoD API URL, e.g. "https://api.ams.fortify.com"
+  #   FOD_CLIENT_ID                 - FoD API Client Id
+  #   FOD_CLIENT_SECRET             - FoD API Client Secret
+  #
+  # For SSC:
+  #   SSC_URL                       - SSC URL
+  #   SSC_CI_TOKEN                  - SSC CIToken
+  #
+  # For ScanCentral SAST:
+  #   SCANCENTRAL_CLIENT_AUTH_TOKEN - ScanCentral SAST Client Authentication Token
+  #
+  # For ScanCentral DAST:
+  
+  # Change these variables depending on which parts of the pipeline to execute:
+- name: USE_FOD_SAST
+  value: false
+- name: USE_FOD_OSS
+  value: false
+- name: USE_FOD_DAST
+  value: false
+- name: USE_SCANCENTRAL_SAST
+  value: false
+- name: USE_SCANCENTRAL_DAST
+  value: false
+
+  #
+  # By default the FoD/SSC application name is set to the name of the Git repository
+  # By default the FoD/SSC release/application version name is set to the name of the Git branch
+  # If you wish to override any of these please set the following variables from the pipelines UI:
+  #
+  # FORTIFY_APP_NAME_OVERRIDE
+  # FORTIFY_RELEASE_NAME_OVERRIDE
+  #
+- name: FORTIFY_APP_NAME
+  value: $(Build.Repository.Name)
+- name: FORTIFY_RELEASE_NAME
+  value: $[replace(variables['Build.SourceBranch'], 'refs/heads/', '')]
+
+  # IMPORTANT: if using a self-hosted agent, please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
+
+stages:
+
+  #
+  # Build and Unit Test the application components
+  #
+- stage: BuildAndUnitTest
+  displayName: 'Build and Unit Test'
+  jobs:
+    # Build InsecurePaymentService and run its tests
+  - template: '../devops-integrations/azure-pipelines/templates/build-and-test.yml'
+    parameters:
+        srcProject: 'InsecurePaymentService/InsecurePaymentService.csproj' 
+        runTests: false
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool

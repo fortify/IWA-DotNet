@@ -1,0 +1,128 @@
+# File: templates/scancentral-sast-scan.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: 'pool'
+  type: object
+  default: {}
+- name: workingDirectory
+  default: ''
+- name: projectFile
+  default: '*.csproj'
+- name: dotnetVersion
+  default: '6.x'
+- name: buildConfiguration
+  default: 'Debug'
+- name: vsVersion
+  default: '2022'
+- name: vsEdition
+  default: 'Community'
+- name: jdkVersion
+  default: '17'
+- name: jdkArch
+  default: 'x64'
+- name: scanCentralClientToken
+- name: scanCentralSensorVersion
+  default: 23.1
+- name: notificationEmail
+  default: 'somebody@somewhere.com'
+- name: sscUrl
+- name: sscCiToken
+- name: sscAppName
+- name: sscAppVerName
+- name: sscParentAppVerName
+  default: 'main'
+- name: sscIssueTemplate
+  default: 'Prioritized-HighRisk-Project-Template'
+
+jobs:
+- job: ScanCentralStaticScan
+  pool: ${{ parameters.pool }}
+  steps:
+  - task: UseDotNet@2
+    inputs:
+      version: ${{ parameters.dotnetVersion }}
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: ${{ parameters.jdkVersion }}
+      jdkArchitectureOption: ${{ parameters.jdkArch }}
+      jdkSourceOption: PreInstalled
+  - task: FcliInstaller@0
+    inputs:
+      version: 'latest'
+  - task: PowerShell@2
+    displayName: 'SSC Check AppVersion'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $App="${env:SSC_APP_NAME}"
+        $Rel="${env:SSC_APPVER_NAME}"
+        if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
+          Write-Host "##[debug]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
+          $App="${env:FORTIFY_APP_NAME_OVERRIDE}"
+        } else {
+          Write-Host "##[command]Using FORTIFY_APP_NAME ${App}"
+        }
+        if (${env:FORTIFY_RELEASE_NAME_OVERRIDE}) {
+          Write-Host "##[debug]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          $Rel=${env:FORTIFY_RELEASE_NAME_OVERRIDE}
+        } else {
+          Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
+        }
+        Write-Host "##[command]fcli sc-sast session login --ssc-url ""${env:SSC_URL}"" --ssc-ci-token ""${env:SSC_CI_TOKEN}"" --client-auth-token ""${env:SCSAST_CLIENT_AUTH_TOKEN}"" --session azure-pipelines"
+        fcli sc-sast session login --ssc-url "${env:SSC_URL}" --ssc-ci-token "${env:SSC_CI_TOKEN}" --client-auth-token "${env:SCSAST_CLIENT_AUTH_TOKEN}" --session azure-pipelines
+        Write-Host "##[command]fcli ssc appversion list -q ""application.name=='${App}'"""
+        fcli ssc appversion list -q "application.name=='${App}'" --session azure-pipelines
+        Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr=""{releaseId}"" --session azure-pipelines"
+        $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr="{id}" --session azure-pipelines)
+        Write-Host "##[debug]Setting sscAppVerId to $AppVerId"
+        Write-Host "##vso[task.setvariable variable=sscAppVerId]$AppVerId"
+        fcli tool sc-client install -y -t "${env:SCSAST_CLIENT_AUTH_TOKEN}" -d $(Build.SourcesDirectory)\sc-client
+        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\sc-client\bin"
+      showWarnings: true
+    env:
+      SSC_URL: ${{ parameters.sscUrl }}
+      SSC_CI_TOKEN: ${{ parameters.sscCiToken }}
+      SSC_APP_NAME: ${{ parameters.sscAppName }}
+      SSC_APPVER_NAME: ${{ parameters.sscAppVerName }}
+      SSC_PARENT_APPVER_NAME: ${{ parameters.sscParentAppVerName }}
+      SSC_ISSUE_TEMPLATE: ${{ parameters.sscIssueTemplate }}
+      SCSAST_CLIENT_AUTH_TOKEN: ${{ parameters.scanCentralClientToken }}
+  - task: BatchScript@1
+    displayName: 'Set Visual Studio environment'
+    inputs:
+      filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
+      modifyEnvironment: true
+  - task: PowerShell@2
+    displayName: 'Fortify ScanCentral SAST Scan'
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##[command]scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}"
+        scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
+        Write-Host "##[command]fcli sc-sast scan start --publish-to $(sscAppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify ""${env:NOTIFY_EMAIL}"" -p ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
+        fcli sc-sast scan start --publish-to $(sscAppVerId) --ssc-ci-token ${env:SSC_CI_TOKEN} -v ${env:SENSOR_VERSION} --notify "${env:NOTIFY_EMAIL}" -p ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
+        $ScanId=(fcli util var get ::curScan::)
+        Write-Host "##[debug]Scan Id is: $ScanId"
+        Write-Host "##vso[task.setvariable variable=scSastScanId]$ScanId"
+        Write-Host "##[command]fcli sc-sast scan wait-for ::curScan:: --session azure-pipelines"
+        fcli sc-sast scan wait-for ::curScan:: --session azure-pipelines
+      workingDirectory: ${{ parameters.workingDirectory }}
+    env:
+      SSC_URL: ${{ parameters.sscUrl }}
+      PROJ_FILE: ${{ parameters.projectFile }}
+      SSC_APPVER_ID: $(sscAppVerId)
+      SSC_CI_TOKEN: ${{ parameters.sscCiToken }}
+      SC_CLIENT_AUTH_TOKEN: ${{ parameters.scanCentralClientToken }}
+      SENSOR_VERSION: ${{ parameters.scanCentralSensorVersion }}
+      NOTIFY_EMAIL: ${{ parameters.notificationEmail }}
+      PACKAGE_FILE: "package.zip"
+  - task: PowerShell@2
+    displayName: 'SSC Logout'
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##[command]fcli sc-sast session logout --no-revoke-token --session azure-pipelines"
+        fcli sc-sast session logout --no-revoke-token --session azure-pipelines
