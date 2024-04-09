@@ -1,10 +1,13 @@
-# Example Continuous Delivery Pipeline with Fortify on Premise (SCA/SSC) and/or Fortify on Demand (FOD) support
+# Example Continuous Delivery Pipeline with Fortify on Demand (FoD) and Fortify ScanCentral support
+
+name: InsecureWebApp-CD
 
 trigger:
   batch: true
   branches:
     include:
     - main
+    - develop
     - features/*
     - releases/*
     exclude:
@@ -24,6 +27,7 @@ pr:
   branches:
     include:
     - main
+    - develop
   paths:
     exclude:
     - InsecureProductService/
@@ -36,58 +40,58 @@ pr:
     - media/*
   
 variables:
+
   #
-  # In order for the Pipeline to execute successfully you should create the following variables in the Pipeline UI (or uncomment and hard-code here)
+  # In order for the pipeline to execute successfully you should create and set the following variables in the Pipeline UI.
   # 
-  # ADOBaseURL: 'Your Azure DevOps Base URL'
-  # ADOPAT: 'Your Azure DevOps Personal Access Token'
-  # ADOProject: 'IWA.NET'
-  # AppUrl: 'URL of deployed application'
-  # AzureDBServer: 'Hostname of database server'
-  # AzureDBName: 'Database Name'
-  # AzureDBUser: 'Database User Login'
-  # AzureDBPassword: ' Database Password'
-  # FoDApplicationName: 'IWA.NET'
-  # FoDBaseUrl: 'https://api.emea.fortify.com'
-  # FoDBugTrackerVersion: '4.2'
-  # FoDClientId: 'Your FoD API Client Id'
-  # FoDClientSecret: 'You FoD API Client Secret'
-  # FoDParentRelease: 'main'
-  # FoDReleaseId: 'Your FOD Release Id'
-  # FoDUsername: 'You FoD username'
-  # FoDTenant: 'Your FoD tenant'
-  # ScanCentralCtrlUrl: 'Your ScanCentral Controller URL'
-  # ScanCentralClientToken: 'Your ScanCentral Client Token'
-  # ScanCentralNotificationEmail: 'Your Email Address'
-  # ScanCentralDASTApiUrl: 'Your ScanCentral DAST API URL'
-  # ScanCentralDASTCICDAuthToken: 'Your ScanCentral DAST CICD Authentication Token'
-  # ScanCentralDASTCICDIdentifier: 'Your ScanCentral DAST CICD Identifier'
-  # SSCUrl: 'Your SSC URL'
-  # SSCApplicationName: 'IWA.NET'
-  # SSCApplicationVersion: 'Your SSC application version'
-  # SSCAuthToken: 'Your SSC CI Authentication Token'
-  # ScanCentralVersion: 'The version of ScanCentral being used'
+  # For FoD:
+  #   FOD_API_URL                   - FoD API URL, e.g. "https://api.ams.fortify.com"
+  #   FOD_CLIENT_ID                 - FoD API Client Id
+  #   FOD_CLIENT_SECRET             - FoD API Client Secret
+  #
+  # For SSC:
+  #   SSC_URL                       - SSC URL
+  #   SSC_CI_TOKEN                  - SSC CIToken
+  #
+  # For ScanCentral SAST:
+  #   SCANCENTRAL_CLIENT_AUTH_TOKEN - ScanCentral SAST Client Authentication Token
+  #
+  # For ScanCentral DAST:
+  #   Nothing Yet
+  #
+  # The pipeline job templates make use of the Fortify CLI tool (https://github.com/fortify/fcli) and Debricked CLI tool (https://github.com/debricked/cli)
+  # There are tasks which make use of preview extensions (not published to the Azure DevOps marketplace) to install these tools included, e.g.:
+  #   - FcliInstaller - https://github.com/fortify-presales/azure-pipelines-fcli-tasks
+  #   - DebrickedInstaller - https://github.com/fortify-presales/azure-pipelines-debricked-tasks
+  # Follow the instructions on the GitHub repos to install these extensions.
+  # If you are using a self-hosted agent you can install the fcli and debricked tools yourselves, add to the path and comment out the these extension tasks.
+  #
+  # IMPORTANT: if using a self-hosted agent, please ensure a Java 17x64 SDK is installed and the environment variable JAVA_HOME_17_X64 is set to its location
+  
+  # Change these variables depending on which parts of the pipeline to execute:
+- name: USE_FOD_SAST
+  value: true
+- name: USE_FOD_OSS
+  value: true
+- name: USE_FOD_DAST
+  value: true
+- name: USE_SCANCENTRAL_SAST
+  value: false
+- name: USE_SCANCENTRAL_DAST
+  value: false
 
-  solution: '**/*.sln'
-  vsDevCmd: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat' # location of visual studio VsDevCmd batch file on Agent
-  buildConfiguration: 'Debug'
-  publishProfile: 'iwanet - Web Deploy'
-  fortifyUploadDir: 'fod' # directory to be created containing all dependencies uploaded to FOD for static analysis
-  FoDConnection: 'FODAzureDevOps' # the name of Fortify on Demand service connection configured in Project Settings
-  SSCConnection: 'SSCAzureDevOps' # the name of the Fortify SSC "generic" connection configured in Project Settings
-  ScanCentralLogsDir: 'C:\Users\VssAdministrator\AppData\Local\Fortify\scancentral-$(ScanCentralVersion)\log' # where ScanCentral logs will be written to
-
-  # get the source branch name
-  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features/') }}:
-    branchName: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', '') ]
-  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases/') }}:
-    branchName: $[ replace(variables['Build.SourceBranch'], 'refs/heads/', '') ]
-  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}:
-    branchName: $[ replace(variables['System.PullRequest.TargetBranch'], 'refs/heads/', '') ]
-  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-    branchName: 'main'
-  isPR: $[startsWith(variables['Build.SourceBranch'], 'refs/pull/')]
-  isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  #
+  # By default the FoD/SSC application name is set to the name of the Git repository
+  # By default the FoD/SSC release/application version name is set to the name of the Git branch
+  # If you wish to override any of these please set the following variables from the pipelines UI:
+  #
+  # FORTIFY_APP_NAME_OVERRIDE
+  # FORTIFY_RELEASE_NAME_OVERRIDE
+  #
+- name: FORTIFY_APP_NAME
+  value: $(Build.Repository.Name)
+- name: FORTIFY_RELEASE_NAME
+  value: $[replace(variables['Build.SourceBranch'], 'refs/heads/', '')]
 
 stages:
 
@@ -96,235 +100,144 @@ stages:
   #
 - stage: BuildAndUnitTest
   displayName: 'Build and Unit Test'
-  pool:
-    # use Azure DevOps provided agent
-    vmImage: 'ubuntu-latest'
   jobs:
-    # Build web application component
-  - job: Web
-    steps:   
-    - task: UseDotNet@2
-      inputs:
-        version: '6.x'
-    - task: DotNetCoreCLI@2
-      displayName: 'dotnet build'
-      inputs:
-        command: 'build'
-        configuration: $(buildConfiguration)
-        projects: '$(solution)'
-        
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: '$(build.artifactStagingDirectory)'
-        artifact: 'InsecureWebApp-Web'
-        publishLocation: 'pipeline'    
+    # Build InsecureWebApp and run its tests
+  - template: 'devops-integrations/azure-pipelines/templates/build-and-test.yml'
+    parameters:
+        srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
+        testProject: 'InsecureWebAppTests/InsecureWebAppTests.csproj'
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
 
-#
-# Static Application Security Testing with ScanCentral SAST (on premise)
-#
-- stage: ScanCentral_SAST
-  displayName: 'ScanCentral SAST'
-  condition: eq(variables['UseScanCentralSAST'], 'true')
-  dependsOn: BuildAndUnitTest
-  pool:
-    # use Azure DevOps provided agent
-    vmImage: 'windows-2022'
-    # or uncomment to use a local Agent pool named 'Fortify' with Fortify software installed
-    # name: Fortify
-  jobs:
-  - job: UploadAndScan
-    displayName: 'Upload and Scan'
-    steps:
-    - task: UseDotNet@2
-      inputs:
-        version: '6.0.202'
-
-    - task: DotNetCoreCLI@2
-      displayName: 'dotnet build'
-      inputs:
-        command: 'build'
-        configuration: $(buildConfiguration)
-        projects: '$(solution)'
-
-    - task: BatchScript@1
-      displayName: 'Set Visual Studio environment'
-      inputs:
-        filename: "$(vsDevCmd)"
-        modifyEnvironment: true
-
-    - task: FortifyScanCentralSAST@7
-      inputs:
-        scanCentralCtrlUrl: '$(ScanCentralCtrlUrl)'
-        scanCentralClientToken: '$(ScanCentralClientToken)'
-        sscUrl: '$(SSCUrl)'
-        sscCiToken: '$(SSCAuthToken)'
-        uploadToSSC: true
-        applicationName: '$(SSCApplicationName)'
-        applicationVersion: '$(SSCApplicationVersion)'
-        buildTool: 'msbuild'
-        buildFile: 'IWA.NET.sln'
-        email: '$(ScanCentralNotificationEmail)'
-        block: true
-        outputFile: 'IWA.NET.fpr'
-        logFile: 'IWA.NET.log'
-        overwrite: true
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: '$(Build.SourcesDirectory)/IWA.NET.fpr'
-        artifact: 'Fortify Results (FPR)'
-        publishLocation: 'pipeline'
-
-#
-# Static Application Security Testing with Fortify on Demand
-#
+  #
+  # Static Application Security Testing with Fortify on Demand
+  #
 - stage: FoD_SAST
   displayName: 'FoD SAST'
-  condition: eq(variables['UseFoD'], 'true') 
-  dependsOn: BuildAndUnitTest
-  pool:
-    # use Azure DevOps provided agent
-    vmImage: 'windows-2022'
-    # or uncomment to use a local Agent pool named 'Fortify'
-    #name: Fortify
-  jobs:
-  - job: UploadAndScan
-    displayName: "Upload and Scan"
-    steps:
-     - task: UseDotNet@2
-      displayName: 'Set DotNet environment'
-      inputs:
-        version: '6.0.202'
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: build
-        projects: '$(solution)'
-        configuration: '$(buildConfiguration)'     
-
-    - task: JavaToolInstaller@0
-      inputs:
-        versionSpec: "11"
-        jdkArchitectureOption: x64
-        jdkSourceOption: PreInstalled
-    - task: BatchScript@1
-      displayName: 'Set Visual Studio environment'
-      inputs:
-        filename: "$(vsDevCmd)"
-        modifyEnvironment: true
-
-    - task: FortifyOnDemandStatic@8
-      # Carry out a Fortify on Demand static assessment
-      inputs:
-        FortifyProjects: '.'
-        FodConnection: '$(FoDConnection)'
-        ReleaseOptions: '0'
-        ReleaseId: $(FoDReleaseId)
-        EntitlementSelection: '1'
-        EntitlementPreference: '1'
-        OverrideScanSettings: '2'
-        InProgressScanActionType: '2'
-        RemediationScanPreference: '2'
-        BuildType: 'msbuild'
-        BuildFile: 'IWA.NET.sln'
-        PolicyFailAction: '0'
-        PollingInterval: 5
-
-# 
-# Deploy the application
-#
-- stage: DeployToAzure
-  condition: eq(variables.isMaster, true)
-  #condition: always()
+  condition: eq(variables['USE_FOD_SAST'], 'true') 
   dependsOn: 
     - BuildAndUnitTest
-    - ScanCentral_SAST
-    - FoD_SAST
-  displayName: 'Deploy to Azure'
-  pool:
-    # use Azure DevOps provided agent
-    vmImage: 'windows-2019'
-    # use local Agent pool named 'Fortify'
-    #name: Fortify
+  jobs:
+    # Run FoD SAST Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/fod-sast-scan.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp' 
+        projectFile: 'InsecureWebApp.csproj'
+        fodApiUrl: $(FOD_API_URL)
+        fodClientId: $(FOD_CLIENT_ID)
+        fodClientSecret: $(FOD_CLIENT_SECRET)
+        fodAppName: "$(FORTIFY_APP_NAME)"
+        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+
+  #
+  # Software Composition Analysis - OSSC Scan with Fortify on Demand
+  #
+- stage: FoD_OSS
+  displayName: 'FoD OSS'
+  condition: eq(variables['USE_FOD_OSS'], 'true') 
+  dependsOn: 
+    - BuildAndUnitTest
+  jobs:
+    # Run FoD OSS Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/fod-oss-scan.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp' 
+        fodApiUrl: $(FOD_API_URL)
+        fodClientId: $(FOD_CLIENT_ID)
+        fodClientSecret: $(FOD_CLIENT_SECRET)
+        fodAppName: "$(FORTIFY_APP_NAME)"
+        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+
+  #
+  # Static Application Security Testing with ScanCentral SAST
+  #
+- stage: ScanCentral_SAST
+  displayName: 'ScanCentral SAST'
+  condition: eq(variables['USE_SCANCENTRAL_SAST'], 'true')
+  dependsOn:
+    - BuildAndUnitTest
+  jobs:
+    # Run Scancentral SAST Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/scancentral-sast-scan.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp' 
+        projectFile: 'InsecureWebApp.csproj'
+        scanCentralClientToken: $(SCANCENTRAL_CLIENT_AUTH_TOKEN)
+        sscUrl: $(SSC_URL)
+        sscCiToken: $(SSC_CI_TOKEN)
+        sscAppName: "$(FORTIFY_APP_NAME)"
+        sscAppVerName: "$(FORTIFY_RELEASE_NAME)"
+        #notificationEmail: 'your_email_address'
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+
+  # 
+  # Deploy the application - use an appropriate set of tasks for your application/environment here
+  #
+- stage: DeployApp
+  displayName: 'Deploy Application'
+  dependsOn: 
+    - BuildAndUnitTest
+    - FoD_OSS # just an example for better visualisation
   jobs: 
-  - job: DownloadAndDeploy
-    displayName: 'Download and Deploy'
-    steps:    
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'InsecureWebApp-DB'
-        itemPattern: '**/*'
-        targetPath: '$(Pipeline.Workspace)'    
-    - task: SqlAzureDacpacDeployment@1
-      inputs:
-        azureSubscription: 'iwa-arm'
-        AuthenticationType: 'connectionString'
-        ConnectionString: 'Data Source=tcp:$(AzureDBServer),1433;Initial Catalog=$(AzureDBName);User Id=$(AzureDBUser);Password=$(AzureDBPassword)'
-        deployType: 'SqlTask'
-        SqlFile: '$(Pipeline.Workspace)/InsecureWebApp.sql'
-        IpDetectionMethod: 'AutoDetect'
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'InsecureWebApp-Web'
-        itemPattern: '**/*'
-        targetPath: '$(Pipeline.Workspace)'    
-    - task: AzureRmWebAppDeployment@4
-      inputs:
-        ConnectionType: 'AzureRM'
-        azureSubscription: 'iwa-arm'
-        appType: 'webApp'
-        WebAppName: 'iwanet'
-        packageForLinux: '$(Pipeline.Workspace)/InsecureWebApp.zip'
-        #JSONFiles: 'appsettings.json'
+    # This is a simulated deployment and does nothing
+  - template: 'devops-integrations/azure-pipelines/templates/simulate-deployment.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp'
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+# More likely you will use something like the following to deploy the application to Azure
+#  - template: 'devops-integrations/azure-pipelines/templates/deploy-to-azure.yml'
+#    parameters:
+#        srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
+#        pool:
+#            name: 'Fortify' # use named self-hosted pool 
+#            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+
+  #
+  # Dynamic Application Security Testing with Fortify on Demand
+  #
+- stage: FoD_DAST
+  displayName: 'FoD DAST'
+  condition: eq(variables['USE_FOD_DAST'], 'true') 
+  dependsOn: DeployApp
+  jobs:
+    # Run FoD DAST Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/fod-dast-scan.yml'
+    parameters:
+        fodApiUrl: $(FOD_API_URL)
+        fodClientId: $(FOD_CLIENT_ID)
+        fodClientSecret: $(FOD_CLIENT_SECRET)
+        fodAppName: "$(FORTIFY_APP_NAME)"
+        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
 
 #
-# Dynamic Application Security Testing with ScanCentral DAST (on-premise)
+# Dynamic Application Security Testing with ScanCentral DAST
 #        
 - stage: ScanCentral_DAST
   displayName: 'ScanCentral DAST'
-  condition: eq(variables['UseScanCentralDAST'], 'true')
-  dependsOn: DeployToAzure
-  pool:
-    # use Azure DevOps provided agent
-    vmImage: 'windows-2019'
-    # use local Agent pool named 'Fortify'
-    #name: Fortify
+  condition: eq(variables['USE_SCANCENTRAL_DAST'], 'true')
+  dependsOn: DeployApp
   jobs:
-  - job: RunScan
-    displayName: 'Run Scan'
-    steps:   
-    - task: FortifyScanCentralDAST@7
-      inputs:
-        scanCentralDastApiUrl: '$(ScanCentralDASTApiUrl)'
-        scanCentralCiCdToken: '$(ScanCentralDASTCICDIdentifier)'
-        sscCiToken: '$(ScanCentralDASTCICDAuthToken)'
-
-#        
-# Dynamic Application Security Testing with Fortify on Demand
-#        
-- stage: FoD_DAST
-  displayName: 'FoD DAST'
-  # renamed from UseFOD because we have not tested FOD DAST currently
-  condition: eq(variables['UseFODXXX'], 'true')
-  dependsOn: DeployToAzure
-  pool:
-    # use Azure DevOps provided agent
-    vmImage: 'windows-2019'
-    # use local Agent pool named 'Fortify'
-    #name: Fortify
-  jobs:
-  - job: RunScan
-    displayName: 'Run Scan'
-    steps:   
-    - task: FortifyOnDemandDynamic@7
-      # renamed from UseFOD because we have not tested FOD DAST currently
-      condition: eq(variables['UseFODXXX'], 'true')
-      inputs:
-        APIUrl: '${FoDBaseUrl}'
-        ReleaseId: '${branchName}'
-        APIAuthenticationType: '1'
-        APIKey: '${FoDClientId}'
-        APISecret: '${FoDClientSecret}'
-        EntitlementPreference: '2'
-        PurchaseEntitlements: false
-        PreferRemediation: false
+    # Run ScanCentral DAST Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/scancentral-dast-scan.yml'
+    parameters:
+        sscUrl: $(SSC_URL)
+        sscCiToken: $(SSC_CI_TOKEN)
+        sscAppName: "$(FORTIFY_APP_NAME)"
+        sscAppVerName: "$(FORTIFY_RELEASE_NAME)"
+        pool:
+            name: 'Fortify' # use named self-hosted pool 
+            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool

@@ -9,19 +9,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecureWebAppTests", "Inse
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1957714E-BC03-4D95-9E4E-D960D85A0ECE}"
 	ProjectSection(SolutionItems) = preProject
+		.env = .env
 		azure-pipelines.yml = azure-pipelines.yml
-		bin\cleanup.ps1 = bin\cleanup.ps1
-		etc\commands.txt = etc\commands.txt
-		bin\fod-ado-sync.ps1 = bin\fod-ado-sync.ps1
-		etc\FoDToGitHub.yml = etc\FoDToGitHub.yml
-		bin\fortify-fod.ps1 = bin\fortify-fod.ps1
-		bin\fortify-sca.ps1 = bin\fortify-sca.ps1
-		bin\fortify-scancentral-dast.groovy = bin\fortify-scancentral-dast.groovy
-		bin\fortify-scancentral-dast.ps1 = bin\fortify-scancentral-dast.ps1
-		bin\fortify-scancentral-sast.ps1 = bin\fortify-scancentral-sast.ps1
-		bin\fortify-sourceandlibscanner.ps1 = bin\fortify-sourceandlibscanner.ps1
-		bin\fortify-webinspect.ps1 = bin\fortify-webinspect.ps1
+		InsecurePaymentService\azure-pipelines.yml = InsecurePaymentService\azure-pipelines.yml
+		devops-integrations\azure-pipelines\templates\build-and-test.yml = devops-integrations\azure-pipelines\templates\build-and-test.yml
+		devops-integrations\azure-pipelines\templates\deploy-to-azure.yml = devops-integrations\azure-pipelines\templates\deploy-to-azure.yml
+		devops-integrations\azure-pipelines\templates\fod-dast-scan.yml = devops-integrations\azure-pipelines\templates\fod-dast-scan.yml
+		devops-integrations\azure-pipelines\templates\fod-oss-scan.yml = devops-integrations\azure-pipelines\templates\fod-oss-scan.yml
+		devops-integrations\azure-pipelines\templates\fod-sast-scan.yml = devops-integrations\azure-pipelines\templates\fod-sast-scan.yml
 		README.md = README.md
+		devops-integrations\azure-pipelines\templates\scancentral-dast-scan.yml = devops-integrations\azure-pipelines\templates\scancentral-dast-scan.yml
+		devops-integrations\azure-pipelines\templates\scancentral-sast-scan.yml = devops-integrations\azure-pipelines\templates\scancentral-sast-scan.yml
+		devops-integrations\azure-pipelines\templates\simulate-deployment.yml = devops-integrations\azure-pipelines\templates\simulate-deployment.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsecureProductService", "InsecureProductService\InsecureProductService.csproj", "{D9C33705-D886-43D9-B5CA-E0ABF57F0970}"
