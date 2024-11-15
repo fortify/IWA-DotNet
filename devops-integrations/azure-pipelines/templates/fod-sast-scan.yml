@@ -16,13 +16,15 @@ parameters:
 - name: vsVersion
   default: '2022'
 - name: vsEdition
-  default: 'Community'
+  default: 'Enterprise'
 - name: jdkVersion
   default: '17'
 - name: jdkArch
   default: 'x64'
 - name: fodApiUrl
   default: 'https://api.ams.fortify.com'
+- name: fodServiceConnection
+  default: 'FOD-AMS'
 - name: fodClientId
 - name: fodClientSecret
 - name: fodAppName
@@ -37,6 +39,11 @@ jobs:
   - task: UseDotNet@2
     inputs:
       version: ${{ parameters.dotnetVersion }}
+  - task: BatchScript@1
+    displayName: 'Set Visual Studio Environment'
+    inputs:
+      filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
+      modifyEnvironment: true
   - task: JavaToolInstaller@0
     inputs:
       versionSpec: ${{ parameters.jdkVersion }}
@@ -46,7 +53,7 @@ jobs:
     inputs:
       version: 'latest'
   - task: PowerShell@2
-    displayName: 'FoD Check Release'
+    displayName: 'Set FoD App and Release Name'
     inputs:
       targetType: 'inline'
       script: |
@@ -68,49 +75,86 @@ jobs:
           Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
           Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${Rel}"
         }
+      showWarnings: true
+    env:
+      FOD_APP_NAME: ${{ parameters.fodAppName }}
+      FOD_RELEASE_NAME: ${{ parameters.fodReleaseName }}
+  - task: PowerShell@2
+    displayName: 'FoD Setup Release'
+    inputs:
+      targetType: 'inline'
+      script: |
         Write-Host "##[command]fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines"
         fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines
-        Write-Host "##[command]fcli fod release list --app "${App}" --session azure-pipelines"
-        fcli fod release list --app "${App}" --session azure-pipelines
-        Write-Host "##[command]fcli fod release create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --copy-from ""${App}:${env:FOD_PARENT_RELEASE_NAME}"" --status Development --skip-if-exists -o expr=""{releaseId}"" --session azure-pipelines"
-        $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --session azure-pipelines)
+        
+        Write-Host "##[command]fcli fod action run setup-release --release ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --description ""Created automatically from Azure DevOps"" --copy-from ""${env:FORTIFY_APP_NAME}:${env:FOD_PARENT_RELEASE_NAME}"" --status Development --session azure-pipelines"
+        fcli fod action run setup-release --release "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --description "Created automatically from Azure DevOps" --copy-from "${env:FORTIFY_APP_NAME}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --session azure-pipelines
+        $RelId=(fcli fod release get "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" -o expr="{releaseId}" --session azure-pipelines)
         Write-Host "##[debug]Setting fodReleaseId to $RelId"
         Write-Host "##vso[task.setvariable variable=fodReleaseId]$RelId"
-        fcli tool sc-client install -y -d $(Build.SourcesDirectory)\sc-client
-        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\sc-client\bin"
       showWarnings: true
     env:
       FOD_API_URL: ${{ parameters.fodApiUrl }}
       FOD_CLIENT_ID: ${{ parameters.fodClientId }}
       FOD_CLIENT_SECRET: ${{ parameters.fodClientSecret }}
-      FOD_APP_NAME: ${{ parameters.fodAppName }}
-      FOD_RELEASE_NAME: ${{ parameters.fodReleaseName }}
       FOD_PARENT_RELEASE_NAME: ${{ parameters.fodParentReleaseName }}
-  - task: BatchScript@1
-    displayName: 'Set Visual Studio environment'
-    inputs:
-      filename: ${{ format('C:\Program Files\Microsoft Visual Studio\{0}\{1}\Common7\Tools\VsDevCmd.bat', parameters.vsVersion, parameters.vsEdition) }}
-      modifyEnvironment: true
   - task: PowerShell@2
-    displayName: 'FoD SAST Scan'
+    displayName: 'Install ScanCentral Client'
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##[command]scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}"
-        scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
-        Write-Host "##[command]fcli fod sast-scan start --release $(fodReleaseId) --notes ""${env:FOD_SCAN_NOTES}"" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
-        fcli fod sast-scan start --release $(fodReleaseId) --notes "${env:FOD_SCAN_NOTES}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
-        $ScanId=(fcli util var get ::curScan::)
-        Write-Host "##[debug]Scan Id is: $ScanId"
-        Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
-        Write-Host "##[command]fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines"
-        fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines
-      workingDirectory: ${{ parameters.workingDirectory }}
-    env:
-      PROJ_FILE: ${{ parameters.projectFile }}
-      FOD_RELEASE_ID: $(fodReleaseId)
-      PACKAGE_FILE: "package.zip"
-      FOD_SCAN_NOTES: "Triggered by Azure DevOps Pipelines"
+        fcli tool sc-client install -y -d $(Build.SourcesDirectory)\sc-client
+        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\sc-client\bin"
+      showWarnings: true
+  - task: PowerShell@2
+    displayName: 'Set ScanCentral Java Home'
+    inputs:
+      targetType: 'inline'
+      script: |
+          Write-Host "##[debug]Setting SCANCENTRAL_JAVA_HOME to ${env:JAVA_HOME_17_X64}"
+          Write-Host "##vso[task.setvariable variable=SCANCENTRAL_JAVA_HOME]${env:JAVA_HOME_17_X64}"
+
+  #
+  # Uncomment below to use Fortify Azure DevOps plugin to initiate SAST scan
+  #
+  - task: FortifyOnDemandStatic@9
+    inputs:
+      FortifyProjects: ${{ parameters.workingDirectory }}
+      FodConnection: ${{ parameters.fodServiceConnection }}
+      ReleaseOptions: '0'
+      ReleaseId: $(fodReleaseId)
+      EntitlementSelection: '1'
+      EntitlementPreference: '1'
+      OverrideScanSettings: '2'
+      InProgressScanActionType: '2'
+      RemediationScanPreference: '2'
+      BuildType: 'msbuild'
+      BuildFile: ${{ parameters.projectFile }}
+      PolicyFailAction: '0'
+
+  #
+  # Uncomment below to use fcli to initiate SAST scan
+  #
+  # task: PowerShell@2
+  #  displayName: 'FoD SAST Scan'
+  #  inputs:
+  #    targetType: 'inline'
+  #    script: |
+  #      Write-Host "##[command]scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}"
+  #      scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
+  #      Write-Host "##[command]fcli fod sast-scan start --release $(fodReleaseId) --notes ""${env:FOD_SCAN_NOTES}"" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
+  #      fcli fod sast-scan start --release $(fodReleaseId) --notes "${env:FOD_SCAN_NOTES}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
+  #      $ScanId=(fcli util var get ::curScan::)
+  #      Write-Host "##[debug]Scan Id is: $ScanId"
+  #      Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
+  #      Write-Host "##[command]fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines"
+  #      fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines
+  #    workingDirectory: ${{ parameters.workingDirectory }}
+  #  env:
+  #    PROJ_FILE: ${{ parameters.projectFile }}
+  #    FOD_RELEASE_ID: $(fodReleaseId)
+  #    PACKAGE_FILE: "package.zip"
+  #    FOD_SCAN_NOTES: "Triggered by Azure DevOps Pipelines"
   - task: PowerShell@2
     displayName: 'FoD Logout'
     inputs:

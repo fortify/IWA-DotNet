@@ -1,4 +1,4 @@
-# Example Continuous Delivery Pipeline with Fortify on Demand (FoD) and Fortify ScanCentral support
+# Example Continuous Delivery Pipeline with Fortify on Demand (FoD) and Fortify ScanCentral SAST/DAST support
 
 name: InsecureWebApp-CD
 
@@ -8,8 +8,8 @@ trigger:
     include:
     - main
     - develop
-    - features/*
-    - releases/*
+    - feature/*
+    - release/*
     exclude:
     - experimental/*
   paths:
@@ -45,13 +45,19 @@ variables:
   # In order for the pipeline to execute successfully you should create and set the following variables in the Pipeline UI.
   # 
   # For FoD:
+  #   FOD_BASE_URL                  - FoD Base Url, e.g. "https://ams.fortify.com"
   #   FOD_API_URL                   - FoD API URL, e.g. "https://api.ams.fortify.com"
+  #   FOD_TENANT                    - FoD Tenant Name
   #   FOD_CLIENT_ID                 - FoD API Client Id
   #   FOD_CLIENT_SECRET             - FoD API Client Secret
+  #   FOD_SERVICE_CONNECTION        - The name of the Service Connection created when configuring the Fortify Azure DevOps plugin
   #
   # For SSC:
   #   SSC_URL                       - SSC URL
   #   SSC_CI_TOKEN                  - SSC CIToken
+  #
+  # For Debricked:
+  #   DEBRICKED_TOKEN               - Debricked Access Token
   #
   # For ScanCentral SAST:
   #   SCANCENTRAL_CLIENT_AUTH_TOKEN - ScanCentral SAST Client Authentication Token
@@ -62,7 +68,6 @@ variables:
   # The pipeline job templates make use of the Fortify CLI tool (https://github.com/fortify/fcli) and Debricked CLI tool (https://github.com/debricked/cli)
   # There are tasks which make use of preview extensions (not published to the Azure DevOps marketplace) to install these tools included, e.g.:
   #   - FcliInstaller - https://github.com/fortify-presales/azure-pipelines-fcli-tasks
-  #   - DebrickedInstaller - https://github.com/fortify-presales/azure-pipelines-debricked-tasks
   # Follow the instructions on the GitHub repos to install these extensions.
   # If you are using a self-hosted agent you can install the fcli and debricked tools yourselves, add to the path and comment out the these extension tasks.
   #
@@ -72,6 +77,8 @@ variables:
 - name: USE_FOD_SAST
   value: true
 - name: USE_FOD_OSS
+  value: true
+- name: USE_DEBRICKED
   value: true
 - name: USE_FOD_DAST
   value: true
@@ -107,34 +114,31 @@ stages:
         srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
         testProject: 'InsecureWebAppTests/InsecureWebAppTests.csproj'
         pool:
-            name: 'Fortify' # use named self-hosted pool 
-            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
 
   #
-  # Static Application Security Testing with Fortify on Demand
+  # Software Composition Analysis - OSS Scan from Debricked
   #
-- stage: FoD_SAST
-  displayName: 'FoD SAST'
-  condition: eq(variables['USE_FOD_SAST'], 'true') 
+- stage: Debricked_OSS
+  displayName: 'Debricked OSS'
+  condition: eq(variables['USE_DEBRICKED'], 'true') 
   dependsOn: 
     - BuildAndUnitTest
   jobs:
-    # Run FoD SAST Scan on Project
-  - template: 'devops-integrations/azure-pipelines/templates/fod-sast-scan.yml'
+    # Run Debricked OSS Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/debricked-oss-scan.yml'
     parameters:
-        workingDirectory: 'InsecureWebApp' 
-        projectFile: 'InsecureWebApp.csproj'
-        fodApiUrl: $(FOD_API_URL)
-        fodClientId: $(FOD_CLIENT_ID)
-        fodClientSecret: $(FOD_CLIENT_SECRET)
-        fodAppName: "$(FORTIFY_APP_NAME)"
-        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        workingDirectory: '.' 
+        debrickedToken: $(DEBRICKED_TOKEN)
         pool:
-            name: 'Fortify' # use named self-hosted pool 
-            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
 
   #
-  # Software Composition Analysis - OSSC Scan with Fortify on Demand
+  # Software Composition Analysis - OSS Scan from Fortify on Demand
   #
 - stage: FoD_OSS
   displayName: 'FoD OSS'
@@ -151,9 +155,37 @@ stages:
         fodClientSecret: $(FOD_CLIENT_SECRET)
         fodAppName: "$(FORTIFY_APP_NAME)"
         fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        vsEdition: "Enterprise"
         pool:
-            name: 'Fortify' # use named self-hosted pool 
-            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+
+  #
+  # Static Application Security Testing with Fortify on Demand
+  #
+- stage: FoD_SAST
+  displayName: 'FoD SAST'
+  condition: eq(variables['USE_FOD_SAST'], 'true') 
+  dependsOn: 
+    - BuildAndUnitTest
+  jobs:
+    # Run FoD SAST Scan on Project
+  - template: 'devops-integrations/azure-pipelines/templates/fod-sast-scan.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp' 
+        projectFile: 'InsecureWebApp.csproj'
+        fodServiceConnection: $(FOD_SERVICE_CONNECTION)
+        fodApiUrl: $(FOD_API_URL)
+        fodClientId: $(FOD_CLIENT_ID)
+        fodClientSecret: $(FOD_CLIENT_SECRET)
+        fodAppName: "$(FORTIFY_APP_NAME)"
+        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        vsEdition: "Enterprise"
+        pool:
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
 
   #
   # Static Application Security Testing with ScanCentral SAST
@@ -176,8 +208,9 @@ stages:
         sscAppVerName: "$(FORTIFY_RELEASE_NAME)"
         #notificationEmail: 'your_email_address'
         pool:
-            name: 'Fortify' # use named self-hosted pool 
-            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
 
   # 
   # Deploy the application - use an appropriate set of tasks for your application/environment here
@@ -185,23 +218,27 @@ stages:
 - stage: DeployApp
   displayName: 'Deploy Application'
   dependsOn: 
-    - BuildAndUnitTest
-    - FoD_OSS # just an example for better visualisation
+    - FoD_SAST
+    - FoD_OSS
+    - Debricked_OSS
+    - ScanCentral_SAST
   jobs: 
     # This is a simulated deployment and does nothing
   - template: 'devops-integrations/azure-pipelines/templates/simulate-deployment.yml'
     parameters:
         workingDirectory: 'InsecureWebApp'
         pool:
-            name: 'Fortify' # use named self-hosted pool 
-            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
-# More likely you will use something like the following to deploy the application to Azure
-#  - template: 'devops-integrations/azure-pipelines/templates/deploy-to-azure.yml'
-#    parameters:
-#        srcProject: 'InsecureWebApp/InsecureWebApp.csproj' 
-#        pool:
-#            name: 'Fortify' # use named self-hosted pool 
-#            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+  # More likely you will be using something like the following:
+  #- template: 'devops-integrations/azure-pipelines/templates/deploy-to-azure.yml'
+  #  parameters:
+  #      workingDirectory: 'InsecureWebApp'
+  #      pool:
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+  #          vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
 
   #
   # Dynamic Application Security Testing with Fortify on Demand
@@ -220,8 +257,9 @@ stages:
         fodAppName: "$(FORTIFY_APP_NAME)"
         fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
         pool:
-            name: 'Fortify' # use named self-hosted pool 
-            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
 
 #
 # Dynamic Application Security Testing with ScanCentral DAST
@@ -239,5 +277,53 @@ stages:
         sscAppName: "$(FORTIFY_APP_NAME)"
         sscAppVerName: "$(FORTIFY_RELEASE_NAME)"
         pool:
-            name: 'Fortify' # use named self-hosted pool 
-            #vmImage: 'windows-2022' # or uncomment to use Azure Devops cloud-hosted pool
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+
+  #
+  # Verify FoD Security Policy
+  #
+- stage: FoD_SecurityGate
+  displayName: 'FoD Security Gate'
+  condition: always() 
+  dependsOn: 
+    - FoD_SAST
+    - FoD_DAST
+  jobs:
+    # Verify Security Policy for the Release
+  - template: 'devops-integrations/azure-pipelines/templates/fod-security-gate.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp' 
+        fodApiUrl: $(FOD_API_URL)
+        fodClientId: $(FOD_CLIENT_ID)
+        fodClientSecret: $(FOD_CLIENT_SECRET)
+        fodAppName: "$(FORTIFY_APP_NAME)"
+        fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        pool:
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+
+  #
+  # Verify SSC Security Policy
+  #
+- stage: SSC_SecurityGate
+  displayName: 'SSC Security Gate'
+  condition: always() 
+  dependsOn: 
+    - ScanCentral_SAST
+    - ScanCentral_DAST
+  jobs:
+    # Verify Security Policy for the Application Version
+  - template: 'devops-integrations/azure-pipelines/templates/ssc-security-gate.yml'
+    parameters:
+        workingDirectory: 'InsecureWebApp' 
+        sscUrl: $(SSC_URL)
+        sscCiToken: $(SSC_CI_TOKEN)
+        sscAppName: "$(FORTIFY_APP_NAME)"
+        sscAppVerName: "$(FORTIFY_RELEASE_NAME)"
+        pool:
+            #name: 'Fortify' # uncomment to use named self-hosted pool 
+            vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
