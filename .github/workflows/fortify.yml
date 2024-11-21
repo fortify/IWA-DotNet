@@ -58,7 +58,7 @@ jobs:
           FOD_PASSWORD: ${{secrets.FOD_PAT}}
           DO_EXPORT: true
           DO_SETUP: true
+          SETUP_EXTRA_OPTS: --copy-from "${{ github.repository }}:${{ github.event.repository.default_branch }}"
           DO_JOB_SUMMARY: true
           DO_PR_COMMENT: true
           #DO_POLICY_CHECK: true
-          #SETUP_EXTRA_OPTS: --copy-from "${{ github.repository }}:${{ github.event.repository.default_branch }}"
