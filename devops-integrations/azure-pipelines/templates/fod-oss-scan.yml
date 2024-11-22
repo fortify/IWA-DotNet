@@ -14,7 +14,7 @@ parameters:
 - name: vsVersion
   default: '2022'
 - name: vsEdition
-  default: 'Community'
+  default: 'Professional'
 - name: jdkVersion
   default: '17'
 - name: jdkArch

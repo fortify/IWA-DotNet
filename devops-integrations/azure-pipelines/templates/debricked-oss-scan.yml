@@ -1,0 +1,47 @@
+# File: templates/debricked-oss-scan.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: 'pool'
+  type: object
+  default: {}
+- name: workingDirectory
+  default: ''
+- name: jdkVersion
+  default: '17'
+- name: jdkArch
+  default: 'x64'
+- name: debrickedToken
+- name: debrickedRepo
+  default: $(Build.Repository.Name)
+
+jobs:
+- job: DebrickedOSSScan
+  pool: ${{ parameters.pool }}
+  steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: ${{ parameters.jdkVersion }}
+      jdkArchitectureOption: ${{ parameters.jdkArch }}
+      jdkSourceOption: PreInstalled
+  - task: FcliInstaller@0
+    inputs:
+      version: 'latest'
+  - task: PowerShell@2
+    displayName: 'Install Debricked CLI'
+    inputs:
+      targetType: 'inline'
+      script: |
+        fcli tool debricked-cli install -y -d $(Build.SourcesDirectory)\debricked
+        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\debricked\bin"      
+  - task: PowerShell@2
+    displayName: 'Debricked OSS Scan'
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##[command]debricked scan . -e '*\**.lock' -e '**\node_modules\**'' -r ${env:DEBRICKED_REPO} -t ${env:DEBRICKED_TOKEN}"
+        debricked scan . -e "*\**.lock" -e "**\node_modules\**" -r ""${env:DEBRICKED_REPO}"" -t ""${env:DEBRICKED_TOKEN}""
+      workingDirectory: ${{ parameters.workingDirectory }}
+    env:
+      DEBRICKED_TOKEN: ${{ parameters.debrickedToken }}
+      DEBRICKED_REPO: ${{ parameters.debrickedRepo }}
