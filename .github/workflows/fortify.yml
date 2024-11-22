@@ -8,10 +8,10 @@
 # GitHub Security Code Scanning Alerts. Existing customers should review inputs and environment variables below to configure scanning against  #
 # an existing application in your Fortify on Demand tenant. Additional information is available in the comments throughout the workflow, the   #
 # documentation for the Fortify actions used, and the Fortify on Demand / ScanCentral Client product documentation. If you need additional     #
-# assistance with configuration, feel free to create a help ticket in the Fortify on Demand portal.   
+# assistance with configuration, feel free to create a help ticket in the Fortify on Demand portal.                                            #
 ################################################################################################################################################
 
-name: Fortify on Demand Scan
+name: Fortify AST Scan
 
 on:
   push:
@@ -21,25 +21,26 @@ on:
   workflow_dispatch:  
 
 jobs:
-  FoD-SAST-Scan:
+  Fortify-AST-Scan:
     # Use the appropriate runner for building your source code.
     runs-on: windows-latest
     permissions:
       actions: read
       contents: read
       security-events: write
+      pull-requests: write
 
     steps:
       # Check out source code
       - name: Check Out Source Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1
+        uses: microsoft/setup-msbuild@v2
         
       # Java is required to run the various Fortify utilities. Ensuring proper version is installed on the runner.
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
@@ -49,11 +50,15 @@ jobs:
         uses: fortify/github-action@v1
         with:
           sast-scan: true
+          debricked-sca-scan: true
         env:
           FOD_URL: https://ams.fortify.com
           FOD_TENANT: ${{secrets.FOD_TENANT}}
           FOD_USER: ${{secrets.FOD_USER}}
           FOD_PASSWORD: ${{secrets.FOD_PAT}}
-          FOD_RELEASE: ${{ secrets.FOD_RELEASE_ID }}
-          EXTRA_PACKAGE_OPTS: -oss
           DO_EXPORT: true
+          DO_SETUP: true
+          SETUP_EXTRA_OPTS: --copy-from "${{ github.repository }}:${{ github.event.repository.default_branch }}"
+          DO_JOB_SUMMARY: true
+          DO_PR_COMMENT: true
+          #DO_POLICY_CHECK: true
