@@ -1,0 +1,66 @@
+# File: templates/ssc-security-gate.yml
+
+# defaults for any parameters that aren't specified
+parameters: 
+- name: 'pool'
+  type: object
+  default: {}
+- name: workingDirectory
+  default: ''
+- name: jdkVersion
+  default: '17'
+- name: jdkArch
+  default: 'x64'
+- name: sscUrl
+- name: sscCiToken
+- name: sscAppName
+- name: sscAppVerName
+
+jobs:
+- job: SSCSecurityGate
+  pool: ${{ parameters.pool }}
+  steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: ${{ parameters.jdkVersion }}
+      jdkArchitectureOption: ${{ parameters.jdkArch }}
+      jdkSourceOption: PreInstalled
+  - task: FcliInstaller@0
+    inputs:
+      version: 'latest'   
+  - task: PowerShell@2
+    displayName: 'Validate Security Policy'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $App="${env:SSC_APP_NAME}"
+        $Rel="${env:SSC_APPVER_NAME}"
+        if (${env:FORTIFY_APP_NAME_OVERRIDE}) {
+          Write-Host "##[debug]Overriding FORTIFY_APP_NAME to ${env:FORTIFY_APP_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_APP_NAME]${env:FORTIFY_APP_NAME_OVERRIDE}"
+          $App="${env:FORTIFY_APP_NAME_OVERRIDE}"
+        } else {
+          Write-Host "##[command]Using FORTIFY_APP_NAME ${App}"
+        }
+        if (${env:FORTIFY_RELEASE_NAME_OVERRIDE}) {
+          Write-Host "##[debug]Overriding FORTIFY_RELEASE_NAME to ${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${env:FORTIFY_RELEASE_NAME_OVERRIDE}"
+          $Rel=${env:FORTIFY_RELEASE_NAME_OVERRIDE}
+        } else {
+          Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
+        }
+
+        Write-Host "##[command]fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines"
+        fcli ssc session login --url "${env:SSC_URL}" --ci-token "${env:SSC_CI_TOKEN}" --session azure-pipelines
+        
+        Write-Host "##[command]fcli ssc action run check-policy --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --session azure-pipelines"
+        fcli ssc action run check-policy --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --session azure-pipelines
+
+        Write-Host "##[command]fcli ssc session logout --session azure-pipelines"
+        fcli ssc session logout --session azure-pipelines
+      showWarnings: true
+    env:
+      SSC_URL: ${{ parameters.sscUrl }}
+      SSC_CI_TOKEN: ${{ parameters.sscCiToken }}
+      SSC_APP_NAME: ${{ parameters.sscAppName }}
+      SSC_APPVER_NAME: ${{ parameters.sscAppVerName }}

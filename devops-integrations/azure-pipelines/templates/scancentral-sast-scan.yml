@@ -73,6 +73,7 @@ jobs:
         }
         Write-Host "##[command]fcli sc-sast session login --ssc-url ""${env:SSC_URL}"" --ssc-ci-token ""${env:SSC_CI_TOKEN}"" --client-auth-token ""${env:SCSAST_CLIENT_AUTH_TOKEN}"" --session azure-pipelines"
         fcli sc-sast session login --ssc-url "${env:SSC_URL}" --ssc-ci-token "${env:SSC_CI_TOKEN}" --client-auth-token "${env:SCSAST_CLIENT_AUTH_TOKEN}" --session azure-pipelines
+        
         Write-Host "##[command]fcli ssc appversion list -q ""application.name=='${App}'"""
         fcli ssc appversion list -q "application.name=='${App}'" --session azure-pipelines
         Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr=""{releaseId}"" --session azure-pipelines"
