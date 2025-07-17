@@ -59,12 +59,12 @@ jobs:
           Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
           Write-Host "##vso[task.setvariable variable=FORTIFY_RELEASE_NAME]${Rel}"
         }
-        Write-Host "##[command]fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines"
-        fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines
-        Write-Host "##[command]fcli fod release list --app "${App}" --session azure-pipelines"
-        fcli fod release list --app "${App}" --session azure-pipelines
-        Write-Host "##[command]fcli fod release create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --copy-from ""${App}:${env:FOD_PARENT_RELEASE_NAME}"" --status Development --skip-if-exists -o expr=""{releaseId}"" --session azure-pipelines"
-        $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --session azure-pipelines)
+        Write-Host "##[command]fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --fod-session azure-pipelines"
+        fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --fod-session azure-pipelines
+        Write-Host "##[command]fcli fod release list --app "${App}" --fod-session azure-pipelines"
+        fcli fod release list --app "${App}" --fod-session azure-pipelines
+        Write-Host "##[command]fcli fod release create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --copy-from ""${App}:${env:FOD_PARENT_RELEASE_NAME}"" --status Development --skip-if-exists -o expr=""{releaseId}"" --fod-session azure-pipelines"
+        $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --fod-session azure-pipelines)
         Write-Host "##[debug]Setting fodReleaseId to $RelId"
         Write-Host "##vso[task.setvariable variable=fodReleaseId]$RelId"
       showWarnings: true
@@ -98,13 +98,13 @@ jobs:
   #  inputs:
   #    targetType: 'inline'
   #    script: |
-  #      Write-Host "##[command]fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines"
-  #      fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines
+  #      Write-Host "##[command]fcli fod dast-scan start --release $(fodReleaseId) --store curScan --fod-session azure-pipelines"
+  #      fcli fod dast-scan start --release $(fodReleaseId) --store curScan --fod-session azure-pipelines
   #      $ScanId=(fcli util var get ::curScan::)
   #      Write-Host "##[debug]Scan Id is: $ScanId"
   #      Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
-  #      Write-Host "##[command]fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines"
-  #      fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines
+  #      Write-Host "##[command]fcli fod dast-scan wait-for ::curScan:: --fod-session azure-pipelines"
+  #      fcli fod dast-scan wait-for ::curScan:: --fod-session azure-pipelines
   #    workingDirectory: ${{ parameters.workingDirectory }}
   #  env:
   #    FOD_RELEASE_ID: $(fodReleaseId)
@@ -113,5 +113,5 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##[command]fcli fod session logout --session azure-pipelines"
-        fcli fod session logout --session azure-pipelines
+        Write-Host "##[command]fcli fod session logout --fod-session azure-pipelines"
+        fcli fod session logout --fod-session azure-pipelines

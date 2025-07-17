@@ -50,14 +50,14 @@ jobs:
           Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
         }
 
-        Write-Host "##[command]fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines"
-        fcli ssc session login --url "${env:SSC_URL}" --ci-token "${env:SSC_CI_TOKEN}" --session azure-pipelines
+        Write-Host "##[command]fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --ssc-session azure-pipelines"
+        fcli ssc session login --url "${env:SSC_URL}" --ci-token "${env:SSC_CI_TOKEN}" --ssc-session azure-pipelines
         
-        Write-Host "##[command]fcli ssc action run check-policy --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --session azure-pipelines"
-        fcli ssc action run check-policy --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --session azure-pipelines
+        Write-Host "##[command]fcli ssc action run check-policy --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --ssc-session azure-pipelines"
+        fcli ssc action run check-policy --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --ssc-session azure-pipelines
 
-        Write-Host "##[command]fcli ssc session logout --session azure-pipelines"
-        fcli ssc session logout --session azure-pipelines
+        Write-Host "##[command]fcli ssc session logout --ssc-session azure-pipelines"
+        fcli ssc session logout --ssc-session azure-pipelines
       showWarnings: true
     env:
       SSC_URL: ${{ parameters.sscUrl }}
