@@ -259,6 +259,8 @@ stages:
         fodClientSecret: $(FOD_CLIENT_SECRET)
         fodAppName: "$(FORTIFY_APP_NAME)"
         fodReleaseName: "$(FORTIFY_RELEASE_NAME)"
+        fodDastAssessmentTypeId: $(FOD_DAST_ASSESSMENT_TYPE_ID)
+        fodDastEntitlementId: $(FOD_ENTITLEMENT_ID)
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool

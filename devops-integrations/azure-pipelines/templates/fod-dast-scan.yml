@@ -21,6 +21,8 @@ parameters:
 - name: fodReleaseName
 - name: fodParentReleaseName
   default: 'main'
+- name: fodDastAssessmentTypeId
+- name: fodDastEntitlementId
 
 jobs:
 - job: FoDDynamicScan
@@ -82,8 +84,8 @@ jobs:
       FodConnection: ${{ parameters.fodServiceConnection }}
       ReleaseOptions: '0'
       ReleaseId: $(fodReleaseId)
-      AssessmentTypeId: ${{ env:FOD_DAST_ASSESSMENT_TYPE_ID }}
-      EntitlementId: ${{ env:FOD_ENTITLEMENT_ID }}
+      AssessmentTypeId: ${{ parameters.fodDastAssessmentTypeId }}
+      EntitlementId: ${{ parameters.fodDastEntitlementId }}
       EntitlementFrequencyType: 'Subscription'
       OverrideScanSettings: '2'
       PolicyFailAction: '0'
