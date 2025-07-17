@@ -34,9 +34,11 @@ namespace MicroFocus.InsecureWebApp
         {
             //services.AddAntiforgery(options => { options.Cookie.Expiration = TimeSpan.Zero; });
 
+
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase(databaseName: "IWADb"));
+                options.UseSqlite("Data Source=database.dat"));
+                //options.UseInMemoryDatabase(databaseName: "IWADb"));
                 //options.UseSqlServer(
                 //    Configuration.GetConnectionString("DefaultConnection")));
             //GRAPH QL IMPLEMENTATION

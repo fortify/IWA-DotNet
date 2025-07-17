@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <UserSecretsId>iwa-689A97DD-C582-4A71-A532-A05A55CB7B74</UserSecretsId>
     <RootNamespace>MicroFocus.InsecureWebApp</RootNamespace>
@@ -12,8 +12,11 @@
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+	<IsPackable>true</IsPackable>
+	<NuGetAudit>False</NuGetAudit>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <Compile Remove="Data\Migrations\20220718074954_Prescription.cs" />
     <Compile Remove="Data\Migrations\20220718074954_Prescription.Designer.cs" />
@@ -33,31 +36,32 @@
   <ItemGroup>
     <PackageReference Include="EnumStringValues" Version="4.0.1" />
     <PackageReference Include="HotChocolate.AspNetCore" Version="12.13.1" />  
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.16" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.16" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.16" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.16" />
+    <!--PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" /-->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.16" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.16">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.16" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.16" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.16" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.16">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="Moment.js" Version="2.19.2" />
     <PackageReference Include="net.sf.mpxj-for-csharp" Version="10.14.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.7" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.0.16" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.6.0" />
-    <PackageReference Include="TGServiceInterface" Version="3.2.1" />
+    <PackageReference Include="Tgstation.Server.Client" Version="17.1.0" />
     <PackageReference Include="TinyMCE" Version="5.10.7" />
   </ItemGroup>
 
