@@ -13,6 +13,8 @@ parameters:
   default: 'x64'
 - name: fodApiUrl
   default: 'https://api.ams.fortify.com'
+- name: fodServiceConnection
+  default: 'FOD-AMS'
 - name: fodClientId
 - name: fodClientSecret
 - name: fodAppName
@@ -63,8 +65,6 @@ jobs:
         $RelId=(fcli fod release create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --copy-from "${App}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --skip-if-exists -o expr="{releaseId}" --session azure-pipelines)
         Write-Host "##[debug]Setting fodReleaseId to $RelId"
         Write-Host "##vso[task.setvariable variable=fodReleaseId]$RelId"
-        fcli tool sc-client install -y -d $(Build.SourcesDirectory)\sc-client
-        Write-Host "##vso[task.prependpath]$(Build.SourcesDirectory)\sc-client\bin"
       showWarnings: true
     env:
       FOD_API_URL: ${{ parameters.fodApiUrl }}
@@ -73,21 +73,39 @@ jobs:
       FOD_APP_NAME: ${{ parameters.fodAppName }}
       FOD_RELEASE_NAME: ${{ parameters.fodReleaseName }}
       FOD_PARENT_RELEASE_NAME: ${{ parameters.fodParentReleaseName }}
-  - task: PowerShell@2
-    displayName: 'FoD DAST Scan'
+
+  #
+  # Uncomment below to use Fortify Azure DevOps plugin to initiate DAST scan
+  #
+  - task: FortifyDASTAutomated@2
     inputs:
-      targetType: 'inline'
-      script: |
-        Write-Host "##[command]fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines"
-        fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines
-        $ScanId=(fcli util var get ::curScan::)
-        Write-Host "##[debug]Scan Id is: $ScanId"
-        Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
-        Write-Host "##[command]fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines"
-        fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines
-      workingDirectory: ${{ parameters.workingDirectory }}
-    env:
-      FOD_RELEASE_ID: $(fodReleaseId)
+      FodConnection: ${{ parameters.fodServiceConnection }}
+      ReleaseOptions: '0'
+      ReleaseId: $(fodReleaseId)
+      AssessmentTypeId: ${{ env.FOD_DAST_ASSESSMENT_TYPE_ID }}
+      EntitlementId: ${{ env.FOD_ENTITLEMENT_ID }}
+      EntitlementFrequencyType: 'Subscription'
+      OverrideScanSettings: '2'
+      PolicyFailAction: '0'
+
+  #
+  # Uncomment below to use fcli to initiate DAST scan
+  #
+  #- task: PowerShell@2
+  #  displayName: 'FoD DAST Scan'
+  #  inputs:
+  #    targetType: 'inline'
+  #    script: |
+  #      Write-Host "##[command]fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines"
+  #      fcli fod dast-scan start --release $(fodReleaseId) --store curScan --session azure-pipelines
+  #      $ScanId=(fcli util var get ::curScan::)
+  #      Write-Host "##[debug]Scan Id is: $ScanId"
+  #      Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
+  #      Write-Host "##[command]fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines"
+  #      fcli fod dast-scan wait-for ::curScan:: --session azure-pipelines
+  #    workingDirectory: ${{ parameters.workingDirectory }}
+  #  env:
+  #    FOD_RELEASE_ID: $(fodReleaseId)
   - task: PowerShell@2
     displayName: 'FoD Logout'
     inputs:
