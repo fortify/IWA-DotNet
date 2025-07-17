@@ -10,7 +10,7 @@ parameters:
 - name: projectFile
   default: '*.csproj'
 - name: dotnetVersion
-  default: '6.x'
+  default: '8.x'
 - name: buildConfiguration
   default: 'Debug'
 - name: vsVersion

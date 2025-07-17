@@ -1,4 +1,4 @@
-# Example Continuous Delivery Pipeline with Fortify on Demand (FoD) and Fortify ScanCentral SAST/DAST support
+# Example Continuous Delivery Pipeline with OpenText Application Security Core and ScanCentral SAST/DAST support
 
 name: InsecureWebApp-CD
 
@@ -116,7 +116,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
   #
   # Software Composition Analysis - OSS Scan from Debricked
@@ -135,7 +135,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
   #
   # Software Composition Analysis - OSS Scan from Fortify on Demand
@@ -159,7 +159,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
   #
   # Static Application Security Testing with Fortify on Demand
@@ -185,7 +185,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
   #
   # Static Application Security Testing with ScanCentral SAST
@@ -210,7 +210,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
   # 
   # Deploy the application - use an appropriate set of tasks for your application/environment here
@@ -230,7 +230,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
   # More likely you will be using something like the following:
   #- template: 'devops-integrations/azure-pipelines/templates/deploy-to-azure.yml'
   #  parameters:
@@ -238,7 +238,7 @@ stages:
   #      pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
   #          vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
   #
   # Dynamic Application Security Testing with Fortify on Demand
@@ -259,7 +259,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
 #
 # Dynamic Application Security Testing with ScanCentral DAST
@@ -279,7 +279,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
   #
   # Verify FoD Security Policy
@@ -303,7 +303,7 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
 
   #
   # Verify SSC Security Policy
@@ -326,4 +326,4 @@ stages:
         pool:
             #name: 'Fortify' # uncomment to use named self-hosted pool 
             vmImage: 'windows-2022' # uncomment to use Azure Devops cloud-hosted pool
-            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet Core 6.x
+            #vmImage: 'ubuntu-20.04' # uncomment to use Linux Agent with DotNet 8
