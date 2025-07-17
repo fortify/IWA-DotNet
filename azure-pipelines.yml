@@ -53,7 +53,7 @@ variables:
   #   FOD_SERVICE_CONNECTION        - The name of the Service Connection created when configuring the Fortify Azure DevOps plugin
   #   FOD_DAST_ASSESSMENT_TYPE_ID   - FoD DAST Automated Assessment Type Id (if using DAST Automated)
   #   FOD_ENTITLEMENT_ID            - FoD Entitlement Id (if using DAST Automated)
-- #
+  #
   # For SSC:
   #   SSC_URL                       - SSC URL
   #   SSC_CI_TOKEN                  - SSC CIToken
