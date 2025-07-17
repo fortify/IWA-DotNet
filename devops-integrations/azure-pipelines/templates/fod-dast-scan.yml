@@ -82,8 +82,8 @@ jobs:
       FodConnection: ${{ parameters.fodServiceConnection }}
       ReleaseOptions: '0'
       ReleaseId: $(fodReleaseId)
-      AssessmentTypeId: ${{ env.FOD_DAST_ASSESSMENT_TYPE_ID }}
-      EntitlementId: ${{ env.FOD_ENTITLEMENT_ID }}
+      AssessmentTypeId: ${{ env:FOD_DAST_ASSESSMENT_TYPE_ID }}
+      EntitlementId: ${{ env:FOD_ENTITLEMENT_ID }}
       EntitlementFrequencyType: 'Subscription'
       OverrideScanSettings: '2'
       PolicyFailAction: '0'
