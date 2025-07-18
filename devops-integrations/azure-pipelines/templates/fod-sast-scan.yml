@@ -84,12 +84,12 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##[command]fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines"
-        fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --session azure-pipelines
+        Write-Host "##[command]fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --fod-session azure-pipelines"
+        fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --fod-session azure-pipelines
         
-        Write-Host "##[command]fcli fod action run setup-release --release ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --description ""Created automatically from Azure DevOps"" --copy-from ""${env:FORTIFY_APP_NAME}:${env:FOD_PARENT_RELEASE_NAME}"" --status Development --session azure-pipelines"
-        fcli fod action run setup-release --release "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --description "Created automatically from Azure DevOps" --copy-from "${env:FORTIFY_APP_NAME}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --session azure-pipelines
-        $RelId=(fcli fod release get "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" -o expr="{releaseId}" --session azure-pipelines)
+        Write-Host "##[command]fcli fod action run setup-release --release ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --description ""Created automatically from Azure DevOps"" --copy-from ""${env:FORTIFY_APP_NAME}:${env:FOD_PARENT_RELEASE_NAME}"" --status Development --fod-session azure-pipelines"
+        fcli fod action run setup-release --release "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --description "Created automatically from Azure DevOps" --copy-from "${env:FORTIFY_APP_NAME}:${env:FOD_PARENT_RELEASE_NAME}" --status Development --fod-session azure-pipelines
+        $RelId=(fcli fod release get "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" -o expr="{releaseId}" --fod-session azure-pipelines)
         Write-Host "##[debug]Setting fodReleaseId to $RelId"
         Write-Host "##vso[task.setvariable variable=fodReleaseId]$RelId"
       showWarnings: true
@@ -142,13 +142,13 @@ jobs:
   #    script: |
   #      Write-Host "##[command]scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}"
   #      scancentral package -bt msbuild -bf ${env:PROJ_FILE} -o ${env:PACKAGE_FILE}
-  #      Write-Host "##[command]fcli fod sast-scan start --release $(fodReleaseId) --notes ""${env:FOD_SCAN_NOTES}"" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines"
-  #      fcli fod sast-scan start --release $(fodReleaseId) --notes "${env:FOD_SCAN_NOTES}" -f ${env:PACKAGE_FILE} --store curScan --session azure-pipelines
+  #      Write-Host "##[command]fcli fod sast-scan start --release $(fodReleaseId) --notes ""${env:FOD_SCAN_NOTES}"" -f ${env:PACKAGE_FILE} --store curScan --fod-session azure-pipelines"
+  #      fcli fod sast-scan start --release $(fodReleaseId) --notes "${env:FOD_SCAN_NOTES}" -f ${env:PACKAGE_FILE} --store curScan --fod-session azure-pipelines
   #      $ScanId=(fcli util var get ::curScan::)
   #      Write-Host "##[debug]Scan Id is: $ScanId"
   #      Write-Host "##vso[task.setvariable variable=fodScanId]$ScanId"
-  #      Write-Host "##[command]fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines"
-  #      fcli fod sast-scan wait-for ::curScan:: --session azure-pipelines
+  #      Write-Host "##[command]fcli fod sast-scan wait-for ::curScan:: --fod-session azure-pipelines"
+  #      fcli fod sast-scan wait-for ::curScan:: --fod-session azure-pipelines
   #    workingDirectory: ${{ parameters.workingDirectory }}
   #  env:
   #    PROJ_FILE: ${{ parameters.projectFile }}
@@ -160,5 +160,5 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##[command]fcli fod session logout --session azure-pipelines"
-        fcli fod session logout --session azure-pipelines
+        Write-Host "##[command]fcli fod session logout --fod-session azure-pipelines"
+        fcli fod session logout --fod-session azure-pipelines

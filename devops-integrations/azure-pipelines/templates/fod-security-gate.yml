@@ -18,13 +18,6 @@ parameters:
 - name: fodAppName
 - name: fodReleaseName
 - name: fodParentReleaseName
-  default: 'main'
-- name: fodReportTemplate
-  default: 'HybridIssueDetail'
-- name: reportDir
-  default: 'reports'
-- name: reportFile
-  default: 'reports/main.html'
 
 jobs:
 - job: FoDSecurityGate
@@ -64,22 +57,12 @@ jobs:
         Write-Host "##[command]fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --fod-session azure-pipelines"
         fcli fod session login --url ""${env:FOD_API_URL}"" --client-id ""${env:FOD_CLIENT_ID}"" --client-secret ""${env:FOD_CLIENT_SECRET}"" --fod-session azure-pipelines
 
-        Write-Host "##[command]fcli fod action run release-summary --release ""${App}:${Rel}"" -f releasesummary.md --fod-session azure-pipelines"
-        fcli fod action run release-summary --release "${App}:${Rel}" -f releasesummary.md --fod-session azure-pipelines
-        ##vso[task.uploadsummary]$(System.DefaultWorkingDirectory)/releasesummary.md
+        Write-Host "##[command]fcli fod action run release-summary --release ""${App}:${Rel}"" -f release-summary.md --fod-session azure-pipelines"
+        fcli fod action run release-summary --release "${App}:${Rel}" -f release-summary.md --fod-session azure-pipelines
+        ##vso[task.uploadsummary]$(System.DefaultWorkingDirectory)/release-summary.md
 
-        Write-Host "##[command]Creating FoD Report for Release"
-        fcli fod report create "${env:FOD_REPORT_NAME}" --format html --release "${App}:${Rel}" --template "${env:FOD_REPORT_TEMPLATE}" --store curReport --fod-session azure-pipelines
-        fcli fod report wait-for ::curReport:: --on-unknown-state=wait --fod-session azure-pipelines
-        New-Item -ItemType Directory -Force -Path ${env:FOD_REPORT_DIR} | Out-Null
-        fcli fod report download ::curReport:: -f ${env:FOD_REPORT_DIR}/${env:FOD_REPORT_NAME}.zip --fod-session azure-pipelines
-        Expand-Archive -Path ${env:FOD_REPORT_DIR}/${env:FOD_REPORT_NAME}.zip -DestinationPath ${env:FOD_REPORT_DIR}
-        Get-ChildItem -Path ${env:FOD_REPORT_DIR} -Filter '*.html' | Rename-Item -NewName { $_.Name -replace '_\d+' }
-        Remove-Item -Force ${env:FOD_REPORT_DIR}/${env:FOD_REPORT_NAME}.zip | Out-Null
-        fcli fod report delete ::curReport:: --fod-session azure-pipelines
-
-        Write-Host "##[command]fcli fod action run check-policy --release ""${App}:${Rel}"" --fod-session azure-pipelines"
-        fcli fod action run check-policy --release "${App}:${Rel}" --fod-session azure-pipelines
+        Write-Host "##[command]fcli fod action run etc\custom-fod-check-policy.yml --release ""${App}:${Rel}"" --on-unsigned=ignore --fod-session azure-pipelines"
+        fcli fod action run etc\custom-fod-check-policy.yml --release "${App}:${Rel}" --on-unsigned=ignore --fod-session azure-pipelines
 
         Write-Host "##[command]fcli fod session logout --fod-session azure-pipelines"
         fcli fod session logout --fod-session azure-pipelines
@@ -90,16 +73,3 @@ jobs:
       FOD_CLIENT_SECRET: ${{ parameters.fodClientSecret }}
       FOD_APP_NAME: ${{ parameters.fodAppName }}
       FOD_RELEASE_NAME: ${{ parameters.fodReleaseName }}
-      FOD_REPORT_TEMPLATE: ${{ parameters.fodReportTemplate }}
-      FOD_REPORT_DIR: ${{ parameters.reportDir }}
-      FOD_REPORT_NAME: "Report-$(Build.BuildId)"
-  - task: PublishBuildArtifacts@1
-    condition: succeededOrFailed()
-    inputs:
-      pathToPublish: ${{ parameters.reportDir }}
-      artifactName: FortifyReports
-  - task: PublishHtmlReport@1
-    condition: succeededOrFailed()
-    inputs:
-      tabName: 'Fortify Security Report'
-      reportDir: ${{ parameters.reportFile }}

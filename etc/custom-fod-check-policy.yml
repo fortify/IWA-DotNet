@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://fortify.github.io/fcli/schemas/action/fcli-action-schema-2.1.0.json
+
+author: Fortify
+usage:
+  header: Check security policy. 
+  description: |
+    This action implements a custom Security Policy check for FoD.
+
+config:
+  rest.target.default: fod
+      
+cli.options:
+  release:
+    names: --release, --rel
+    description: "Required release id or <appName>:[<microserviceName>:]<releaseName>"
+  
+steps:
+  - var.set:
+      rel: ${#fod.release(cli.release)}
+  - run.fcli:
+      listIssues:
+        cmd: fod issue ls --release ${rel.releaseId}
+        records.for-each:
+          record.var-name: issue
+          do:
+            - check:
+                noNewCritical:
+                  display-name: No new critical issues allowed
+                  fail.if:      ${issue.status=='new' && issue.severityString=='Critical'}
+                  ifSkipped:    PASS # If no issues
+  #- run.fcli:
+  #    listComponents:
+  #      cmd: fcli fod oss lsc --release ${rel.releaseId}
+  #      records.for-each:
+  #        record.var-name: component
+  #        do:
+  #          - check:
+  #              noVulnerableComponents:
+  #                display-name: No vulnerable components allowed
+  #                fail.if:      ${component.isVulnerable}
+  - run.fcli:
+      listComponents:
+        cmd: fcli fod oss lsc --release ${rel.releaseId}
+        records.for-each:
+          record.var-name: component
+          do:
+            - check:
+                noAGPLcomponents:
+                  display-name: No AGPL licenses allowed
+                  fail.if:      ${component.licenseSummary matches "AGPL.*"}
+                  ifSkipped:    PASS # If no components
+  #- check:
+  #    fodSecurityPolicy:
+  #      display-name: FoD Security Policy must Pass
+  #      pass.if:      ${rel.isPassed}
+  #- check:
+  #    fodCriticalPolicy:
+  #      display-name:   No Criticals
+  #      fail.if:       ${rel.critical > 100}
+  - check:
+      lastSastScanCompleted:
+        display-name:   Last SAST scan must be completed
+        pass.if:        ${rel.staticAnalysisStatusType == 'Completed'}
+      

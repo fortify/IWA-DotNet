@@ -53,8 +53,12 @@ jobs:
         Write-Host "##[command]fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --ssc-session azure-pipelines"
         fcli ssc session login --url "${env:SSC_URL}" --ci-token "${env:SSC_CI_TOKEN}" --ssc-session azure-pipelines
         
-        Write-Host "##[command]fcli ssc action run check-policy --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --ssc-session azure-pipelines"
-        fcli ssc action run check-policy --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --ssc-session azure-pipelines
+        Write-Host "##[command]fcli ssc action run appversion-summary --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" -f appversion-summary.md --ssc-session azure-pipelines"
+        fcli ssc action run appversion-summary --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" -f appversion-summary.md --ssc-session azure-pipelines
+        ##vso[task.uploadsummary]$(System.DefaultWorkingDirectory)/appversion-summary.md
+
+        Write-Host "##[command]fcli ssc action run etc\custom-ssc-check-policy.yml --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --on-unsigned=ignore --ssc-session azure-pipelines"
+        fcli ssc action run etc\custom-ssc-check-policy.yml --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --on-unsigned=ignore --ssc-session azure-pipelines
 
         Write-Host "##[command]fcli ssc session logout --ssc-session azure-pipelines"
         fcli ssc session logout --ssc-session azure-pipelines
