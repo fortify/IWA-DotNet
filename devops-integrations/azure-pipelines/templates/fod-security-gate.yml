@@ -17,7 +17,6 @@ parameters:
 - name: fodClientSecret
 - name: fodAppName
 - name: fodReleaseName
-- name: fodParentReleaseName
 
 jobs:
 - job: FoDSecurityGate
@@ -61,8 +60,8 @@ jobs:
         fcli fod action run release-summary --release "${App}:${Rel}" -f release-summary.md --fod-session azure-pipelines
         ##vso[task.uploadsummary]$(System.DefaultWorkingDirectory)/release-summary.md
 
-        Write-Host "##[command]fcli fod action run etc\custom-fod-check-policy.yml --release ""${App}:${Rel}"" --on-unsigned=ignore --fod-session azure-pipelines"
-        fcli fod action run etc\custom-fod-check-policy.yml --release "${App}:${Rel}" --on-unsigned=ignore --fod-session azure-pipelines
+        Write-Host "##[command]fcli fod action run $(Build.SourcesDirectory)\etc\custom-fod-check-policy.yml --release ""${App}:${Rel}"" --on-unsigned=ignore --fod-session azure-pipelines"
+        fcli fod action run $(Build.SourcesDirectory)\etc\custom-fod-check-policy.yml --release "${App}:${Rel}" --on-unsigned=ignore --fod-session azure-pipelines
 
         Write-Host "##[command]fcli fod session logout --fod-session azure-pipelines"
         fcli fod session logout --fod-session azure-pipelines
