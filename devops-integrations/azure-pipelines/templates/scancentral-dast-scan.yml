@@ -10,7 +10,7 @@ parameters:
 - name: projectFile
   default: '*.csproj'
 - name: dotnetVersion
-  default: '6.x'
+  default: '8.x'
 - name: buildConfiguration
   default: 'Debug'
 - name: vsVersion
@@ -68,12 +68,12 @@ jobs:
         } else {
           Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
         }
-        Write-Host "##[command]fcli sc-dast session login --ssc-url ""${env:SSC_URL}"" --ssc-ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines"
-        fcli sc-dast session login --ssc-url "${env:SSC_URL}" --ssc-ci-token "${env:SSC_CI_TOKEN}" --session azure-pipelines
+        Write-Host "##[command]fcli sc-dast session login --ssc-url ""${env:SSC_URL}"" --ssc-ci-token ""${env:SSC_CI_TOKEN}"" --ssc-session azure-pipelines"
+        fcli sc-dast session login --ssc-url "${env:SSC_URL}" --ssc-ci-token "${env:SSC_CI_TOKEN}" --ssc-session azure-pipelines
         Write-Host "##[command]fcli ssc appversion list -q ""application.name=='${App}'"""
-        fcli ssc appversion list -q "application.name=='${App}'" --session azure-pipelines
-        Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr=""{releaseId}"" --session azure-pipelines"
-        $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr="{id}" --session azure-pipelines)
+        fcli ssc appversion list -q "application.name=='${App}'" --ssc-session azure-pipelines
+        Write-Host "##[command]fcli ssc appversion create ""${App}:${Rel}"" --description ""Created automatically from Azure DevOps"" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr=""{releaseId}"" --ssc-session azure-pipelines"
+        $AppVerId=(fcli ssc appversion create "${App}:${Rel}" --description "Created automatically from Azure DevOps" --auto-required-attrs --skip-if-exists --issue-template ${env:SSC_ISSUE_TEMPLATE} -o expr="{id}" --ssc-session azure-pipelines)
         Write-Host "##[debug]Setting sscAppVerId to $AppVerId"
         Write-Host "##vso[task.setvariable variable=sscAppVerId]$AppVerId"
       showWarnings: true
@@ -101,5 +101,5 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##[command]fcli sc-dast session logout --no-revoke-token --session azure-pipelines"
-        fcli sc-dast session logout --no-revoke-token --session azure-pipelines
+        Write-Host "##[command]fcli sc-dast session logout --no-revoke-token --ssc-session azure-pipelines"
+        fcli sc-dast session logout --no-revoke-token --ssc-session azure-pipelines

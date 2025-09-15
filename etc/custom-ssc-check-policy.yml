@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://fortify.github.io/fcli/schemas/action/fcli-action-schema-2.1.0.json
+
+author: Fortify
+usage:
+  header: (SAMPLE) Check security policy. 
+  description: |
+    This sample action demonstrates how to implement a security policy using
+    fcli actions, returning a non-zero exit code if any of the checks fail.
+
+config:
+  rest.target.default: ssc
+  
+cli.options:
+  appversion:
+    names: --appversion,--av
+    description: "Required application version id or <appName>:<versionName>"
+  filterset:
+    names: --filterset, --fs
+    description: "Filter set name or guid from which to load issue data. Default value: Default filter set for given application version"
+    required: false
+  
+steps:
+  - var.set:
+      av: ${#ssc.appVersion(cli.appversion)}
+      fs: ${#ssc.filterSet(av, cli.filterset)}
+  - run.fcli:
+      countsByFolder:
+        cmd: ssc issue count --av ${av.id} --fs ${fs.guid} --by FOLDER
+        records.collect: true
+  - run.fcli:
+      countsByNewIssue:
+        cmd: ssc issue count --av ${av.id} --fs ${fs.guid} --by "New Issue"
+        records.collect: true
+  #- check:
+  #    noCritical:
+  #      display-name: No critical issues allowed
+  #      fail.if:      ${countsByFolder.records.^[cleanName=='Critical']?.visibleCount>0}
+  #    noNew:
+  #      display-name: No new issues allowed
+  #      fail.if:      ${countsByNewIssue.records.^[cleanName=='NEW']?.visibleCount>0}
+  - run.fcli:
+      listIssues:
+        cmd: ssc issue ls --av ${av.id} --fs ${fs.guid}
+        records.for-each:
+          record.var-name: issue
+          do:
+            - check:
+                noNewCritical:
+                  display-name: No new critical issues allowed
+                  fail.if:      ${issue.scanStatus=='NEW' && issue.friority=='Critical'}
+                  ifSkipped:    PASS # If no issues

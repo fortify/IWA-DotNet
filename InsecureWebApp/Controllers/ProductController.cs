@@ -56,26 +56,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
         [HttpGet("GetProducts")]
         public ActionResult<IEnumerable<Product>> GetProducts(String keywords, long limit = 50)
         {
-            /* FvB */
-            var query = "SELECT TOP " + Convert.ToInt32(limit) + " *, Description as HtmlContent FROM dbo.Product WHERE (" +
-                " Name LIKE '%" + keywords + "%' OR " +
-                " Summary LIKE '%" + keywords + "%' OR " +
-                " Description LIKE '%" + keywords + "%')";
-            try
-            {
-                var products1 = _context.Product.FromSqlRaw(query);
-                //var products1 = _context.Database.ExecuteSqlRaw(query);
-            }catch (Exception ex)
-            {
-                
-                // add sensitive data and bubble up exception
-                ex.Data.Add("dynamic data", query);
-
-                throw new Exception("Problem building SQL Query:"+query, ex.InnerException);
-                //throw ex;
-            }
-            //return products;
-            //var products1 = _context.Product.FromSqlRaw(query);
+            // KAL: refactored for SQLite
             /*var products = from p in _context.Product
                            select p;
 
@@ -91,10 +72,10 @@ namespace MicroFocus.InsecureWebApp.Controllers
                 products = products.Take(Convert.ToInt32(limit));
             }
             return await products.AsNoTracking().ToListAsync();*/
-            var products = _context.Product.FromSqlRaw("SELECT TOP " + Convert.ToInt32(limit) + " *, Description as HtmlContent FROM dbo.Product WHERE (" +
+            var products = _context.Product.FromSqlRaw("SELECT *, Description as HtmlContent FROM Product WHERE (" +
                 " Name LIKE '%" + keywords + "%' OR " +
                 " Summary LIKE '%" + keywords + "%' OR " +
-                " Description LIKE '%" + keywords + "%')").ToList();
+                " Description LIKE '%" + keywords + "%') LIMIT " + Convert.ToInt32(limit)).ToList();
             return products;
         }
 

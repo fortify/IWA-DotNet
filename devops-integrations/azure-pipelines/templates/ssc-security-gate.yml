@@ -50,14 +50,18 @@ jobs:
           Write-Host "##[debug]Using FORTIFY_RELEASE_NAME ${Rel}"
         }
 
-        Write-Host "##[command]fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --session azure-pipelines"
-        fcli ssc session login --url "${env:SSC_URL}" --ci-token "${env:SSC_CI_TOKEN}" --session azure-pipelines
+        Write-Host "##[command]fcli ssc session login --url ""${env:SSC_URL}"" --ci-token ""${env:SSC_CI_TOKEN}"" --ssc-session azure-pipelines"
+        fcli ssc session login --url "${env:SSC_URL}" --ci-token "${env:SSC_CI_TOKEN}" --ssc-session azure-pipelines
         
-        Write-Host "##[command]fcli ssc action run check-policy --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --session azure-pipelines"
-        fcli ssc action run check-policy --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --session azure-pipelines
+        Write-Host "##[command]fcli ssc action run appversion-summary --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" -f appversion-summary.md --ssc-session azure-pipelines"
+        fcli ssc action run appversion-summary --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" -f appversion-summary.md --ssc-session azure-pipelines
+        Write-Host "##vso[task.uploadsummary]$(System.DefaultWorkingDirectory)/appversion-summary.md"
 
-        Write-Host "##[command]fcli ssc session logout --session azure-pipelines"
-        fcli ssc session logout --session azure-pipelines
+        Write-Host "##[command]fcli ssc action run $(Build.SourcesDirectory)\etc\custom-ssc-check-policy.yml --appversion ""${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}"" --on-unsigned=ignore --ssc-session azure-pipelines"
+        fcli ssc action run $(Build.SourcesDirectory)\etc\custom-ssc-check-policy.yml --appversion "${env:FORTIFY_APP_NAME}:${env:FORTIFY_RELEASE_NAME}" --on-unsigned=ignore --ssc-session azure-pipelines
+
+        Write-Host "##[command]fcli ssc session logout --ssc-session azure-pipelines"
+        fcli ssc session logout --ssc-session azure-pipelines
       showWarnings: true
     env:
       SSC_URL: ${{ parameters.sscUrl }}

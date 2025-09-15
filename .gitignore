@@ -377,3 +377,8 @@ FodyWeavers.xsd
 /IWA-DotNet.KAL.zip
 /InsecureWebApp/package.zip
 /InsecureWebApp/Files/Order.file
+/InsecureShippingService/packages.lock.json
+/InsecureWebApp/fortifypackage.zip
+/InsecureWebApp/database.dat
+/InsecureWebApp/database.dat-shm
+/InsecureWebApp/database.dat-wal
